@@ -1,9 +1,10 @@
 // Books Page - List and manage user's book collection
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { BookOpen, Plus, AlertCircle, SlidersHorizontal, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
@@ -143,18 +144,118 @@ function sortBooks(
   return sorted;
 }
 
-export default function BooksPage() {
+/**
+ * Parse URL search params into BookFilters
+ */
+function parseFiltersFromURL(searchParams: URLSearchParams): { filters: BookFilters; sort: SortOption } {
+  const filters: BookFilters = {};
+
+  // Parse statuses (comma-separated)
+  const statuses = searchParams.get('status');
+  if (statuses) {
+    filters.statuses = statuses.split(',').filter((s) =>
+      ['reading', 'finished', 'want-to-read'].includes(s)
+    ) as BookFilters['statuses'];
+  }
+
+  // Parse genres (comma-separated)
+  const genreIds = searchParams.get('genre');
+  if (genreIds) {
+    filters.genreIds = genreIds.split(',');
+  }
+
+  // Parse series (comma-separated)
+  const seriesIds = searchParams.get('series');
+  if (seriesIds) {
+    filters.seriesIds = seriesIds.split(',');
+  }
+
+  // Parse rating
+  const rating = searchParams.get('rating');
+  if (rating) {
+    const minRating = parseInt(rating, 10);
+    if (minRating >= 1 && minRating <= 5) {
+      filters.minRating = minRating;
+    }
+  }
+
+  // Parse author
+  const author = searchParams.get('author');
+  if (author) {
+    filters.author = author;
+  }
+
+  // Parse sort
+  const sortParam = searchParams.get('sort') as SortOption | null;
+  const validSorts: SortOption[] = [
+    'createdAt-desc', 'createdAt-asc', 'title-asc', 'title-desc',
+    'author-asc', 'author-desc', 'rating-desc', 'rating-asc', 'seriesPosition-asc'
+  ];
+  const sort = sortParam && validSorts.includes(sortParam) ? sortParam : 'createdAt-desc';
+
+  return { filters, sort };
+}
+
+/**
+ * Build URL search params from filters
+ */
+function buildURLParams(filters: BookFilters, sort: SortOption): string {
+  const params = new URLSearchParams();
+
+  if (filters.statuses && filters.statuses.length > 0) {
+    params.set('status', filters.statuses.join(','));
+  }
+  if (filters.genreIds && filters.genreIds.length > 0) {
+    params.set('genre', filters.genreIds.join(','));
+  }
+  if (filters.seriesIds && filters.seriesIds.length > 0) {
+    params.set('series', filters.seriesIds.join(','));
+  }
+  if (filters.minRating) {
+    params.set('rating', String(filters.minRating));
+  }
+  if (filters.author) {
+    params.set('author', filters.author);
+  }
+  if (sort !== 'createdAt-desc') {
+    params.set('sort', sort);
+  }
+
+  return params.toString();
+}
+
+function BooksPageContent() {
   const { user, loading: authLoading } = useAuthContext();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Parse initial filters from URL
+  const initialState = useMemo(() => parseFiltersFromURL(searchParams), [searchParams]);
 
   // Filter and sort state
-  const [filters, setFilters] = useState<BookFilters>({});
-  const [sortValue, setSortValue] = useState<SortOption>('createdAt-desc');
+  const [filters, setFilters] = useState<BookFilters>(initialState.filters);
+  const [sortValue, setSortValue] = useState<SortOption>(initialState.sort);
   const [showFilterSheet, setShowFilterSheet] = useState(false);
+
+  // Sync URL when filters change (after initial load)
+  useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+      return;
+    }
+
+    const params = buildURLParams(filters, sortValue);
+    const newURL = params ? `/books?${params}` : '/books';
+
+    // Use replaceState to avoid cluttering history
+    window.history.replaceState(null, '', newURL);
+  }, [filters, sortValue, isInitialized]);
 
   // Infinite scroll state
   const ITEMS_PER_PAGE = 20;
@@ -784,5 +885,34 @@ export default function BooksPage() {
         <Plus className="w-6 h-6" aria-hidden="true" />
       </Link>
     </div>
+  );
+}
+
+/**
+ * Books Page with Suspense wrapper for useSearchParams
+ */
+export default function BooksPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
+          </div>
+          <div className="flex gap-6">
+            <div className="hidden md:block w-72 flex-shrink-0">
+              <div className="bg-gray-200 rounded-xl h-96 animate-pulse" />
+            </div>
+            <div className="flex-1 space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="bg-gray-200 rounded-xl h-24 animate-pulse" />
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <BooksPageContent />
+    </Suspense>
   );
 }

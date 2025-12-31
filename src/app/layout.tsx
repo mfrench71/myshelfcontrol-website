@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/components/providers/auth-provider';
+import { ToastProvider } from '@/components/ui/toast';
 import { ServiceWorkerRegister } from '@/components/service-worker-register';
 
 const inter = Inter({
@@ -55,7 +56,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased min-h-screen`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthProvider>
         <ServiceWorkerRegister />
       </body>
     </html>

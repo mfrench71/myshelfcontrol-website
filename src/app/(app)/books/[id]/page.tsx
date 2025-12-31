@@ -124,20 +124,17 @@ function DeleteModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50"
+      className="fixed inset-0 z-50 bottom-sheet-backdrop"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Move to bin confirmation"
     >
       <div
-        className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white md:rounded-xl rounded-t-2xl p-6 md:max-w-md md:w-full animate-slide-up md:animate-none"
+        className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Handle for mobile */}
-        <div className="flex justify-center mb-4 md:hidden">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
+        <div className="bottom-sheet-handle" />
 
         <h3 className="text-lg font-semibold mb-2">Move to Bin?</h3>
         <p className="text-gray-500 mb-4">

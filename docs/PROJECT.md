@@ -1,8 +1,53 @@
 # MyShelfControl - Project Documentation
 
+## Table of Contents
+
+1. [Overview & Tech Stack](#overview)
+2. [Project Structure](#project-structure)
+3. [Development](#development)
+4. [Features & Migration Status](#features)
+5. [Widget System](#widget-system)
+6. [API Integration](#api-integration)
+7. [Architecture](#architecture)
+   - [Current Data Model](#current-single-user-design-from-legacy-app)
+   - [Multi-User Architecture](#planned-multi-user-features)
+   - [Architecture Decisions](#architecture-decisions)
+8. [Feature Roadmap](#feature-roadmap)
+   - [Priorities](#roadmap-post-migration)
+   - [Detailed Feature Specs](#detailed-feature-specs)
+9. [Research & Competitor Analysis](#research--competitor-analysis)
+   - [Key Competitors](#key-competitors)
+   - [Multi-User Features](#multi-user-features-research)
+   - [Additional Features](#additional-features-research)
+   - [Feature Inspiration](#feature-inspiration)
+10. [Legal & Compliance](#legal--compliance)
+    - [UK Legal Requirements](#uk-legal-requirements)
+    - [Privacy & Data Protection](#privacy--data-protection)
+    - [Multi-User Legal Checklist](#multi-user-legal-checklist)
+11. [Business & Marketing](#business--marketing)
+    - [Public Frontend](#public-frontend-marketing-site)
+    - [Demo Account](#demo-account-options)
+    - [Monetisation](#monetisation-models)
+    - [Growth & Marketing](#growth--marketing)
+12. [Operations](#operations)
+    - [Scalability](#scalability-checkpoints)
+    - [Analytics](#privacy-respecting-analytics)
+    - [Import/Export](#importexport--portability)
+    - [Internationalisation](#internationalisation-i18n)
+13. [Security](#security-considerations)
+14. [Performance](#performance-targets)
+15. [Testing](#testing-strategy)
+16. [Known Limitations](#known-limitations)
+17. [Technical Reference](#technical-reference)
+
+---
+
 ## Overview
 
 A mobile-friendly book tracking PWA with multi-user features planned. Rebuilt with Next.js to enable server-side capabilities for social features.
+
+**Name:** MyShelfControl (pun on "my self control")
+**Domain:** myshelfcontrol.app (TBD)
 
 ## Tech Stack
 
@@ -17,14 +62,9 @@ A mobile-friendly book tracking PWA with multi-user features planned. Rebuilt wi
 | Hosting | Netlify (free tier) |
 | Testing | Vitest (unit) + Playwright (E2E) |
 
-## Branding
-
-- **Name**: MyShelfControl (pun on "my self control")
-- **Domain**: myshelfcontrol.app (TBD)
-
 ---
 
-## Multi-User Architecture
+## Architecture
 
 ### Current: Single-User Design (from legacy app)
 
@@ -54,138 +94,11 @@ All data stored under `/users/{userId}/`:
 4. **Firestore Rules** - Allow public reads on visible content
 5. **API Routes** - Server-side validation for complex permissions
 
-### Competitor Analysis: Multi-User Features
+### Architecture Decisions
 
-#### Feature Comparison Matrix
-
-| Feature | Goodreads | StoryGraph | Hardcover | Literal | Fable | Oku | BookTrack |
-|---------|-----------|------------|-----------|---------|-------|-----|-----------|
-| **Friends/Following** | Both systems | Opt-in friends | Follow | Follow | Follow | Follow | None |
-| **Friend Limit** | 5,000 / ∞ followers | Unlimited | — | — | — | — | N/A |
-| **Activity Feed** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| **Book Clubs** | ✓ Groups | ✓ | — | ✓ | ✓ Strong | ✗ | ✗ |
-| **Buddy Reads** | ✗ | ✓ ≤15 people | ✗ | ✗ | ✓ | ✗ | ✗ |
-| **Share to Social** | ✓ Facebook | ✓ | ✓ | ✓ Highlights | ✓ | ✓ | ✓ Stats |
-| **Shareable Lists** | ✓ Shelves | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| **Direct Messaging** | ✓ | ✗ | — | ✗ | ✓ | ✗ | ✗ |
-| **Book Lending Tracker** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ Unique |
-| **Per-Book Privacy** | ✗ | Requested | ✓ | — | — | — | N/A |
-
-#### Privacy & Visibility Options
-
-| App | Profile Visibility | Notes |
-|-----|-------------------|-------|
-| **Goodreads** | Public / Members / Friends | Reviews always public on book pages |
-| **StoryGraph** | Public / Community / Private | Reviews visible regardless of profile setting |
-| **Hardcover** | Public / Private / Friends | Per-book privacy available |
-| **BookTrack** | Private only | No social features by design |
-
-#### Key Insights
-
-**High-Value Features (Table Stakes):**
-1. Profile visibility controls (public/private/friends-only)
-2. Follow/friends system
-3. Activity feed (see what friends are reading)
-4. Shareable lists/shelves (public or link-only)
-
-**Potential Differentiators:**
-1. **Per-book privacy** (only Hardcover has this) — highly requested on StoryGraph
-2. **Book lending tracker** (only BookTrack has this) — practical for physical collections
-3. **Buddy reads with spoiler protection** (StoryGraph) — complex but loved
-
-**Privacy Gotchas to Avoid:**
-- Goodreads/StoryGraph: Reviews are public on book pages even with private profile
-- Consider separating review visibility from profile visibility
-
-**Simplest MVP Path:**
-1. Profile visibility (public/private)
-2. Follow system (one-way, no approval needed)
-3. Activity feed of followed users
-4. Shareable book lists (public link)
-
-#### Sources
-
-- [Goodreads Help: Friends & Followers](https://help.goodreads.com/s/announcements/a031H00000T7hFjQAJ/how-to-manage-your-friends-and-followers)
-- [StoryGraph Features Roadmap](https://roadmap.thestorygraph.com/features)
-- [StoryGraph Buddy Reads](https://thestorygraph.freshdesk.com/support/solutions/articles/79000141943-buddy-reads-and-readalongs-on-the-storygraph)
-- [Fable Club Features](https://fable.co/club-features)
-- [BookTrack Lending](https://booktrack.app/blog/lending-books-to-friends-how-to-track-your-shared-library-without-losing-it/)
-
-### Competitor Analysis: Additional Features (Dec 2025)
-
-#### New/Underdocumented Features Found
-
-| Feature | App(s) | Notes |
-|---------|--------|-------|
-| **Paused Book Status** | StoryGraph | Most upvoted request ever. Separate from DNF, excludes paused time from stats |
-| **Favorites Showcase** | StoryGraph | Pin up to 5 books to profile, used for recommendations |
-| **Sub-Ratings** | Pagebound | Rate enjoyment, quality, characters, plot separately |
-| **Per-Book Forums** | Pagebound | Each book has discussion forum, posts sorted by % read (unique) |
-| **Year in Review** | BookTrack, StoryGraph | Spotify Wrapped-style annual summary, shareable cards |
-| **AI Book Chat** | Basmo, Bookly | Ask questions about current book, summaries without spoilers |
-| **Kindle/Notion Sync** | Basmo | Import highlights and notes automatically |
-| **Match Percentage** | Hardcover | See reading taste overlap with other users |
-| **Similar Users ML** | StoryGraph | ML-powered suggestions for reading buddies |
-| **Reading Speed Prediction** | Bookly, Basmo | Estimate time to finish based on pace |
-| **Ambient Sounds** | Bookly | Rain, coffee shop sounds during reading timer |
-| **Book Characters Tracker** | Bookly | Track character names and relationships |
-| **Emotion Journaling** | Basmo | Log how each reading session made you feel |
-| **Anonymous Social** | Pagebound | No profile photos, private follower counts |
-| **GraphQL API** | Hardcover | Developer-friendly public API |
-
-#### DNF Tracking (Expanded)
-
-Current apps offer DNF as first-class status:
-- **StoryGraph/Pagebound/Tome**: DNF in status dropdown
-- **Reading Journey**: "DNF Graveyard" feature
-- Track pages read before abandoning
-- Optional review of why book was abandoned
-
-#### Content Warnings (Expanded)
-
-StoryGraph implementation:
-- User specifies content to avoid in preferences survey
-- Books filtered from recommendations automatically
-- Warning symbols shown on book pages
-- Traffic light severity system (planned)
-- Community-sourced via [BookTriggerWarnings.com](https://booktriggerwarnings.com/)
-
-#### Edition/Version Handling
-
-Complex UX challenge across competitors:
-- **StoryGraph**: Each edition is separate item (controversial but necessary)
-- **BookTrack**: ISBN-based exact matching for metadata accuracy
-- **Challenge**: Users want to track physical + audiobook of same title
-- **Consideration**: Show "You've read another edition" on book pages
-
-#### Reread Tracking
-
-- **Bookmory**: Explicit "Reread" section with history
-- **Goodreads**: Limited - rereads don't count toward reading challenges
-- **Best practice**: Track each read date separately, show reread count
-
-#### New Release Notifications
-
-Highly requested (major Goodreads advantage):
-- Email alerts when followed authors release new books
-- Services like BookBub, FictFact specialise in this
-- Requested feature on StoryGraph roadmap
-
-#### Sources (Additional)
-
-- [StoryGraph Changelog](https://roadmap.thestorygraph.com/changelog)
-- [Pagebound App](https://pagebound.co/)
-- [Basmo App](https://basmo.app/)
-- [Hardcover API](https://www.emgoto.com/hardcover-book-api/)
-- [BookTrack Year in Review](https://booktrack.app/blog/how-to-create-your-own-spotify-wrapped-for-books-using-book-tracker/)
-
-### Settings Page Layout (Research)
-
-#### Current Implementation: Hub Pattern
+#### Settings Page: Hub Pattern
 
 Settings uses a hub-and-drill-down pattern: main Settings page lists categories, each linking to a sub-page. This differs from the legacy app which used horizontal tabs with in-section links.
-
-#### Approach Comparison
 
 | Aspect | **Hub Pattern** (Current) | **Horizontal Tabs** (Legacy) |
 |--------|---------------------------|------------------------------|
@@ -195,55 +108,27 @@ Settings uses a hub-and-drill-down pattern: main Settings page lists categories,
 | Cognitive load | Low (one section at a time) | Higher (multiple visible) |
 | iOS/Android convention | ✓ Follows native patterns | ✗ Custom pattern |
 
-#### What Competitors Do
+**Decision:** Keep hub pattern. It follows iOS/Android conventions, scales well, and settings are infrequently accessed. Consider adding desktop sidebar layout as future enhancement.
 
-| App | Pattern |
-|-----|---------|
-| **iOS/Android Settings** | Hub → Drill-down (industry standard) |
-| **StoryGraph** | Bottom nav → Settings → Categories |
-| **Goodreads** | Hamburger → Settings → Tabs within |
-| **Notion** | Sidebar → Modal settings |
-| **Gmail** | Gear icon → Settings tabs |
+**Potential improvements:**
+1. Keyboard shortcut (Cmd/Ctrl+,) for power users
+2. Surface frequent settings outside hub (dark mode toggle in header)
+3. Desktop sidebar (>768px): show settings categories always visible
 
-#### UX Research Summary
+#### Author Sorting
 
-**Hub pattern is appropriate when:**
-- Settings are infrequently accessed (set once, forget)
-- Many categories exist or will be added
-- Mobile-first design is priority
-- Following platform conventions matters
+| Context | Sorting Logic |
+|---------|--------------|
+| **Author Filter Dropdown** | By book count first (most used), then alphabetically by full name |
+| **Book List "Author A-Z"** | By surname (last word of author name) |
+| **Author Typeahead** | By book count first, then alphabetically |
 
-**Inline/tabs preferred when:**
-- Users frequently move between settings
-- Only 3-5 categories exist
-- Desktop is primary platform
+**Surname extraction** uses `getAuthorSurname()` utility:
+- "First Last" → "last"
+- "First Middle Last" → "last"
+- "Last, First" → "last" (comma format)
 
-**For book tracking apps:** Settings are typically accessed rarely (after initial setup), supporting the hub pattern.
-
-#### Potential Improvements
-
-1. **Keyboard shortcut** (Cmd/Ctrl+,) for power users
-2. **Surface frequent settings** outside hub (dark mode toggle in header)
-3. **Desktop sidebar** (>768px): show settings categories always visible
-4. **Inline editing** within settings pages where possible
-
-#### Hybrid Alternatives Considered
-
-| Alternative | Description | Trade-off |
-|-------------|-------------|-----------|
-| **Hub + Quick Actions** | Keep hub, surface common settings elsewhere | Duplication |
-| **Responsive sidebar** | Mobile: hub, Desktop: always-visible sidebar | More code |
-| **Tabs within hub** | Hub page with horizontal tabs for categories | Limited mobile space |
-| **Accordion sections** | Single page with collapsible sections | Long scroll |
-
-**Decision:** Keep hub pattern for now. It follows iOS/Android conventions, scales well, and settings are infrequently accessed. Consider adding desktop sidebar layout as future enhancement.
-
-#### Sources
-
-- [Apple HIG - Navigation](https://developer.apple.com/design/human-interface-guidelines/ios/app-architecture/navigation/)
-- [Android Settings Patterns](https://developer.android.com/design/ui/mobile/guides/patterns/settings)
-- [Toptal - Settings UX](https://www.toptal.com/designers/ux/settings-ux)
-- [NN/g - Mobile Navigation](https://www.nngroup.com/articles/mobile-navigation-patterns/)
+**Decision:** Keep current approach (count first, then full name A-Z). Add surname display as future enhancement if users request it.
 
 ---
 
@@ -430,18 +315,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 
 ---
 
-## Privacy Considerations
-
-- [ ] Document Firebase usage in privacy policy
-- [ ] Document Google Books API usage (ISBN lookups)
-- [ ] Document Open Library API usage (cover images, book data)
-- [ ] Consider Gravatar opt-out setting
-- [ ] No user PII in URLs
-- [ ] localStorage contains only non-sensitive caches
-
----
-
-## Detailed Feature Roadmap
+## Feature Roadmap
 
 ### Add Book UX Redesign
 
@@ -643,7 +517,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 | Hardcover | Yes | $5/mo or $50/yr | Subscription |
 | BookTrack | — | $4.99 once (iOS) | One-time |
 
-### UK Legal Considerations
+### UK Legal Requirements
 
 #### Current Requirements (Single-User)
 
@@ -817,22 +691,44 @@ Sources: [Orrick FAQ](https://www.orrick.com/en/tech-studio/resources/faq/what-l
 - [ ] Cookie consent if adding analytics
 - [ ] Clear subscription terms if adding premium tier
 
+### Privacy & Data Protection
+
+#### Privacy Policy Requirements
+
+- [ ] Document Firebase usage (authentication, database, storage)
+- [ ] Document Google Books API usage (ISBN lookups, metadata)
+- [ ] Document Open Library API usage (cover images, book data)
+- [ ] Explain data retention policies
+- [ ] Detail user rights (access, rectification, erasure, portability)
+
+#### Technical Privacy Measures
+
+- [ ] No user PII in URLs (use IDs, not usernames/emails)
+- [ ] localStorage contains only non-sensitive caches
+- [ ] Session tokens secured with httpOnly cookies
+- [ ] Consider Gravatar opt-out setting (if using)
+
+#### Privacy-Respecting Analytics Options
+
+| Option | Cost | Notes |
+|--------|------|-------|
+| **Plausible** | ~$9/mo | Privacy-friendly, GDPR compliant, hosted |
+| **Fathom** | ~$14/mo | Privacy-friendly, GDPR compliant |
+| **Self-hosted Umami** | Free | Open source, own your data |
+| **None** | Free | Just track signups, trust the product |
+
 ---
 
-## Other Considerations
+## Operations
 
 ### Growth & Marketing
+
 | Channel | Effort | Cost | Notes |
 |---------|--------|------|-------|
 | **SEO/Content** | High | Free | Blog posts, book lists, reading tips |
 | **Reddit/forums** | Medium | Free | r/books, r/52book, book communities |
 | **Product Hunt** | Low | Free | One-time launch boost |
 | **Word of mouth** | Low | Free | Referral program? |
-
-### Privacy-Respecting Analytics
-- **Plausible/Fathom**: Privacy-friendly, GDPR compliant, ~$9/mo
-- **Self-hosted Umami**: Free, open source, own your data
-- **None**: Just track signups and trust the product
 
 ### Import/Export & Portability
 - [x] Export to JSON (implemented in legacy)
@@ -867,9 +763,10 @@ Sources: [Orrick FAQ](https://www.orrick.com/en/tech-studio/resources/faq/what-l
 
 ---
 
-## Competitor Analysis
+## Research & Competitor Analysis
 
 ### Key Competitors
+
 | App | Strengths | Weaknesses |
 |-----|-----------|------------|
 | Goodreads | Largest community, social features | Outdated UI, Amazon-owned, no half-stars |
@@ -879,28 +776,135 @@ Sources: [Orrick FAQ](https://www.orrick.com/en/tech-studio/resources/faq/what-l
 | Hardcover | Ad-free, per-book privacy, modern UI, API | Smaller community |
 | Literal | Quote-centric, public API, book clubs | Limited free features |
 | Oku | Minimalist design, clean UI, ad-free | Premium required for goals |
-| Book Tracker | Native iOS, OCR quote capture, loan tracking | iOS only |
+| BookTrack | Native iOS, OCR quote capture, loan tracking | iOS only |
+| Pagebound | Per-book forums, sub-ratings, anonymous social | New/smaller |
+| Basmo | AI chat, Kindle sync, emotion journaling | Premium features |
 
-### Feature Inspiration
+### Multi-User Features Research
+
+#### Feature Comparison Matrix
+
+| Feature | Goodreads | StoryGraph | Hardcover | Literal | Fable | Oku | BookTrack |
+|---------|-----------|------------|-----------|---------|-------|-----|-----------|
+| **Friends/Following** | Both systems | Opt-in friends | Follow | Follow | Follow | Follow | None |
+| **Friend Limit** | 5,000 / ∞ followers | Unlimited | — | — | — | — | N/A |
+| **Activity Feed** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| **Book Clubs** | ✓ Groups | ✓ | — | ✓ | ✓ Strong | ✗ | ✗ |
+| **Buddy Reads** | ✗ | ✓ ≤15 people | ✗ | ✗ | ✓ | ✗ | ✗ |
+| **Share to Social** | ✓ Facebook | ✓ | ✓ | ✓ Highlights | ✓ | ✓ | ✓ Stats |
+| **Shareable Lists** | ✓ Shelves | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| **Direct Messaging** | ✓ | ✗ | — | ✗ | ✓ | ✗ | ✗ |
+| **Book Lending Tracker** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ Unique |
+| **Per-Book Privacy** | ✗ | Requested | ✓ | — | — | — | N/A |
+
+#### Privacy & Visibility Options
+
+| App | Profile Visibility | Notes |
+|-----|-------------------|-------|
+| **Goodreads** | Public / Members / Friends | Reviews always public on book pages |
+| **StoryGraph** | Public / Community / Private | Reviews visible regardless of profile setting |
+| **Hardcover** | Public / Private / Friends | Per-book privacy available |
+| **BookTrack** | Private only | No social features by design |
+
+#### Key Insights
+
+**High-Value Features (Table Stakes):**
+1. Profile visibility controls (public/private/friends-only)
+2. Follow/friends system
+3. Activity feed (see what friends are reading)
+4. Shareable lists/shelves (public or link-only)
+
+**Potential Differentiators:**
+1. **Per-book privacy** (only Hardcover has this) — highly requested on StoryGraph
+2. **Book lending tracker** (only BookTrack has this) — practical for physical collections
+3. **Buddy reads with spoiler protection** (StoryGraph) — complex but loved
+
+**Privacy Gotchas to Avoid:**
+- Goodreads/StoryGraph: Reviews are public on book pages even with private profile
+- Consider separating review visibility from profile visibility
+
+**Simplest MVP Path:**
+1. Profile visibility (public/private)
+2. Follow system (one-way, no approval needed)
+3. Activity feed of followed users
+4. Shareable book lists (public link)
+
+### Additional Features Research (Dec 2025)
+
+| Feature | App(s) | Notes |
+|---------|--------|-------|
+| **Paused Book Status** | StoryGraph | Most upvoted request ever. Separate from DNF, excludes paused time from stats |
+| **Favorites Showcase** | StoryGraph | Pin up to 5 books to profile, used for recommendations |
+| **Sub-Ratings** | Pagebound | Rate enjoyment, quality, characters, plot separately |
+| **Per-Book Forums** | Pagebound | Each book has discussion forum, posts sorted by % read (unique) |
+| **Year in Review** | BookTrack, StoryGraph | Spotify Wrapped-style annual summary, shareable cards |
+| **AI Book Chat** | Basmo, Bookly | Ask questions about current book, summaries without spoilers |
+| **Kindle/Notion Sync** | Basmo | Import highlights and notes automatically |
+| **Match Percentage** | Hardcover | See reading taste overlap with other users |
+| **Similar Users ML** | StoryGraph | ML-powered suggestions for reading buddies |
+| **Reading Speed Prediction** | Bookly, Basmo | Estimate time to finish based on pace |
+| **Ambient Sounds** | Bookly | Rain, coffee shop sounds during reading timer |
+| **Book Characters Tracker** | Bookly | Track character names and relationships |
+| **Emotion Journaling** | Basmo | Log how each reading session made you feel |
+| **Anonymous Social** | Pagebound | No profile photos, private follower counts |
+| **GraphQL API** | Hardcover | Developer-friendly public API |
+
+#### DNF Tracking
+
+- **StoryGraph/Pagebound/Tome**: DNF in status dropdown
+- **Reading Journey**: "DNF Graveyard" feature
+- Track pages read before abandoning
+- Optional review of why book was abandoned
+
+#### Content Warnings
+
+StoryGraph implementation:
+- User specifies content to avoid in preferences survey
+- Books filtered from recommendations automatically
+- Warning symbols shown on book pages
+- Traffic light severity system (planned)
+- Community-sourced via [BookTriggerWarnings.com](https://booktriggerwarnings.com/)
+
+#### Edition/Version Handling
+
+- **StoryGraph**: Each edition is separate item (controversial but necessary)
+- **BookTrack**: ISBN-based exact matching for metadata accuracy
+- **Challenge**: Users want to track physical + audiobook of same title
+- **Consideration**: Show "You've read another edition" on book pages
+
+#### Reread Tracking
+
+- **Bookmory**: Explicit "Reread" section with history
+- **Goodreads**: Limited - rereads don't count toward reading challenges
+- **Best practice**: Track each read date separately, show reread count
+
+### Feature Inspiration Summary
+
 - **Reading Timer**: Track sessions, calculate reading speed, ambient sounds, reading speed prediction
 - **Mood Tracking**: Tag by mood, pacing, content warnings with severity levels, emotion journaling per session
 - **Gamification**: Streaks, badges, annual challenges, progress bars, Year in Review/Reading Wrapped
 - **Quote Capture**: OCR from photos, reading journal, highlight capture, Kindle sync
-- **Advanced Stats**: Year-over-year comparison, custom charts, reading speed trends, sub-ratings (enjoyment/quality/characters/plot)
+- **Advanced Stats**: Year-over-year comparison, custom charts, reading speed trends, sub-ratings
 - **Privacy**: Per-book visibility, anonymous browsing mode, anonymous social profiles
-- **Social**: Buddy reads, readalongs, direct messaging, per-book discussion forums, match percentage/similar users
-- **Book Management**: Paused status (separate from DNF), DNF with page tracking, edition handling, reread tracking, book characters tracker
+- **Social**: Buddy reads, readalongs, direct messaging, per-book discussion forums, match percentage
+- **Book Management**: Paused status, DNF with page tracking, edition handling, reread tracking, character tracker
 - **Notifications**: New release alerts for followed authors, wishlist release notifications
 - **AI Features**: Book chat assistant, summaries without spoilers (emerging 2025 trend)
 
 ### Research Sources
-- [The StoryGraph](https://thestorygraph.com/)
+
+- [The StoryGraph](https://thestorygraph.com/) | [Roadmap](https://roadmap.thestorygraph.com/)
 - [Bookly](https://getbookly.com/)
-- [Book Tracker App](https://booktrack.app/)
-- [Hardcover](https://hardcover.app/)
+- [BookTrack App](https://booktrack.app/)
+- [Hardcover](https://hardcover.app/) | [API](https://www.emgoto.com/hardcover-book-api/)
 - [Literal](https://literal.club/)
 - [Oku](https://oku.club/)
+- [Pagebound](https://pagebound.co/)
+- [Basmo](https://basmo.app/)
+- [Fable](https://fable.co/)
+- [Goodreads Help](https://help.goodreads.com/)
 - [Book Riot Comparison](https://bookriot.com/best-book-tracking-app/)
+- [BookTriggerWarnings](https://booktriggerwarnings.com/)
 
 ---
 
@@ -1087,50 +1091,6 @@ return adminUids.includes(user.uid);
 ### Implementation Plan
 
 See `/Users/matthewfrench/.claude/plans/sleepy-rolling-haven.md` for detailed implementation steps.
-
----
-
-## Author Sorting & Display (Research)
-
-### Current Implementation
-
-| Context | Sorting Logic |
-|---------|--------------|
-| **Author Filter Dropdown** | By book count first (most used), then alphabetically by full name |
-| **Book List "Author A-Z"** | By surname (last word of author name) |
-| **Author Typeahead** | By book count first, then alphabetically |
-
-### Surname Extraction
-
-Uses `getAuthorSurname()` utility:
-- "First Last" → "last"
-- "First Middle Last" → "last"
-- "Last, First" → "last" (comma format)
-
-### Library Convention Challenges
-
-Per AACR2 cataloging rules:
-- **Compound surnames** (García Márquez): File by author's preference
-- **Prefixes** (de, van, von): Varies by country/culture
-- **Spanish names**: May have both mother's and father's surname
-- **Mac vs Mc**: Should NOT be interfiled (shelve as spelled)
-
-### Competitor Analysis
-
-| App | Author Sorting |
-|-----|----------------|
-| **Goodreads** | Seemingly random order on author pages |
-| **StoryGraph** | No surname sorting - frequently requested feature |
-| **Apple Books** | Users frustrated it doesn't sort by surname |
-| **Library Standards** | Last name, first name (fiction shelving) |
-
-### Future Options
-
-1. **Display as "Surname, First"**: Show "Rowling, J.K." instead of "J.K. Rowling"
-2. **Separate surname field**: Store first/last name separately for accurate sorting
-3. **User preference**: Let user choose full name vs surname display
-
-**Decision**: Keep current approach (count first, then full name A-Z). Add surname display as future enhancement if users request it.
 
 ---
 

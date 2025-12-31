@@ -19,6 +19,10 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { getGravatarUrl } from '@/lib/utils';
+
+/** localStorage key for caching Gravatar availability per email hash */
+const GRAVATAR_CACHE_KEY = 'gravatar_cache';
 
 export function Header() {
   const pathname = usePathname();
@@ -26,7 +30,62 @@ export function Header() {
   const { user, loading } = useAuthContext();
   const [showMenu, setShowMenu] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Check if Gravatar exists for user email
+   * Caches result in localStorage to avoid repeated requests
+   */
+  useEffect(() => {
+    if (!user?.email || user.photoURL) {
+      setGravatarUrl(null);
+      return;
+    }
+
+    const email = user.email.toLowerCase().trim();
+
+    // Check cache first
+    try {
+      const cache = JSON.parse(localStorage.getItem(GRAVATAR_CACHE_KEY) || '{}');
+      if (cache[email] !== undefined) {
+        setGravatarUrl(cache[email] || null);
+        return;
+      }
+    } catch {
+      // Ignore cache errors
+    }
+
+    // Check if Gravatar exists by loading the image
+    const url = getGravatarUrl(email, 80);
+    const img = new window.Image();
+
+    img.onload = () => {
+      setGravatarUrl(url);
+      // Cache success
+      try {
+        const cache = JSON.parse(localStorage.getItem(GRAVATAR_CACHE_KEY) || '{}');
+        cache[email] = url;
+        localStorage.setItem(GRAVATAR_CACHE_KEY, JSON.stringify(cache));
+      } catch {
+        // Ignore cache errors
+      }
+    };
+
+    img.onerror = () => {
+      setGravatarUrl(null);
+      // Cache failure
+      try {
+        const cache = JSON.parse(localStorage.getItem(GRAVATAR_CACHE_KEY) || '{}');
+        cache[email] = '';
+        localStorage.setItem(GRAVATAR_CACHE_KEY, JSON.stringify(cache));
+      } catch {
+        // Ignore cache errors
+      }
+    };
+
+    img.src = url;
+  }, [user?.email, user?.photoURL]);
 
   /**
    * Handle user logout
@@ -92,19 +151,22 @@ export function Header() {
   };
 
   /**
-   * Get user avatar (photo or initial)
+   * Get user avatar (photo, Gravatar, or initial)
    */
   const renderAvatar = (size: 'sm' | 'md') => {
     const sizeClasses = size === 'sm' ? 'w-10 h-10' : 'w-12 h-12';
-    const textSize = size === 'sm' ? 'text-sm' : 'text-lg';
+    const pixelSize = size === 'sm' ? 40 : 48;
 
-    if (user?.photoURL) {
+    // Priority: 1. photoURL, 2. Gravatar, 3. Initial
+    const avatarUrl = user?.photoURL || gravatarUrl;
+
+    if (avatarUrl) {
       return (
         <Image
-          src={user.photoURL}
+          src={avatarUrl}
           alt=""
-          width={size === 'sm' ? 40 : 48}
-          height={size === 'sm' ? 40 : 48}
+          width={pixelSize}
+          height={pixelSize}
           className={`${sizeClasses} rounded-full object-cover`}
         />
       );

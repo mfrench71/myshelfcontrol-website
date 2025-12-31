@@ -16,12 +16,17 @@ import {
   ExternalLink,
   AlertCircle,
   CheckCircle,
+  MailCheck,
+  MailWarning,
+  Send,
+  Loader2,
 } from 'lucide-react';
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
   deleteUser,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { useAuthContext } from '@/components/providers/auth-provider';
@@ -145,19 +150,17 @@ function ChangePasswordModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50"
+      className="fixed inset-0 z-50 bottom-sheet-backdrop"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Change password"
     >
       <div
-        className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white md:rounded-xl rounded-t-2xl p-6 md:max-w-md md:w-full animate-slide-up md:animate-none"
+        className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-center mb-4 md:hidden">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
+        <div className="bottom-sheet-handle" />
 
         <h3 className="text-lg font-semibold mb-4">Change Password</h3>
 
@@ -335,19 +338,17 @@ function DeleteAccountModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50"
+      className="fixed inset-0 z-50 bottom-sheet-backdrop"
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
       aria-label="Delete account confirmation"
     >
       <div
-        className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white md:rounded-xl rounded-t-2xl p-6 md:max-w-md md:w-full animate-slide-up md:animate-none"
+        className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-center mb-4 md:hidden">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
+        <div className="bottom-sheet-handle" />
 
         <h3 className="text-lg font-semibold text-red-600 mb-2">Delete Account</h3>
         <p className="text-gray-500 mb-4">
@@ -421,6 +422,26 @@ export default function ProfileSettingsPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  /**
+   * Resend email verification
+   */
+  const handleResendVerification = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    setSendingVerification(true);
+    try {
+      await sendEmailVerification(currentUser);
+      setVerificationSent(true);
+    } catch (error) {
+      console.error('Failed to send verification email:', error);
+    } finally {
+      setSendingVerification(false);
+    }
+  };
 
   const handleDeleteAccount = async (password: string) => {
     const currentUser = auth.currentUser;
@@ -522,6 +543,51 @@ export default function ProfileSettingsPage() {
         )}
 
         <div className="space-y-4">
+          {/* Email Verification Status */}
+          {user && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  {user.emailVerified ? (
+                    <MailCheck className="w-5 h-5 text-green-600 flex-shrink-0" aria-hidden="true" />
+                  ) : (
+                    <MailWarning className="w-5 h-5 text-amber-600 flex-shrink-0" aria-hidden="true" />
+                  )}
+                  <div>
+                    <h3 className="font-medium text-gray-900">Email Verification</h3>
+                    <p className={`text-sm mt-0.5 ${user.emailVerified ? 'text-green-600' : 'text-amber-600'}`}>
+                      {user.emailVerified ? 'Verified' : 'Not verified'}
+                    </p>
+                  </div>
+                </div>
+                {!user.emailVerified && (
+                  <button
+                    onClick={handleResendVerification}
+                    disabled={sendingVerification || verificationSent}
+                    className="flex-shrink-0 flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 text-sm rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendingVerification ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                        <span>Sending...</span>
+                      </>
+                    ) : verificationSent ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 text-green-600" aria-hidden="true" />
+                        <span>Sent!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" aria-hidden="true" />
+                        <span>Resend</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Change Password */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between gap-4">

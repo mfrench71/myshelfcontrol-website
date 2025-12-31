@@ -326,6 +326,36 @@ export default function AddBookPage() {
   }, [hasMoreResults, loadingMore, searchQuery, handleSearch]);
 
   /**
+   * Debounced live search as user types
+   */
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setSearchMessage(null);
+      return;
+    }
+
+    // For ISBNs, show hint but don't auto-search (wait for explicit Go/Enter)
+    if (isISBN(searchQuery)) {
+      setSearchResults([]);
+      setSearchMessage({ text: 'ISBN detected — press Go to look up', type: 'info' });
+      return;
+    }
+
+    // Need at least 2 characters for title/author search
+    if (searchQuery.length < 2) {
+      return;
+    }
+
+    // Debounce search by 400ms
+    const timer = setTimeout(() => {
+      handleSearch(searchQuery);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, handleSearch]);
+
+  /**
    * Handle search input keypress
    */
   const handleSearchKeyPress = (e: React.KeyboardEvent) => {

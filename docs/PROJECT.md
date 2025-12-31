@@ -111,6 +111,140 @@ All data stored under `/users/{userId}/`:
 - [Fable Club Features](https://fable.co/club-features)
 - [BookTrack Lending](https://booktrack.app/blog/lending-books-to-friends-how-to-track-your-shared-library-without-losing-it/)
 
+### Competitor Analysis: Additional Features (Dec 2025)
+
+#### New/Underdocumented Features Found
+
+| Feature | App(s) | Notes |
+|---------|--------|-------|
+| **Paused Book Status** | StoryGraph | Most upvoted request ever. Separate from DNF, excludes paused time from stats |
+| **Favorites Showcase** | StoryGraph | Pin up to 5 books to profile, used for recommendations |
+| **Sub-Ratings** | Pagebound | Rate enjoyment, quality, characters, plot separately |
+| **Per-Book Forums** | Pagebound | Each book has discussion forum, posts sorted by % read (unique) |
+| **Year in Review** | BookTrack, StoryGraph | Spotify Wrapped-style annual summary, shareable cards |
+| **AI Book Chat** | Basmo, Bookly | Ask questions about current book, summaries without spoilers |
+| **Kindle/Notion Sync** | Basmo | Import highlights and notes automatically |
+| **Match Percentage** | Hardcover | See reading taste overlap with other users |
+| **Similar Users ML** | StoryGraph | ML-powered suggestions for reading buddies |
+| **Reading Speed Prediction** | Bookly, Basmo | Estimate time to finish based on pace |
+| **Ambient Sounds** | Bookly | Rain, coffee shop sounds during reading timer |
+| **Book Characters Tracker** | Bookly | Track character names and relationships |
+| **Emotion Journaling** | Basmo | Log how each reading session made you feel |
+| **Anonymous Social** | Pagebound | No profile photos, private follower counts |
+| **GraphQL API** | Hardcover | Developer-friendly public API |
+
+#### DNF Tracking (Expanded)
+
+Current apps offer DNF as first-class status:
+- **StoryGraph/Pagebound/Tome**: DNF in status dropdown
+- **Reading Journey**: "DNF Graveyard" feature
+- Track pages read before abandoning
+- Optional review of why book was abandoned
+
+#### Content Warnings (Expanded)
+
+StoryGraph implementation:
+- User specifies content to avoid in preferences survey
+- Books filtered from recommendations automatically
+- Warning symbols shown on book pages
+- Traffic light severity system (planned)
+- Community-sourced via [BookTriggerWarnings.com](https://booktriggerwarnings.com/)
+
+#### Edition/Version Handling
+
+Complex UX challenge across competitors:
+- **StoryGraph**: Each edition is separate item (controversial but necessary)
+- **BookTrack**: ISBN-based exact matching for metadata accuracy
+- **Challenge**: Users want to track physical + audiobook of same title
+- **Consideration**: Show "You've read another edition" on book pages
+
+#### Reread Tracking
+
+- **Bookmory**: Explicit "Reread" section with history
+- **Goodreads**: Limited - rereads don't count toward reading challenges
+- **Best practice**: Track each read date separately, show reread count
+
+#### New Release Notifications
+
+Highly requested (major Goodreads advantage):
+- Email alerts when followed authors release new books
+- Services like BookBub, FictFact specialise in this
+- Requested feature on StoryGraph roadmap
+
+#### Sources (Additional)
+
+- [StoryGraph Changelog](https://roadmap.thestorygraph.com/changelog)
+- [Pagebound App](https://pagebound.co/)
+- [Basmo App](https://basmo.app/)
+- [Hardcover API](https://www.emgoto.com/hardcover-book-api/)
+- [BookTrack Year in Review](https://booktrack.app/blog/how-to-create-your-own-spotify-wrapped-for-books-using-book-tracker/)
+
+### Settings Page Layout (Research)
+
+#### Current Implementation: Hub Pattern
+
+Settings uses a hub-and-drill-down pattern: main Settings page lists categories, each linking to a sub-page. This differs from the legacy app which used horizontal tabs with in-section links.
+
+#### Approach Comparison
+
+| Aspect | **Hub Pattern** (Current) | **Horizontal Tabs** (Legacy) |
+|--------|---------------------------|------------------------------|
+| Clicks to setting | 2-3 clicks | 1-2 clicks |
+| Mobile friendliness | Excellent (vertical list) | Moderate (horizontal scroll) |
+| Scalability | High (unlimited sections) | Limited (5-7 tabs max) |
+| Cognitive load | Low (one section at a time) | Higher (multiple visible) |
+| iOS/Android convention | ✓ Follows native patterns | ✗ Custom pattern |
+
+#### What Competitors Do
+
+| App | Pattern |
+|-----|---------|
+| **iOS/Android Settings** | Hub → Drill-down (industry standard) |
+| **StoryGraph** | Bottom nav → Settings → Categories |
+| **Goodreads** | Hamburger → Settings → Tabs within |
+| **Notion** | Sidebar → Modal settings |
+| **Gmail** | Gear icon → Settings tabs |
+
+#### UX Research Summary
+
+**Hub pattern is appropriate when:**
+- Settings are infrequently accessed (set once, forget)
+- Many categories exist or will be added
+- Mobile-first design is priority
+- Following platform conventions matters
+
+**Inline/tabs preferred when:**
+- Users frequently move between settings
+- Only 3-5 categories exist
+- Desktop is primary platform
+
+**For book tracking apps:** Settings are typically accessed rarely (after initial setup), supporting the hub pattern.
+
+#### Potential Improvements
+
+1. **Keyboard shortcut** (Cmd/Ctrl+,) for power users
+2. **Surface frequent settings** outside hub (dark mode toggle in header)
+3. **Desktop sidebar** (>768px): show settings categories always visible
+4. **Inline editing** within settings pages where possible
+
+#### Hybrid Alternatives Considered
+
+| Alternative | Description | Trade-off |
+|-------------|-------------|-----------|
+| **Hub + Quick Actions** | Keep hub, surface common settings elsewhere | Duplication |
+| **Responsive sidebar** | Mobile: hub, Desktop: always-visible sidebar | More code |
+| **Tabs within hub** | Hub page with horizontal tabs for categories | Limited mobile space |
+| **Accordion sections** | Single page with collapsible sections | Long scroll |
+
+**Decision:** Keep hub pattern for now. It follows iOS/Android conventions, scales well, and settings are infrequently accessed. Consider adding desktop sidebar layout as future enhancement.
+
+#### Sources
+
+- [Apple HIG - Navigation](https://developer.apple.com/design/human-interface-guidelines/ios/app-architecture/navigation/)
+- [Android Settings Patterns](https://developer.android.com/design/ui/mobile/guides/patterns/settings)
+- [Toptal - Settings UX](https://www.toptal.com/designers/ux/settings-ux)
+- [NN/g - Mobile Navigation](https://www.nngroup.com/articles/mobile-navigation-patterns/)
+
 ---
 
 ## Project Structure
@@ -393,6 +527,47 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 - [ ] Quick-fix actions (refresh from API)
 - [ ] Completeness score with progress bar
 
+### Year in Review / Reading Wrapped
+- [ ] Annual summary page (Spotify Wrapped-style)
+- [ ] Top rated book of the year
+- [ ] Most read authors
+- [ ] Genre distribution breakdown
+- [ ] Total books/pages/hours read
+- [ ] Reading streaks summary
+- [ ] Shareable social cards (image generation)
+- [ ] Compare with previous years
+
+### Paused & DNF Status
+- [ ] Add "Paused" as reading status (separate from DNF)
+- [ ] Paused books in collapsed section
+- [ ] Exclude paused time from reading speed calculations
+- [ ] DNF with pages-read tracking
+- [ ] Optional "Why I DNF'd" notes field
+- [ ] DNF books don't count against reading goals
+
+### Sub-Ratings System
+- [ ] Overall rating (current half-star system)
+- [ ] Enjoyment rating (how much you liked it)
+- [ ] Quality rating (writing/craft)
+- [ ] Characters rating
+- [ ] Plot rating
+- [ ] Optional: show breakdown on book view page
+- [ ] Use sub-ratings to improve recommendations
+
+### Edition & Reread Tracking
+- [ ] Track multiple editions of same book (physical + audiobook)
+- [ ] "You've read another edition" indicator
+- [ ] Explicit reread tracking with dates
+- [ ] Reread count displayed on book card
+- [ ] Rereads count toward reading challenges
+
+### New Release Notifications
+- [ ] Follow authors from author page
+- [ ] Email alerts when followed authors release new books
+- [ ] In-app notification centre
+- [ ] Wishlist items: notify when released
+- [ ] Weekly digest option (vs immediate alerts)
+
 ---
 
 ## Public Frontend (Marketing Site)
@@ -470,12 +645,177 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 
 ### UK Legal Considerations
 
+#### Current Requirements (Single-User)
+
 | Legislation | Requirement | Impact |
 |-------------|-------------|--------|
 | **UK GDPR / Data Protection Act 2018** | Privacy policy, consent, data rights | Already compliant ✓ |
 | **Consumer Rights Act 2015** | Digital content must be as described | Clear feature descriptions |
 | **Consumer Contracts Regulations 2013** | 14-day cooling-off period | Must offer refunds within 14 days |
 | **VAT (digital services)** | 20% VAT on UK sales | Use Paddle/Stripe Tax to handle |
+
+#### Additional Requirements for Multi-User (Research Dec 2025)
+
+##### Age Appropriate Design Code (Children's Code)
+
+**Applies if:** Service likely to be accessed by under-18s (even if not aimed at them).
+
+| Requirement | Implementation |
+|-------------|----------------|
+| High privacy by default | Default profiles to private, opt-in for public |
+| Minimum data collection | Only collect essential data |
+| No nudge techniques | Don't push users toward less private options |
+| Age-appropriate privacy info | Clear, simple language in privacy policy |
+| Parental controls option | Consider for future |
+| Geolocation off by default | N/A (no location features) |
+
+**Risk Assessment:** Book tracking app is low-risk. Not aimed at children, no chat features, no algorithmically-recommended content. However, if users under 18 may access (likely), should apply Code standards to all users.
+
+**Action:** Add age verification or apply Code standards universally.
+
+Sources: [ICO Children's Code](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/childrens-information/childrens-code-guidance-and-resources/)
+
+##### Online Safety Act 2023
+
+**Applies if:** User-to-user service where content can be encountered by other users.
+
+| Duty | Applies? | Notes |
+|------|----------|-------|
+| Illegal content duty | ✓ Yes | Risk assessment required, remove illegal content |
+| Children's safety duty | ✓ If accessible | Age assurance or apply protections to all |
+| Categorised service duties | ✗ No | Only for 7M+ UK users with recommender system |
+
+**Risk Assessment:** Low-risk platform. No algorithmic recommendations, no chat/messaging, limited UGC (reviews only). Falls under smallest tier of regulation.
+
+**Requirements:**
+- [ ] Conduct illegal content risk assessment (by March 2025 ✓)
+- [ ] Implement basic moderation for reviews/comments
+- [ ] Terms of service must prohibit illegal content
+- [ ] Simple reporting mechanism for users
+
+**Exemptions that may apply:**
+- Comments/reviews only (limited UGC)
+- No private messaging
+- No content recommender system
+
+Sources: [Ofcom Guide](https://www.ofcom.org.uk/online-safety/illegal-and-harmful-content/guide-for-services), [Gov.uk Explainer](https://www.gov.uk/government/publications/online-safety-act-explainer/online-safety-act-explainer)
+
+##### PECR Cookie Consent
+
+**Current requirements:**
+- Consent required before setting non-essential cookies
+- Reject must be as easy as accept
+- No pre-ticked boxes
+- Clear information about what cookies do
+
+**Exempt (no consent needed):**
+- Session cookies for authentication
+- Shopping basket / essential functionality
+- Analytics cookies (from June 2025 under DUA Act - with opt-out)
+
+**Action:**
+- [ ] Cookie consent banner if using analytics
+- [ ] Document cookies in privacy policy
+- [ ] Ensure reject is equally prominent as accept
+
+Sources: [ICO Cookie Guidance](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guide-to-pecr/cookies-and-similar-technologies/)
+
+##### Right to Erasure (Multi-User Implications)
+
+When user data is shared with others (reviews, public profiles, activity feeds):
+
+| Scenario | Obligation |
+|----------|------------|
+| User deletes account | Must erase all personal data |
+| Data shared with other users | Must inform recipients of erasure |
+| Public reviews on book pages | Must remove or anonymise |
+| Activity feed mentions | Must remove from other users' feeds |
+| Data made public | Take reasonable steps to inform other controllers |
+
+**Implementation considerations:**
+- [ ] Cascade delete for all user content
+- [ ] Anonymise rather than delete if review is valuable
+- [ ] Offer "delete account" vs "delete account and all content" options
+- [ ] Log data recipients for erasure notifications
+
+Sources: [ICO Right to Erasure](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-erasure/)
+
+##### Data Controller/Processor (Multi-User)
+
+| Role | When |
+|------|------|
+| **Sole Controller** | Processing user's own data for their library |
+| **Controller** | Processing data to show to other users (activity feeds, public profiles) |
+| **Joint Controller** | If integrating social media plugins that share data back |
+
+**Actions:**
+- [ ] Document controller status in privacy policy
+- [ ] If using third-party social plugins, establish joint controller arrangement
+- [ ] Data sharing agreements if sharing with other controllers
+
+Sources: [ICO Controllers & Processors](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/controllers-and-processors/controllers-and-processors/what-are-controllers-and-processors/)
+
+##### Digital Markets, Competition and Consumers Act 2024
+
+**Relevant consumer protection changes (from April 2025):**
+
+| Requirement | Impact |
+|-------------|--------|
+| Fake reviews prohibition | Must not post or commission fake reviews |
+| Subscription clarity | Clear pre-contract info, renewal reminders |
+| Easy cancellation | Cancellation must be simple (not buried) |
+| Drip pricing ban | Show full price upfront, not hidden fees |
+
+**Subscription requirements (from Spring 2026):**
+- [ ] Pre-contract information in durable medium
+- [ ] Regular renewal reminders
+- [ ] Simple cancellation mechanism
+
+Sources: [Lewis Silkin Guide](https://www.lewissilkin.com/en/insights/2024/09/12/our-guide-digital-markets-competition-consumers-bill-focusing-consumer-law)
+
+##### Accessibility (Equality Act 2010)
+
+| Requirement | Standard | Applies |
+|-------------|----------|---------|
+| Reasonable adjustments | WCAG 2.1 AA recommended | Private sector |
+| WCAG 2.2 AA mandatory | UK public sector only | ✗ Not required |
+| European Accessibility Act | WCAG 2.1 AA | Only if serving EU customers |
+
+**Best practice:**
+- [ ] WCAG 2.1 AA compliance for core features
+- [ ] Keyboard navigation
+- [ ] Screen reader support
+- [ ] Colour contrast ratios
+- [ ] Alt text for images
+
+Sources: [Bird & Bird UK Accessibility](https://www.twobirds.com/en/insights/2025/uk/uk-accessibility-requirements-for-websites-and-mobile-applications)
+
+##### Terms of Service Requirements
+
+**Required legal documents:**
+- [ ] Privacy Policy (legally required if collecting personal data)
+- [ ] Cookie Policy (if using cookies)
+- [ ] Terms & Conditions (recommended, not legally required)
+
+**Terms must include:**
+- Acceptable use policy
+- User content rights and restrictions
+- Payment and refund terms (if applicable)
+- Service limitations
+- Plain English (consumer protection requirement)
+
+Sources: [Orrick FAQ](https://www.orrick.com/en/tech-studio/resources/faq/what-legal-terms-do-I-need-for-my-UK-company-website-or-mobile-app)
+
+#### Multi-User Legal Checklist
+
+**Before launch of multi-user features:**
+- [ ] Update privacy policy for data sharing between users
+- [ ] Add content moderation capability
+- [ ] Implement user reporting mechanism
+- [ ] Document approach to under-18 users (age gate or universal protections)
+- [ ] Cascade delete for account erasure
+- [ ] Cookie consent if adding analytics
+- [ ] Clear subscription terms if adding premium tier
 
 ---
 
@@ -542,13 +882,16 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 | Book Tracker | Native iOS, OCR quote capture, loan tracking | iOS only |
 
 ### Feature Inspiration
-- **Reading Timer**: Track sessions, calculate reading speed, ambient sounds
-- **Mood Tracking**: Tag by mood, pacing, content warnings with severity levels
-- **Gamification**: Streaks, badges, annual challenges, progress bars
-- **Quote Capture**: OCR from photos, reading journal, highlight capture
-- **Advanced Stats**: Year-over-year comparison, custom charts, reading speed trends
-- **Privacy**: Per-book visibility, anonymous browsing mode
-- **Social**: Buddy reads, readalongs, direct messaging
+- **Reading Timer**: Track sessions, calculate reading speed, ambient sounds, reading speed prediction
+- **Mood Tracking**: Tag by mood, pacing, content warnings with severity levels, emotion journaling per session
+- **Gamification**: Streaks, badges, annual challenges, progress bars, Year in Review/Reading Wrapped
+- **Quote Capture**: OCR from photos, reading journal, highlight capture, Kindle sync
+- **Advanced Stats**: Year-over-year comparison, custom charts, reading speed trends, sub-ratings (enjoyment/quality/characters/plot)
+- **Privacy**: Per-book visibility, anonymous browsing mode, anonymous social profiles
+- **Social**: Buddy reads, readalongs, direct messaging, per-book discussion forums, match percentage/similar users
+- **Book Management**: Paused status (separate from DNF), DNF with page tracking, edition handling, reread tracking, book characters tracker
+- **Notifications**: New release alerts for followed authors, wishlist release notifications
+- **AI Features**: Book chat assistant, summaries without spoilers (emerging 2025 trend)
 
 ### Research Sources
 - [The StoryGraph](https://thestorygraph.com/)
@@ -812,4 +1155,4 @@ Per AACR2 cataloging rules:
 
 ---
 
-*Last updated: 2025-12-31* (Added multi-user competitor analysis)
+*Last updated: 2025-12-31* (Added UK multi-user legal requirements)

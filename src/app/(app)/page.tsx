@@ -15,7 +15,12 @@ import {
   CheckCircle,
   Library,
   TrendingUp,
+  AlertCircle,
+  X,
+  Loader2,
+  Mail,
 } from 'lucide-react';
+import { sendEmailVerification } from 'firebase/auth';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
 import { getGenres } from '@/lib/repositories/genres';
@@ -290,6 +295,83 @@ function RecentlyFinishedWidget({ books }: { books: Book[] }) {
 }
 
 /**
+ * Email Verification Banner
+ * Shows when user's email is not verified
+ */
+function EmailVerificationBanner({
+  user,
+  onDismiss,
+}: {
+  user: { email: string | null; emailVerified: boolean };
+  onDismiss: () => void;
+}) {
+  const [isSending, setIsSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleResend = async () => {
+    setIsSending(true);
+    setError(null);
+    try {
+      const { auth } = await import('@/lib/firebase/client');
+      if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+        setSent(true);
+      }
+    } catch (err) {
+      console.error('Failed to send verification email:', err);
+      setError('Failed to send. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+      <div className="flex items-start gap-3">
+        <Mail className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+        <div className="flex-1 min-w-0">
+          <p className="text-amber-800 font-medium">Please verify your email address</p>
+          <p className="text-amber-700 text-sm mt-1">
+            We sent a verification link to <strong>{user.email}</strong>. Check your inbox and click
+            the link to verify.
+          </p>
+          {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+          {sent ? (
+            <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
+              <CheckCircle className="w-4 h-4" />
+              Verification email sent!
+            </p>
+          ) : (
+            <button
+              onClick={handleResend}
+              disabled={isSending}
+              className="mt-2 text-sm text-amber-700 hover:text-amber-800 underline disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
+            >
+              {isSending ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                'Resend verification email'
+              )}
+            </button>
+          )}
+        </div>
+        <button
+          onClick={onDismiss}
+          className="p-1 hover:bg-amber-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="Dismiss verification banner"
+        >
+          <X className="w-5 h-5 text-amber-600" aria-hidden="true" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Series Progress Widget
  */
 function SeriesProgressWidget({
@@ -343,11 +425,33 @@ function SeriesProgressWidget({
   );
 }
 
+const BANNER_DISMISSED_KEY = 'email-verification-banner-dismissed';
+
 export default function HomePage() {
   const { user, loading: authLoading } = useAuthContext();
   const [books, setBooks] = useState<Book[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bannerDismissed, setBannerDismissed] = useState(true); // Default true to prevent flash
+
+  // Check session storage for banner dismissed state
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const dismissed = sessionStorage.getItem(BANNER_DISMISSED_KEY) === 'true';
+      setBannerDismissed(dismissed);
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    setBannerDismissed(true);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(BANNER_DISMISSED_KEY, 'true');
+    }
+  };
+
+  // Show banner if email not verified and not dismissed
+  const showVerificationBanner =
+    user && !user.emailVerified && !bannerDismissed;
 
   useEffect(() => {
     async function loadData() {
@@ -521,6 +625,11 @@ export default function HomePage() {
 
   return (
     <div id="dashboard" className="max-w-4xl mx-auto px-4 py-6">
+      {/* Email Verification Banner */}
+      {showVerificationBanner && (
+        <EmailVerificationBanner user={user} onDismiss={handleDismissBanner} />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>

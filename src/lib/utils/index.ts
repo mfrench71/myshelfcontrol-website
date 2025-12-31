@@ -127,3 +127,15 @@ export function normalizeSeriesName(name: string): string {
     .replace(/^the\s+/i, '') // Remove leading "The "
     .replace(/\s+/g, ' '); // Normalize whitespace
 }
+
+/**
+ * Normalize author name for comparison
+ * Lowercases, removes punctuation, and normalizes whitespace
+ */
+export function normalizeAuthor(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[.,\-']/g, '') // Remove punctuation
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim();
+}

@@ -19,8 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { addBook } from '@/lib/repositories/books';
-import { GenrePicker } from '@/components/pickers/genre-picker';
-import { SeriesPicker, type SeriesSelection } from '@/components/pickers/series-picker';
+import { GenrePicker, SeriesPicker, AuthorPicker, type SeriesSelection } from '@/components/pickers';
 import type { PhysicalFormat } from '@/lib/types';
 
 // Book search result from API
@@ -444,20 +443,15 @@ export default function AddBookPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="author" className="block font-semibold text-gray-700 mb-1">
-                  Author <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="author"
-                  name="author"
+              {/* Author Picker */}
+              {user && (
+                <AuthorPicker
+                  userId={user.uid}
                   value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
+                  onChange={setAuthor}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                 />
-              </div>
+              )}
 
               {/* Genre Picker */}
               {user && (

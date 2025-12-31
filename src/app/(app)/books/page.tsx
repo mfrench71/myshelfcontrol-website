@@ -16,6 +16,7 @@ import {
   FilterBottomSheet,
   ActiveFilterChip,
   type SortOption,
+  type BookCounts,
 } from '@/components/books/filter-panel';
 import type { Book, Genre, Series, BookFilters } from '@/lib/types';
 
@@ -176,6 +177,35 @@ export default function BooksPage() {
     const filtered = filterBooks(books, filters);
     return sortBooks(filtered, sortBy, direction);
   }, [books, filters, sortValue]);
+
+  // Calculate book counts for filter options (from all books, not filtered)
+  const bookCounts = useMemo((): BookCounts => {
+    const counts: BookCounts = {
+      genres: {},
+      statuses: { reading: 0, finished: 0 },
+      series: {},
+      total: books.length,
+    };
+
+    books.forEach((book) => {
+      // Count statuses
+      const status = getBookStatus(book);
+      if (status === 'reading') counts.statuses.reading++;
+      else if (status === 'finished') counts.statuses.finished++;
+
+      // Count genres
+      (book.genres || []).forEach((genreId) => {
+        counts.genres[genreId] = (counts.genres[genreId] || 0) + 1;
+      });
+
+      // Count series
+      if (book.seriesId) {
+        counts.series[book.seriesId] = (counts.series[book.seriesId] || 0) + 1;
+      }
+    });
+
+    return counts;
+  }, [books]);
 
   useEffect(() => {
     async function loadData() {
@@ -362,43 +392,28 @@ export default function BooksPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">My Books</h1>
-        {/* Desktop Add button - hidden on mobile, FAB is used there */}
-        <Link
-          href="/books/add"
-          className="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"
-        >
-          <Plus className="w-5 h-5" aria-hidden="true" />
-          <span>Add Book</span>
-        </Link>
-      </div>
-
+    <div className="max-w-6xl mx-auto px-4 pt-6 pb-24">
       {/* Mobile Sort & Filter Bar */}
       {books.length > 0 && (
         <div className="flex gap-2 mb-4 md:hidden">
-          <MobileSortDropdown value={sortValue} onChange={handleSortChange} hasSeriesFilter={!!(filters.seriesIds && filters.seriesIds.length > 0)} />
           <button
             id="filter-btn"
             onClick={() => setShowFilterSheet(true)}
-            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border transition-colors min-w-[44px] min-h-[44px] ${
-              hasActiveFilters
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
+            className="relative p-2.5 hover:bg-gray-100 rounded-lg text-gray-600 min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Open filters"
           >
-            <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+            <SlidersHorizontal className="w-5 h-5" aria-hidden="true" />
             {hasActiveFilters && (
-              <span className="text-sm font-medium">{activeFilterLabels.length}</span>
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {activeFilterLabels.length}
+              </span>
             )}
           </button>
+          <MobileSortDropdown value={sortValue} onChange={handleSortChange} hasSeriesFilter={!!(filters.seriesIds && filters.seriesIds.length > 0)} />
         </div>
       )}
 
-      {/* Active Filter Chips (Mobile) */}
+      {/* Mobile Active Filter Chips */}
       {hasActiveFilters && activeFilterLabels.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4 md:hidden">
           {activeFilterLabels.map(({ label, key, value }, index) => (
@@ -411,44 +426,63 @@ export default function BooksPage() {
         </div>
       )}
 
-      {/* Book count */}
-      {books.length > 0 && (
-        <p className="text-sm text-gray-500 mb-4">
-          {hasActiveFilters ? (
-            <>
-              Showing {filteredAndSortedBooks.length} of {books.length}{' '}
-              {books.length === 1 ? 'book' : 'books'}
-            </>
-          ) : (
-            <>
-              {books.length} {books.length === 1 ? 'book' : 'books'} in your library
-            </>
-          )}
-        </p>
-      )}
+      {/* Mobile Header */}
+      <div className="flex items-center justify-between mb-4 md:hidden">
+        <h1 className="text-xl font-bold text-gray-900">My Books</h1>
+        {books.length > 0 && (
+          <p className="text-sm text-gray-500">
+            {hasActiveFilters
+              ? `${filteredAndSortedBooks.length} of ${books.length}`
+              : `${books.length} ${books.length === 1 ? 'book' : 'books'}`}
+          </p>
+        )}
+      </div>
 
       {/* Two-Column Layout */}
-      <div className="flex gap-6">
+      <div className="flex gap-4 md:gap-6">
         {/* Desktop Sidebar */}
         {books.length > 0 && (
           <aside className="hidden md:block w-72 flex-shrink-0">
-            <div className="sticky top-20">
-              <FilterSidebar
+            <FilterSidebar
                 genres={genres}
                 series={series}
                 authors={authors}
                 filters={filters}
                 sortValue={sortValue}
+                bookCounts={bookCounts}
                 onFiltersChange={handleFiltersChange}
                 onSortChange={handleSortChange}
                 onReset={handleReset}
               />
-            </div>
           </aside>
         )}
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
+          {/* Desktop Header */}
+          <div className="hidden md:flex items-center justify-between mb-4">
+            <h1 className="text-xl font-bold text-gray-900">My Books</h1>
+            {books.length > 0 && (
+              <p className="text-sm text-gray-500">
+                {hasActiveFilters
+                  ? `Showing ${filteredAndSortedBooks.length} of ${books.length} ${books.length === 1 ? 'book' : 'books'}`
+                  : `${books.length} ${books.length === 1 ? 'book' : 'books'}`}
+              </p>
+            )}
+          </div>
+
+          {/* Desktop Active Filter Chips */}
+          {hasActiveFilters && activeFilterLabels.length > 0 && (
+            <div className="hidden md:flex flex-wrap gap-2 mb-4">
+              {activeFilterLabels.map(({ label, key, value }, index) => (
+                <ActiveFilterChip
+                  key={`${key}-${value || index}`}
+                  label={label}
+                  onRemove={() => removeFilter(key, value)}
+                />
+              ))}
+            </div>
+          )}
           {/* Empty State */}
           {books.length === 0 ? (
             <div id="empty-state" className="text-center py-12">
@@ -501,6 +535,7 @@ export default function BooksPage() {
         series={series}
         authors={authors}
         filters={filters}
+        bookCounts={bookCounts}
         onFiltersChange={handleFiltersChange}
         onReset={handleReset}
       />

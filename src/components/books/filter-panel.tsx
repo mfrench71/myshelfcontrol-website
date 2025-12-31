@@ -11,12 +11,21 @@ import type { Genre, Series, BookFilters } from '@/lib/types';
 
 export type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc' | 'seriesPosition-asc';
 
+/** Book counts for filter options (faceted filtering) */
+export type BookCounts = {
+  genres: Record<string, number>;
+  statuses: { reading: number; finished: number };
+  series: Record<string, number>;
+  total: number;
+};
+
 type FilterPanelProps = {
   genres: Genre[];
   series: Series[];
   authors: string[];
   filters: BookFilters;
   sortValue: SortOption;
+  bookCounts?: BookCounts;
   onFiltersChange: (filters: BookFilters) => void;
   onSortChange: (sort: SortOption) => void;
   onReset: () => void;
@@ -236,13 +245,14 @@ export function FilterSidebar({
   authors,
   filters,
   sortValue,
+  bookCounts,
   onFiltersChange,
   onSortChange,
   onReset,
 }: FilterPanelProps) {
   const id = useId();
   const [showMoreFilters, setShowMoreFilters] = useState(
-    !!(filters.seriesIds && filters.seriesIds.length > 0) || !!filters.author
+    !!(filters.seriesIds && filters.seriesIds.length > 0)
   );
 
   const handleStatusChange = (status: string, checked: boolean) => {
@@ -332,22 +342,29 @@ export function FilterSidebar({
       <div>
         <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
         <div className="space-y-3">
-          {STATUS_OPTIONS.map((option) => (
-            <label
-              key={option.value}
-              htmlFor={`${id}-status-${option.value}`}
-              className="flex items-center justify-between cursor-pointer"
-            >
-              <span className="text-sm text-gray-900">{option.label}</span>
-              <input
-                type="checkbox"
-                id={`${id}-status-${option.value}`}
-                checked={filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read') || false}
-                onChange={(e) => handleStatusChange(option.value, e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
-              />
-            </label>
-          ))}
+          {STATUS_OPTIONS.map((option) => {
+            const count = bookCounts?.statuses?.[option.value as 'reading' | 'finished'] ?? 0;
+            return (
+              <label
+                key={option.value}
+                htmlFor={`${id}-status-${option.value}`}
+                className={`flex items-center justify-between cursor-pointer ${count === 0 ? 'opacity-50' : ''}`}
+              >
+                <span className="text-sm text-gray-900">{option.label}</span>
+                <span className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500">({count})</span>
+                  <input
+                    type="checkbox"
+                    id={`${id}-status-${option.value}`}
+                    checked={filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read') || false}
+                    onChange={(e) => handleStatusChange(option.value, e.target.checked)}
+                    className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                    disabled={count === 0 && !filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read')}
+                  />
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
@@ -370,33 +387,56 @@ export function FilterSidebar({
         </select>
       </div>
 
+      {/* Author */}
+      {authors.length > 0 && (
+        <div>
+          <label htmlFor={`${id}-author`} className="block text-sm font-semibold text-gray-900 mb-2">
+            Author
+          </label>
+          <AuthorTypeahead
+            id={`${id}-author`}
+            authors={authors}
+            value={filters.author || ''}
+            onChange={handleAuthorChange}
+          />
+        </div>
+      )}
+
       {/* Genre */}
       {genres.length > 0 && (
         <div>
           <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
           <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
-            {genres.map((genre) => (
-              <label
-                key={genre.id}
-                htmlFor={`${id}-genre-${genre.id}`}
-                className="flex items-center justify-between cursor-pointer"
-              >
-                <span className="text-sm text-gray-900">{genre.name}</span>
-                <input
-                  type="checkbox"
-                  id={`${id}-genre-${genre.id}`}
-                  checked={filters.genreIds?.includes(genre.id) || false}
-                  onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
-                />
-              </label>
-            ))}
+            {genres.map((genre) => {
+              const count = bookCounts?.genres?.[genre.id] ?? 0;
+              const isSelected = filters.genreIds?.includes(genre.id) || false;
+              return (
+                <label
+                  key={genre.id}
+                  htmlFor={`${id}-genre-${genre.id}`}
+                  className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
+                >
+                  <span className="text-sm text-gray-900">{genre.name}</span>
+                  <span className="flex items-center gap-3">
+                    <span className="text-sm text-gray-500">({count})</span>
+                    <input
+                      type="checkbox"
+                      id={`${id}-genre-${genre.id}`}
+                      checked={isSelected}
+                      onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
+                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                      disabled={count === 0 && !isSelected}
+                    />
+                  </span>
+                </label>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* More Filters Toggle */}
-      {(series.length > 0 || authors.length > 0) && (
+      {/* More Filters Toggle (Series) */}
+      {series.length > 0 && (
         <>
           <button
             onClick={() => setShowMoreFilters(!showMoreFilters)}
@@ -410,47 +450,35 @@ export function FilterSidebar({
           </button>
 
           {showMoreFilters && (
-            <>
-              {/* Author (in More section) */}
-              {authors.length > 0 && (
-                <div>
-                  <label htmlFor={`${id}-author`} className="block text-sm font-semibold text-gray-900 mb-2">
-                    Author
-                  </label>
-                  <AuthorTypeahead
-                    id={`${id}-author`}
-                    authors={authors}
-                    value={filters.author || ''}
-                    onChange={handleAuthorChange}
-                  />
-                </div>
-              )}
-
-              {/* Series (in More section) */}
-              {series.length > 0 && (
-                <div>
-                  <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-                  <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
-                    {series.map((s) => (
-                      <label
-                        key={s.id}
-                        htmlFor={`${id}-series-${s.id}`}
-                        className="flex items-center justify-between cursor-pointer"
-                      >
-                        <span className="text-sm text-gray-900">{s.name}</span>
+            <div>
+              <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
+              <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+                {series.map((s) => {
+                  const count = bookCounts?.series?.[s.id] ?? 0;
+                  const isSelected = filters.seriesIds?.includes(s.id) || false;
+                  return (
+                    <label
+                      key={s.id}
+                      htmlFor={`${id}-series-${s.id}`}
+                      className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
+                    >
+                      <span className="text-sm text-gray-900">{s.name}</span>
+                      <span className="flex items-center gap-3">
+                        <span className="text-sm text-gray-500">({count})</span>
                         <input
                           type="checkbox"
                           id={`${id}-series-${s.id}`}
-                          checked={filters.seriesIds?.includes(s.id) || false}
+                          checked={isSelected}
                           onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
                           className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                          disabled={count === 0 && !isSelected}
                         />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </>
       )}
@@ -510,6 +538,7 @@ export function FilterBottomSheet({
   series,
   authors,
   filters,
+  bookCounts,
   onFiltersChange,
   onReset,
 }: {
@@ -519,12 +548,13 @@ export function FilterBottomSheet({
   series: Series[];
   authors: string[];
   filters: BookFilters;
+  bookCounts?: BookCounts;
   onFiltersChange: (filters: BookFilters) => void;
   onReset: () => void;
 }) {
   const id = useId();
   const [showMoreFilters, setShowMoreFilters] = useState(
-    !!(filters.seriesIds && filters.seriesIds.length > 0) || !!filters.author
+    !!(filters.seriesIds && filters.seriesIds.length > 0)
   );
 
   const handleStatusChange = (status: string, checked: boolean) => {
@@ -616,22 +646,29 @@ export function FilterBottomSheet({
           <div>
             <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
             <div className="space-y-3">
-              {STATUS_OPTIONS.map((option) => (
-                <label
-                  key={option.value}
-                  htmlFor={`${id}-mobile-status-${option.value}`}
-                  className="flex items-center justify-between cursor-pointer"
-                >
-                  <span className="text-sm text-gray-900">{option.label}</span>
-                  <input
-                    type="checkbox"
-                    id={`${id}-mobile-status-${option.value}`}
-                    checked={filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read') || false}
-                    onChange={(e) => handleStatusChange(option.value, e.target.checked)}
-                    className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
-                  />
-                </label>
-              ))}
+              {STATUS_OPTIONS.map((option) => {
+                const count = bookCounts?.statuses?.[option.value as 'reading' | 'finished'] ?? 0;
+                return (
+                  <label
+                    key={option.value}
+                    htmlFor={`${id}-mobile-status-${option.value}`}
+                    className={`flex items-center justify-between cursor-pointer ${count === 0 ? 'opacity-50' : ''}`}
+                  >
+                    <span className="text-sm text-gray-900">{option.label}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="text-sm text-gray-500">({count})</span>
+                      <input
+                        type="checkbox"
+                        id={`${id}-mobile-status-${option.value}`}
+                        checked={filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read') || false}
+                        onChange={(e) => handleStatusChange(option.value, e.target.checked)}
+                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                        disabled={count === 0 && !filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read')}
+                      />
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
@@ -657,33 +694,56 @@ export function FilterBottomSheet({
             </select>
           </div>
 
+          {/* Author */}
+          {authors.length > 0 && (
+            <div>
+              <label htmlFor={`${id}-mobile-author`} className="block text-sm font-semibold text-gray-900 mb-2">
+                Author
+              </label>
+              <AuthorTypeahead
+                id={`${id}-mobile-author`}
+                authors={authors}
+                value={filters.author || ''}
+                onChange={handleAuthorChange}
+              />
+            </div>
+          )}
+
           {/* Genre */}
           {genres.length > 0 && (
             <div>
               <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
-              <div className="space-y-3 max-h-48 overflow-y-auto">
-                {genres.map((genre) => (
-                  <label
-                    key={genre.id}
-                    htmlFor={`${id}-mobile-genre-${genre.id}`}
-                    className="flex items-center justify-between cursor-pointer"
-                  >
-                    <span className="text-sm text-gray-900">{genre.name}</span>
-                    <input
-                      type="checkbox"
-                      id={`${id}-mobile-genre-${genre.id}`}
-                      checked={filters.genreIds?.includes(genre.id) || false}
-                      onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
-                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
-                    />
-                  </label>
-                ))}
+              <div className="space-y-3 max-h-48 overflow-y-auto pr-3">
+                {genres.map((genre) => {
+                  const count = bookCounts?.genres?.[genre.id] ?? 0;
+                  const isSelected = filters.genreIds?.includes(genre.id) || false;
+                  return (
+                    <label
+                      key={genre.id}
+                      htmlFor={`${id}-mobile-genre-${genre.id}`}
+                      className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
+                    >
+                      <span className="text-sm text-gray-900">{genre.name}</span>
+                      <span className="flex items-center gap-3">
+                        <span className="text-sm text-gray-500">({count})</span>
+                        <input
+                          type="checkbox"
+                          id={`${id}-mobile-genre-${genre.id}`}
+                          checked={isSelected}
+                          onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
+                          className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                          disabled={count === 0 && !isSelected}
+                        />
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* More Filters (Author, Series) */}
-          {(series.length > 0 || authors.length > 0) && (
+          {/* More Filters (Series) */}
+          {series.length > 0 && (
             <>
               <button
                 onClick={() => setShowMoreFilters(!showMoreFilters)}
@@ -696,47 +756,35 @@ export function FilterBottomSheet({
               </button>
 
               {showMoreFilters && (
-                <>
-                  {/* Author */}
-                  {authors.length > 0 && (
-                    <div>
-                      <label htmlFor={`${id}-mobile-author`} className="block text-sm font-semibold text-gray-900 mb-2">
-                        Author
-                      </label>
-                      <AuthorTypeahead
-                        id={`${id}-mobile-author`}
-                        authors={authors}
-                        value={filters.author || ''}
-                        onChange={handleAuthorChange}
-                      />
-                    </div>
-                  )}
-
-                  {/* Series */}
-                  {series.length > 0 && (
-                    <div>
-                      <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-                      <div className="space-y-3 max-h-48 overflow-y-auto">
-                        {series.map((s) => (
-                          <label
-                            key={s.id}
-                            htmlFor={`${id}-mobile-series-${s.id}`}
-                            className="flex items-center justify-between cursor-pointer"
-                          >
-                            <span className="text-sm text-gray-900">{s.name}</span>
+                <div>
+                  <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
+                  <div className="space-y-3 max-h-48 overflow-y-auto pr-3">
+                    {series.map((s) => {
+                      const count = bookCounts?.series?.[s.id] ?? 0;
+                      const isSelected = filters.seriesIds?.includes(s.id) || false;
+                      return (
+                        <label
+                          key={s.id}
+                          htmlFor={`${id}-mobile-series-${s.id}`}
+                          className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
+                        >
+                          <span className="text-sm text-gray-900">{s.name}</span>
+                          <span className="flex items-center gap-3">
+                            <span className="text-sm text-gray-500">({count})</span>
                             <input
                               type="checkbox"
                               id={`${id}-mobile-series-${s.id}`}
-                              checked={filters.seriesIds?.includes(s.id) || false}
+                              checked={isSelected}
                               onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
                               className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                              disabled={count === 0 && !isSelected}
                             />
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </>
           )}

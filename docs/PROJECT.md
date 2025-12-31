@@ -54,6 +54,63 @@ All data stored under `/users/{userId}/`:
 4. **Firestore Rules** - Allow public reads on visible content
 5. **API Routes** - Server-side validation for complex permissions
 
+### Competitor Analysis: Multi-User Features
+
+#### Feature Comparison Matrix
+
+| Feature | Goodreads | StoryGraph | Hardcover | Literal | Fable | Oku | BookTrack |
+|---------|-----------|------------|-----------|---------|-------|-----|-----------|
+| **Friends/Following** | Both systems | Opt-in friends | Follow | Follow | Follow | Follow | None |
+| **Friend Limit** | 5,000 / ∞ followers | Unlimited | — | — | — | — | N/A |
+| **Activity Feed** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| **Book Clubs** | ✓ Groups | ✓ | — | ✓ | ✓ Strong | ✗ | ✗ |
+| **Buddy Reads** | ✗ | ✓ ≤15 people | ✗ | ✗ | ✓ | ✗ | ✗ |
+| **Share to Social** | ✓ Facebook | ✓ | ✓ | ✓ Highlights | ✓ | ✓ | ✓ Stats |
+| **Shareable Lists** | ✓ Shelves | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| **Direct Messaging** | ✓ | ✗ | — | ✗ | ✓ | ✗ | ✗ |
+| **Book Lending Tracker** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ Unique |
+| **Per-Book Privacy** | ✗ | Requested | ✓ | — | — | — | N/A |
+
+#### Privacy & Visibility Options
+
+| App | Profile Visibility | Notes |
+|-----|-------------------|-------|
+| **Goodreads** | Public / Members / Friends | Reviews always public on book pages |
+| **StoryGraph** | Public / Community / Private | Reviews visible regardless of profile setting |
+| **Hardcover** | Public / Private / Friends | Per-book privacy available |
+| **BookTrack** | Private only | No social features by design |
+
+#### Key Insights
+
+**High-Value Features (Table Stakes):**
+1. Profile visibility controls (public/private/friends-only)
+2. Follow/friends system
+3. Activity feed (see what friends are reading)
+4. Shareable lists/shelves (public or link-only)
+
+**Potential Differentiators:**
+1. **Per-book privacy** (only Hardcover has this) — highly requested on StoryGraph
+2. **Book lending tracker** (only BookTrack has this) — practical for physical collections
+3. **Buddy reads with spoiler protection** (StoryGraph) — complex but loved
+
+**Privacy Gotchas to Avoid:**
+- Goodreads/StoryGraph: Reviews are public on book pages even with private profile
+- Consider separating review visibility from profile visibility
+
+**Simplest MVP Path:**
+1. Profile visibility (public/private)
+2. Follow system (one-way, no approval needed)
+3. Activity feed of followed users
+4. Shareable book lists (public link)
+
+#### Sources
+
+- [Goodreads Help: Friends & Followers](https://help.goodreads.com/s/announcements/a031H00000T7hFjQAJ/how-to-manage-your-friends-and-followers)
+- [StoryGraph Features Roadmap](https://roadmap.thestorygraph.com/features)
+- [StoryGraph Buddy Reads](https://thestorygraph.freshdesk.com/support/solutions/articles/79000141943-buddy-reads-and-readalongs-on-the-storygraph)
+- [Fable Club Features](https://fable.co/club-features)
+- [BookTrack Lending](https://booktrack.app/blog/lending-books-to-friends-how-to-track-your-shared-library-without-losing-it/)
+
 ---
 
 ## Project Structure
@@ -188,6 +245,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 - [ ] Book clubs
 - [ ] Reading challenges/goals
 - [ ] Reading timer with sessions
+- [ ] Error logging & admin dashboard (requires role system)
 
 ---
 
@@ -619,6 +677,120 @@ The following physical formats are currently hardcoded in the app:
 
 ---
 
+## Error Logging & Admin Dashboard (Future)
+
+**Prerequisite:** Role-based permissions system (admin role)
+
+### Overview
+
+Centralised error logging to capture JS errors, API failures, Firebase errors, and unhandled promise rejections. Stored in Firestore with an admin-only view in Settings.
+
+### Firestore Structure
+
+**Collection:** `/errorLogs` (top-level, admin-accessible)
+
+```typescript
+type ErrorLog = {
+  id: string;
+  message: string;
+  stack?: string;
+  type: 'runtime' | 'api' | 'firebase' | 'unhandled-rejection';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  url: string;
+  userAgent: string;
+  userId?: string | null;
+  userEmail?: string | null;
+  context?: Record<string, unknown>;
+  fingerprint: string;           // Hash for deduplication
+  count: number;                 // Occurrence count
+  firstOccurredAt: Timestamp;
+  lastOccurredAt: Timestamp;
+  resolved: boolean;
+  resolvedAt?: Timestamp;
+  resolvedBy?: string;
+};
+```
+
+### Key Components
+
+| Component | Purpose |
+|-----------|---------|
+| `ErrorBoundary` | Catch React rendering errors, show fallback UI |
+| `ErrorLoggerProvider` | Initialise global error handlers (window.onerror, unhandledrejection) |
+| `error-logger.ts` | Core utility with queueing, rate limiting, fingerprinting |
+| `/api/errors/log` | POST endpoint to receive and store errors |
+| `/settings/error-logs` | Admin UI to view, filter, and resolve errors |
+
+### Cost Control
+
+- **Deduplication:** Same fingerprint updates count instead of new doc
+- **Client batching:** Queue errors, flush every 5 seconds
+- **Rate limiting:** Max 10 errors per minute client-side
+- **Future:** Cloud Function to delete logs older than 30 days
+
+### Admin Access Strategy
+
+Initially use environment variable `ADMIN_USER_IDS` with comma-separated UIDs. Transition to proper role system when implemented:
+
+```typescript
+// Phase 1 (temporary): Check env var
+const adminUids = process.env.NEXT_PUBLIC_ADMIN_USER_IDS?.split(',') || [];
+return adminUids.includes(user.uid);
+
+// Phase 2 (future): Check custom claims or Firestore user doc
+// return user.customClaims?.role === 'admin';
+```
+
+### Implementation Plan
+
+See `/Users/matthewfrench/.claude/plans/sleepy-rolling-haven.md` for detailed implementation steps.
+
+---
+
+## Author Sorting & Display (Research)
+
+### Current Implementation
+
+| Context | Sorting Logic |
+|---------|--------------|
+| **Author Filter Dropdown** | By book count first (most used), then alphabetically by full name |
+| **Book List "Author A-Z"** | By surname (last word of author name) |
+| **Author Typeahead** | By book count first, then alphabetically |
+
+### Surname Extraction
+
+Uses `getAuthorSurname()` utility:
+- "First Last" → "last"
+- "First Middle Last" → "last"
+- "Last, First" → "last" (comma format)
+
+### Library Convention Challenges
+
+Per AACR2 cataloging rules:
+- **Compound surnames** (García Márquez): File by author's preference
+- **Prefixes** (de, van, von): Varies by country/culture
+- **Spanish names**: May have both mother's and father's surname
+- **Mac vs Mc**: Should NOT be interfiled (shelve as spelled)
+
+### Competitor Analysis
+
+| App | Author Sorting |
+|-----|----------------|
+| **Goodreads** | Seemingly random order on author pages |
+| **StoryGraph** | No surname sorting - frequently requested feature |
+| **Apple Books** | Users frustrated it doesn't sort by surname |
+| **Library Standards** | Last name, first name (fiction shelving) |
+
+### Future Options
+
+1. **Display as "Surname, First"**: Show "Rowling, J.K." instead of "J.K. Rowling"
+2. **Separate surname field**: Store first/last name separately for accurate sorting
+3. **User preference**: Let user choose full name vs surname display
+
+**Decision**: Keep current approach (count first, then full name A-Z). Add surname display as future enhancement if users request it.
+
+---
+
 ## Technical Reference
 
 ### Colour Scheme (Semantic)
@@ -640,4 +812,4 @@ The following physical formats are currently hardcoded in the app:
 
 ---
 
-*Last updated: 2025-12-31*
+*Last updated: 2025-12-31* (Added multi-user competitor analysis)

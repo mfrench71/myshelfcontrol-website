@@ -1,8 +1,8 @@
 // Books Page - List and manage user's book collection
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { BookOpen, Plus, AlertCircle, SlidersHorizontal } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { BookOpen, Plus, AlertCircle, SlidersHorizontal, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
@@ -156,6 +156,12 @@ export default function BooksPage() {
   const [sortValue, setSortValue] = useState<SortOption>('createdAt-desc');
   const [showFilterSheet, setShowFilterSheet] = useState(false);
 
+  // Infinite scroll state
+  const ITEMS_PER_PAGE = 20;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
   // Create lookup maps for genres and series
   const genreLookup = useMemo(() => createGenreLookup(genres), [genres]);
   const seriesLookup = useMemo(() => createSeriesLookup(series), [series]);
@@ -177,6 +183,50 @@ export default function BooksPage() {
     const filtered = filterBooks(books, filters);
     return sortBooks(filtered, sortBy, direction);
   }, [books, filters, sortValue]);
+
+  // Slice books for infinite scroll (only render visible items)
+  const visibleBooks = useMemo(() => {
+    return filteredAndSortedBooks.slice(0, visibleCount);
+  }, [filteredAndSortedBooks, visibleCount]);
+
+  const hasMoreBooks = visibleCount < filteredAndSortedBooks.length;
+
+  /**
+   * Load more books when sentinel comes into view
+   */
+  const loadMoreBooks = useCallback(() => {
+    if (isLoadingMore || !hasMoreBooks) return;
+
+    setIsLoadingMore(true);
+    // Small delay to show loading spinner
+    setTimeout(() => {
+      setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
+      setIsLoadingMore(false);
+    }, 300);
+  }, [isLoadingMore, hasMoreBooks]);
+
+  // Reset visible count when filters or sort changes
+  useEffect(() => {
+    setVisibleCount(ITEMS_PER_PAGE);
+  }, [filters, sortValue]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreBooks && !isLoadingMore) {
+          loadMoreBooks();
+        }
+      },
+      { rootMargin: '200px' } // Load more before reaching bottom
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreBooks, isLoadingMore, loadMoreBooks]);
 
   /**
    * Calculate faceted book counts for filter options
@@ -584,7 +634,7 @@ export default function BooksPage() {
           ) : (
             /* Books List */
             <div id="book-list" className="space-y-4">
-              {filteredAndSortedBooks.map((book) => (
+              {visibleBooks.map((book) => (
                 <BookCard
                   key={book.id}
                   book={book}
@@ -592,6 +642,18 @@ export default function BooksPage() {
                   series={seriesLookup}
                 />
               ))}
+
+              {/* Infinite scroll sentinel and loading indicator */}
+              {hasMoreBooks && (
+                <div
+                  ref={sentinelRef}
+                  className="flex items-center justify-center py-8"
+                >
+                  {isLoadingMore && (
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" aria-label="Loading more books" />
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

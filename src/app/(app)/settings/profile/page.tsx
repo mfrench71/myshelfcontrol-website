@@ -4,21 +4,18 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  User,
   Key,
   FileText,
   Download,
   Trash2,
-  ChevronRight,
   ArrowRight,
   ExternalLink,
   AlertCircle,
   CheckCircle,
-  X,
 } from 'lucide-react';
 import {
   EmailAuthProvider,
@@ -28,6 +25,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { checkPasswordStrength } from '@/lib/utils';
 
 /**
  * Delete all user data from Firestore
@@ -69,6 +67,17 @@ function ChangePasswordModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Calculate password strength
+  const passwordStrength = useMemo(() => {
+    if (!newPassword) return null;
+    return checkPasswordStrength(newPassword);
+  }, [newPassword]);
+
+  // Strength bar colours and labels
+  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
+  const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong'];
+  const strengthTextColors = ['text-red-500', 'text-orange-500', 'text-yellow-600', 'text-green-500'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,7 +193,40 @@ function ChangePasswordModal({
                 minLength={8}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               />
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+              {/* Password Strength Indicator */}
+              {passwordStrength && (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1">
+                    {[0, 1, 2, 3].map((index) => (
+                      <div
+                        key={index}
+                        className={`h-1 flex-1 rounded-full ${
+                          index < passwordStrength.score
+                            ? strengthColors[Math.min(passwordStrength.score - 1, 3)]
+                            : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {passwordStrength.score > 0 && (
+                    <p className={`text-xs ${strengthTextColors[Math.min(passwordStrength.score - 1, 3)]}`}>
+                      {strengthLabels[Math.min(passwordStrength.score - 1, 3)]}
+                    </p>
+                  )}
+                </div>
+              )}
+              {/* Password Requirements */}
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                <span className={passwordStrength?.checks.length ? 'text-green-500' : 'text-gray-500'}>
+                  8+ chars
+                </span>
+                <span className={passwordStrength?.checks.uppercase ? 'text-green-500' : 'text-gray-500'}>
+                  1 uppercase
+                </span>
+                <span className={passwordStrength?.checks.number ? 'text-green-500' : 'text-gray-500'}>
+                  1 number
+                </span>
+              </div>
             </div>
 
             <div>

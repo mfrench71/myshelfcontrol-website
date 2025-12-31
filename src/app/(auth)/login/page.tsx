@@ -6,12 +6,21 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { getAuthErrorMessage } from '@/lib/utils/auth-errors';
 import { checkPasswordStrength } from '@/lib/utils';
+import { LoginSchema, RegisterSchema } from '@/lib/schemas/auth';
 import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+
+/** Field-level validation errors */
+type FieldErrors = {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+};
 
 /**
  * Login form component that uses searchParams
@@ -26,6 +35,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [registerPassword, setRegisterPassword] = useState('');
 
   const loginFormRef = useRef<HTMLFormElement>(null);
@@ -65,29 +75,48 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
+    setFieldErrors({});
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
 
-    // Validate confirm password for registration
-    if (!isLogin && password !== confirmPassword) {
-      setError('Passwords do not match.');
-      setLoading(false);
+    // Validate with Zod schema
+    const schema = isLogin ? LoginSchema : RegisterSchema;
+    const data = isLogin ? { email, password } : { email, password, confirmPassword };
+    const result = schema.safeParse(data);
+
+    if (!result.success) {
+      // Extract field-level errors
+      const errors: FieldErrors = {};
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof FieldErrors;
+        if (!errors[field]) {
+          errors[field] = issue.message;
+        }
+      }
+      setFieldErrors(errors);
       return;
     }
+
+    setLoading(true);
 
     try {
       let userCredential;
 
       if (isLogin) {
         // Sign in existing user
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        userCredential = await signInWithEmailAndPassword(auth, result.data.email, password);
       } else {
         // Create new account
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        userCredential = await createUserWithEmailAndPassword(auth, result.data.email, password);
+        // Send verification email
+        try {
+          await sendEmailVerification(userCredential.user);
+        } catch (verifyError) {
+          console.warn('Could not send verification email:', verifyError);
+        }
       }
 
       // Get ID token and create session cookie
@@ -118,10 +147,30 @@ function LoginForm() {
   const switchMode = (toLogin: boolean) => {
     setIsLogin(toLogin);
     setError(null);
+    setFieldErrors({});
     setShowPassword(false);
     setRegisterPassword('');
     loginFormRef.current?.reset();
     registerFormRef.current?.reset();
+  };
+
+  /**
+   * Get input class with optional error styling
+   */
+  const getInputClass = (hasError: boolean, hasIcon = true) => {
+    const base = hasIcon
+      ? 'w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed'
+      : 'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed';
+    return hasError
+      ? `${base} border-red-500 focus:ring-red-500 focus:border-red-500`
+      : `${base} border-gray-300`;
+  };
+
+  const getPasswordInputClass = (hasError: boolean) => {
+    const base = 'w-full pl-10 pr-12 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed';
+    return hasError
+      ? `${base} border-red-500 focus:ring-red-500 focus:border-red-500`
+      : `${base} border-gray-300`;
   };
 
   return (
@@ -151,11 +200,12 @@ function LoginForm() {
           id="login-form"
           ref={loginFormRef}
           onSubmit={handleSubmit}
+          noValidate
           className={`space-y-4 ${isLogin ? '' : 'hidden'}`}
         >
           <div>
             <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
@@ -164,17 +214,19 @@ function LoginForm() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
                 disabled={loading}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={getInputClass(!!fieldErrors.email)}
                 placeholder="you@example.com"
               />
             </div>
+            {fieldErrors.email && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div>
             <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
@@ -183,10 +235,8 @@ function LoginForm() {
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
-                required
-                minLength={8}
                 disabled={loading}
-                className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={getPasswordInputClass(!!fieldErrors.password)}
                 placeholder="••••••••"
               />
               <button
@@ -199,6 +249,9 @@ function LoginForm() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.password}</p>
+            )}
           </div>
 
           <button
@@ -223,11 +276,12 @@ function LoginForm() {
           id="register-form"
           ref={registerFormRef}
           onSubmit={handleSubmit}
+          noValidate
           className={`space-y-4 ${isLogin ? 'hidden' : ''}`}
         >
           <div>
             <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
@@ -236,17 +290,19 @@ function LoginForm() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
                 disabled={loading}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={getInputClass(!!fieldErrors.email)}
                 placeholder="you@example.com"
               />
             </div>
+            {fieldErrors.email && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div>
             <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
@@ -255,12 +311,10 @@ function LoginForm() {
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
-                required
-                minLength={8}
                 disabled={loading}
                 value={registerPassword}
                 onChange={(e) => setRegisterPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={getPasswordInputClass(!!fieldErrors.password)}
                 placeholder="••••••••"
               />
               <button
@@ -273,6 +327,9 @@ function LoginForm() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.password}</p>
+            )}
             {/* Password Strength Indicator */}
             {passwordStrength && (
               <div className="mt-2">
@@ -311,7 +368,7 @@ function LoginForm() {
 
           <div>
             <label htmlFor="register-password-confirm" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
+              Confirm Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
@@ -320,13 +377,14 @@ function LoginForm() {
                 name="confirmPassword"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
-                required
-                minLength={8}
                 disabled={loading}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={getInputClass(!!fieldErrors.confirmPassword)}
                 placeholder="••••••••"
               />
             </div>
+            {fieldErrors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-500">{fieldErrors.confirmPassword}</p>
+            )}
           </div>
 
           <button

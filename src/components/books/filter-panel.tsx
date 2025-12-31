@@ -310,7 +310,8 @@ export function FilterSidebar({
     (filters.genreIds && filters.genreIds.length > 0) ||
     (filters.seriesIds && filters.seriesIds.length > 0) ||
     filters.minRating ||
-    filters.author;
+    filters.author ||
+    sortValue !== 'createdAt-desc'; // Also reset if sort is non-default
 
   // Include series sort option only when filtering by a series
   const sortOptions = filters.seriesIds && filters.seriesIds.length > 0
@@ -815,7 +816,8 @@ export function FilterBottomSheet({
 }
 
 /**
- * Active filter chip for mobile display
+ * Active filter chip - clickable button to remove filter
+ * Entire chip is tappable for better mobile UX (44px min touch target)
  */
 export function ActiveFilterChip({
   label,
@@ -825,16 +827,14 @@ export function ActiveFilterChip({
   onRemove: () => void;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
-      {label}
-      <button
-        onClick={onRemove}
-        className="hover:bg-primary/20 rounded-full p-0.5"
-        aria-label={`Remove ${label} filter`}
-      >
-        <X className="w-3 h-3" />
-      </button>
-    </span>
+    <button
+      onClick={onRemove}
+      className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] bg-primary/10 text-primary hover:bg-primary/20 rounded-full text-sm font-medium transition-colors"
+      aria-label={`Remove ${label} filter`}
+    >
+      <span>{label}</span>
+      <X className="w-4 h-4" aria-hidden="true" />
+    </button>
   );
 }
 

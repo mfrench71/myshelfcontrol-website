@@ -240,6 +240,13 @@ export default function BooksPage() {
     }
   }, [user, authLoading]);
 
+  /**
+   * Scroll to top of book list when filters change
+   */
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleFiltersChange = (newFilters: BookFilters) => {
     setFilters(newFilters);
 
@@ -253,15 +260,20 @@ export default function BooksPage() {
     else if (!hasSeries && sortValue === 'seriesPosition-asc') {
       setSortValue('createdAt-desc');
     }
+
+    // Scroll to top when filter changes
+    scrollToTop();
   };
 
   const handleSortChange = (newSort: SortOption) => {
     setSortValue(newSort);
+    scrollToTop();
   };
 
   const handleReset = () => {
     setFilters({});
     setSortValue('createdAt-desc');
+    scrollToTop();
   };
 
   // Get active filter labels for chips (with value for multi-select removal)

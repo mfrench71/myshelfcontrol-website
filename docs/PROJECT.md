@@ -157,14 +157,15 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 | Feature | Status |
 |---------|--------|
 | Project setup | ✅ Complete |
-| Auth (login/register) | 🔄 In progress |
-| Book list page | ⏳ Pending |
-| Book add page | ⏳ Pending |
-| Book view/edit pages | ⏳ Pending |
-| Settings pages | ⏳ Pending |
+| Auth (login/register) | ✅ Complete |
+| Book list page | ✅ Complete |
+| Book add page | ✅ Complete |
+| Book view/edit pages | ✅ Complete |
+| Settings hub page | ✅ Complete |
+| Settings sub-pages | 🔄 In progress |
 | Widgets | ⏳ Pending |
 | PWA configuration | ⏳ Pending |
-| Testing | ⏳ Pending |
+| E2E Testing | ✅ Complete (27 tests) |
 
 ### Roadmap (Post-Migration)
 
@@ -177,6 +178,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 **Medium Priority**
 - [ ] Dark mode
 - [ ] View mode setting (Card/Compact/List)
+- [ ] User-defined physical formats (see below)
 - [ ] Reading statistics charts
 - [ ] Import from Goodreads
 
@@ -554,6 +556,65 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 4. **Library Availability** - Check Libby/OverDrive availability
 5. **Shareable Wishlists** - Public link for gift coordination
 6. **Gift Reservation** - Prevent duplicate purchases
+
+---
+
+## Physical Format Configuration (Future)
+
+### Current Default Formats
+
+The following physical formats are currently hardcoded in the app:
+
+| Format | Description |
+|--------|-------------|
+| `Paperback` | Standard softcover edition |
+| `Hardcover` | Hardback/casebound edition |
+| `Mass Market Paperback` | Smaller, cheaper pocket-sized edition |
+| `Trade Paperback` | Larger, higher-quality softcover |
+| `Library Binding` | Reinforced binding for libraries |
+| `Spiral-bound` | Spiral/coil binding |
+| `Audio CD` | Physical audiobook format |
+| `Ebook` | Digital/electronic format |
+
+### User-Defined Formats Feature
+
+**Goal:** Allow users to customise the physical format list to match their collection.
+
+**Proposed Implementation:**
+
+1. **Settings UI** (in Library Settings):
+   - List of enabled formats with checkboxes
+   - "Add custom format" input field
+   - Drag-and-drop reordering
+   - Reset to defaults button
+
+2. **Storage:**
+   - Store in `/users/{userId}/settings/physicalFormats`
+   - Schema: `{ enabled: string[], custom: string[], order: string[] }`
+
+3. **Migration:**
+   - Default to all built-in formats enabled
+   - Existing books with formats not in user's list still display correctly
+
+4. **Use Cases:**
+   - Disable unused formats (e.g., user never buys Audio CDs)
+   - Add regional formats (e.g., "Bunkobon" for Japanese editions)
+   - Add collector formats (e.g., "Signed Edition", "Collector's Edition")
+   - Distinguish physical vs digital (e.g., "Kindle", "Kobo", "PDF")
+
+5. **Suggested Custom Formats:**
+   - `Board Book` (children's books)
+   - `Kindle Edition` / `Kobo Edition`
+   - `PDF` / `EPUB`
+   - `Audiobook (Digital)`
+   - `Signed Edition`
+   - `Collector's Edition`
+   - `First Edition`
+   - `ARC` (Advance Reader Copy)
+   - `Proof Copy`
+   - `Graphic Novel`
+   - `Manga`
+   - `Comic`
 
 ---
 

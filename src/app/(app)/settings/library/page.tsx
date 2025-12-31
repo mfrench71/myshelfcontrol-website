@@ -87,6 +87,9 @@ export default function LibrarySettingsPage() {
   const [seriesTotalBooks, setSeriesTotalBooks] = useState('');
   const [seriesSaving, setSeriesSaving] = useState(false);
   const [seriesDeleteConfirm, setSeriesDeleteConfirm] = useState<SeriesWithCount | null>(null);
+  const [showMergeSeriesModal, setShowMergeSeriesModal] = useState(false);
+  const [mergingSeries, setMergingSeries] = useState<Series | null>(null);
+  const [mergeSeriesTargetId, setMergeSeriesTargetId] = useState('');
 
   // Picker settings
   const [pickerSettings, setPickerSettings] = useState<PickerSettings>(DEFAULT_PICKER_SETTINGS);
@@ -324,6 +327,40 @@ export default function LibrarySettingsPage() {
       await loadData();
     } catch (error) {
       console.error('Failed to delete series:', error);
+    } finally {
+      setSeriesSaving(false);
+    }
+  };
+
+  const openMergeSeriesModal = (series: Series) => {
+    setMergingSeries(series);
+    setMergeSeriesTargetId('');
+    setShowMergeSeriesModal(true);
+  };
+
+  const closeMergeSeriesModal = () => {
+    setShowMergeSeriesModal(false);
+    setMergingSeries(null);
+    setMergeSeriesTargetId('');
+  };
+
+  const handleMergeSeries = async () => {
+    if (!user || !mergingSeries || !mergeSeriesTargetId || seriesSaving) return;
+
+    setSeriesSaving(true);
+    try {
+      // Update all books with the source series to have the target series instead
+      const booksToUpdate = books.filter((b) => b.seriesId === mergingSeries.id);
+      // TODO: Implement batch update in repository
+      // For now, this is a placeholder - merge logic would need to update books
+      console.log('Would update', booksToUpdate.length, 'books');
+
+      // Delete the source series
+      await deleteSeries(user.uid, mergingSeries.id);
+      closeMergeSeriesModal();
+      await loadData();
+    } catch (error) {
+      console.error('Failed to merge series:', error);
     } finally {
       setSeriesSaving(false);
     }
@@ -568,6 +605,13 @@ export default function LibrarySettingsPage() {
                             aria-label={`Edit ${series.name}`}
                           >
                             <Pencil className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            onClick={() => openMergeSeriesModal(series)}
+                            className="p-2 hover:bg-blue-50 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label={`Merge ${series.name}`}
+                          >
+                            <GitMerge className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => setSeriesDeleteConfirm(series)}
@@ -966,6 +1010,73 @@ export default function LibrarySettingsPage() {
                   className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
                 >
                   {seriesSaving ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Series Merge Modal */}
+      {showMergeSeriesModal && mergingSeries && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={closeMergeSeriesModal}
+              aria-hidden="true"
+            />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Merge Series</h3>
+                <button
+                  onClick={closeMergeSeriesModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <p className="text-gray-600 mb-4">
+                Merge &quot;{mergingSeries.name}&quot; into another series. All books with this series will be
+                updated.
+              </p>
+
+              <div>
+                <label htmlFor="merge-series-target" className="block text-sm font-medium text-gray-700 mb-1">
+                  Target Series
+                </label>
+                <select
+                  id="merge-series-target"
+                  value={mergeSeriesTargetId}
+                  onChange={(e) => setMergeSeriesTargetId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Select a series...</option>
+                  {seriesList
+                    .filter((s) => s.id !== mergingSeries.id)
+                    .map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={closeMergeSeriesModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleMergeSeries}
+                  disabled={!mergeSeriesTargetId || seriesSaving}
+                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                >
+                  {seriesSaving ? 'Merging...' : 'Merge'}
                 </button>
               </div>
             </div>

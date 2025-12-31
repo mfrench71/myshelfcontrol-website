@@ -131,7 +131,7 @@ function DeleteModal({
       aria-label="Move to bin confirmation"
     >
       <div
-        className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white md:rounded-xl rounded-t-2xl p-6 md:max-w-sm md:w-full animate-slide-up md:animate-none"
+        className="absolute bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white md:rounded-xl rounded-t-2xl p-6 md:max-w-md md:w-full animate-slide-up md:animate-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle for mobile */}
@@ -168,14 +168,14 @@ function DeleteModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+            className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] disabled:opacity-50"
+            className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Moving...' : 'Move to Bin'}
           </button>

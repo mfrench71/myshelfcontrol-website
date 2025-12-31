@@ -312,14 +312,14 @@ export function ConfirmModal({
         <button
           onClick={onClose}
           disabled={isLoading}
-          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 min-h-[44px]"
+          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
         >
           {cancelText}
         </button>
         <button
           onClick={onConfirm}
           disabled={isLoading}
-          className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-2 ${confirmButtonClass}`}
+          className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center gap-2 ${confirmButtonClass}`}
         >
           {isLoading ? (
             <>

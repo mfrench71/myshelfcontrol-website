@@ -20,6 +20,7 @@ import {
   Check,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { useToast } from '@/components/ui/toast';
 import { getGenres, createGenre, updateGenre, deleteGenre } from '@/lib/repositories/genres';
 import { getSeries, createSeries, updateSeries, deleteSeries } from '@/lib/repositories/series';
 import { getBooks } from '@/lib/repositories/books';
@@ -61,6 +62,7 @@ function savePickerSettings(settings: Partial<PickerSettings>): void {
 
 export default function LibrarySettingsPage() {
   const { user, loading: authLoading } = useAuthContext();
+  const { showToast } = useToast();
 
   // Books data (for counting)
   const [books, setBooks] = useState<Book[]>([]);
@@ -208,13 +210,16 @@ export default function LibrarySettingsPage() {
           name: genreName.trim(),
           color: genreColor,
         });
+        showToast('Genre updated!', { type: 'success' });
       } else {
         await createGenre(user.uid, genreName.trim(), genreColor);
+        showToast('Genre created!', { type: 'success' });
       }
       closeGenreModal();
       await loadData();
     } catch (error) {
       console.error('Failed to save genre:', error);
+      showToast('Failed to save genre. Please try again.', { type: 'error' });
     } finally {
       setGenreSaving(false);
     }
@@ -227,9 +232,11 @@ export default function LibrarySettingsPage() {
     try {
       await deleteGenre(user.uid, genreDeleteConfirm.id);
       setGenreDeleteConfirm(null);
+      showToast('Genre deleted', { type: 'success' });
       await loadData();
     } catch (error) {
       console.error('Failed to delete genre:', error);
+      showToast('Error deleting genre', { type: 'error' });
     } finally {
       setGenreSaving(false);
     }
@@ -261,9 +268,12 @@ export default function LibrarySettingsPage() {
       // Delete the source genre
       await deleteGenre(user.uid, mergingGenre.id);
       closeMergeGenreModal();
+      const targetGenre = genres.find((g) => g.id === mergeTargetId);
+      showToast(`Merged ${booksToUpdate.length} books into "${targetGenre?.name}"`, { type: 'success' });
       await loadData();
     } catch (error) {
       console.error('Failed to merge genre:', error);
+      showToast('Failed to merge genres. Please try again.', { type: 'error' });
     } finally {
       setGenreSaving(false);
     }
@@ -304,14 +314,17 @@ export default function LibrarySettingsPage() {
           name: seriesName.trim(),
           totalBooks,
         });
+        showToast('Series updated!', { type: 'success' });
       } else {
         await createSeries(user.uid, seriesName.trim(), totalBooks);
+        showToast('Series created!', { type: 'success' });
       }
 
       closeSeriesModal();
       await loadData();
     } catch (error) {
       console.error('Failed to save series:', error);
+      showToast('Failed to save series. Please try again.', { type: 'error' });
     } finally {
       setSeriesSaving(false);
     }
@@ -324,9 +337,11 @@ export default function LibrarySettingsPage() {
     try {
       await deleteSeries(user.uid, seriesDeleteConfirm.id);
       setSeriesDeleteConfirm(null);
+      showToast('Series deleted', { type: 'success' });
       await loadData();
     } catch (error) {
       console.error('Failed to delete series:', error);
+      showToast('Error deleting series', { type: 'error' });
     } finally {
       setSeriesSaving(false);
     }
@@ -358,9 +373,12 @@ export default function LibrarySettingsPage() {
       // Delete the source series
       await deleteSeries(user.uid, mergingSeries.id);
       closeMergeSeriesModal();
+      const targetSeries = seriesList.find((s) => s.id === mergeSeriesTargetId);
+      showToast(`Merged ${booksToUpdate.length} books into "${targetSeries?.name}"`, { type: 'success' });
       await loadData();
     } catch (error) {
       console.error('Failed to merge series:', error);
+      showToast('Failed to merge series. Please try again.', { type: 'error' });
     } finally {
       setSeriesSaving(false);
     }
@@ -371,11 +389,13 @@ export default function LibrarySettingsPage() {
   const handleGenreSuggestionsFirstChange = (checked: boolean) => {
     setPickerSettings((prev) => ({ ...prev, genreSuggestionsFirst: checked }));
     savePickerSettings({ genreSuggestionsFirst: checked });
+    showToast(checked ? 'Genre suggestions shown first' : 'Your genres shown first', { type: 'info' });
   };
 
   const handleSeriesSuggestionsFirstChange = (checked: boolean) => {
     setPickerSettings((prev) => ({ ...prev, seriesSuggestionsFirst: checked }));
     savePickerSettings({ seriesSuggestionsFirst: checked });
+    showToast(checked ? 'Series suggestions shown first' : 'Your series shown first', { type: 'info' });
   };
 
   if (authLoading) {
@@ -848,13 +868,12 @@ export default function LibrarySettingsPage() {
                 </button>
               </div>
 
-              <p className="text-gray-600 mb-4">
-                Merge &quot;{mergingGenre.name}&quot; into another genre. All books with this genre will be
-                updated.
+              <p className="text-gray-600 text-sm mb-4">
+                Merge &quot;<span className="font-medium">{mergingGenre.name}</span>&quot; into another genre. Books will be moved and the source genre will be deleted.
               </p>
 
               <div>
-                <label htmlFor="merge-target" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="merge-target" className="block font-semibold text-gray-700 mb-1">
                   Target Genre
                 </label>
                 <select
@@ -1038,13 +1057,12 @@ export default function LibrarySettingsPage() {
                 </button>
               </div>
 
-              <p className="text-gray-600 mb-4">
-                Merge &quot;{mergingSeries.name}&quot; into another series. All books with this series will be
-                updated.
+              <p className="text-gray-600 text-sm mb-4">
+                Merge &quot;<span className="font-medium">{mergingSeries.name}</span>&quot; into another series. Books will be moved and the source series will be deleted.
               </p>
 
               <div>
-                <label htmlFor="merge-series-target" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="merge-series-target" className="block font-semibold text-gray-700 mb-1">
                   Target Series
                 </label>
                 <select

@@ -167,7 +167,7 @@ function ChangePasswordModal({
             <span>Password changed successfully!</span>
           </div>
         ) : (
-          <form id="password-form" onSubmit={handleSubmit} className="space-y-4">
+          <form id="password-form" onSubmit={handleSubmit} noValidate className="space-y-4">
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -260,14 +260,14 @@ function ChangePasswordModal({
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] disabled:opacity-50"
+                className="flex-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Changing...' : 'Change Password'}
               </button>
@@ -396,14 +396,14 @@ function DeleteAccountModal({
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !password || confirmText !== 'DELETE'}
-              className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] disabled:opacity-50"
+              className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Deleting...' : 'Delete Account'}
             </button>

@@ -162,7 +162,7 @@ select {
   animation: modalContentIn 0.2s ease-out;
 }
 
-/* Bottom Sheet Slide Up */
+/* Bottom Sheet Animations */
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -172,8 +172,95 @@ select {
   }
 }
 
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes modalBackdropOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes modalContentOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
 .animate-slide-up {
   animation: slideUp 0.3s ease-out;
+}
+
+/* Bottom Sheet Container */
+.bottom-sheet-backdrop {
+  animation: modalBackdropIn 0.2s ease-out;
+  display: flex;
+  align-items: flex-end; /* Mobile: align to bottom */
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .bottom-sheet-backdrop {
+    align-items: center; /* Tablet+: center vertically */
+    justify-content: center;
+  }
+}
+
+.modal-exit {
+  animation: modalBackdropOut 0.15s ease-in forwards;
+}
+
+/* Bottom Sheet Content */
+.bottom-sheet-content {
+  animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+@media (min-width: 768px) {
+  .bottom-sheet-content {
+    animation: modalContentIn 0.2s ease-out;
+    width: auto;
+    border-radius: 0.75rem;
+  }
+}
+
+.modal-exit .bottom-sheet-content {
+  animation: slideDown 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@media (min-width: 768px) {
+  .modal-exit .bottom-sheet-content {
+    animation: modalContentOut 0.15s ease-in forwards;
+  }
+}
+
+/* Bottom Sheet Handle (drag indicator) */
+.bottom-sheet-handle {
+  width: 2rem;
+  height: 0.2rem;
+  background-color: #d1d5db;
+  border-radius: 9999px;
+  margin: 0.75rem auto;
+}
+
+@media (min-width: 768px) {
+  .bottom-sheet-handle {
+    display: none; /* Hide on tablet+ */
+  }
 }
 
 /* Skeleton Loading */

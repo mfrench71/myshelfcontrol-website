@@ -801,7 +801,7 @@ export default function AddBookPage() {
                   type="button"
                   onClick={() => handleSearch(searchQuery)}
                   disabled={searching}
-                  className="flex-shrink-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors min-h-[48px] disabled:opacity-50"
+                  className="flex-shrink-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {searching ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Go'}
                 </button>
@@ -931,7 +931,7 @@ export default function AddBookPage() {
             )}
 
             {/* Book Form */}
-            <form id="book-form" onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
+            <form id="book-form" onSubmit={handleSubmit} noValidate className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
               <div>
                 <label htmlFor="title" className="block font-semibold text-gray-700 mb-1">
                   Title <span className="text-red-500">*</span>
@@ -942,7 +942,6 @@ export default function AddBookPage() {
                   name="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                 />
               </div>

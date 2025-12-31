@@ -115,3 +115,15 @@ export function getNextAvailableColor(usedColors: string[]): string {
   const available = GENRE_COLORS.find((c) => !usedSet.has(c.toLowerCase()));
   return available || GENRE_COLORS[Math.floor(Math.random() * GENRE_COLORS.length)];
 }
+
+/**
+ * Normalize series name for comparison
+ * Lowercases, removes "the" prefix, and normalizes whitespace
+ */
+export function normalizeSeriesName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/^the\s+/i, '') // Remove leading "The "
+    .replace(/\s+/g, ' '); // Normalize whitespace
+}

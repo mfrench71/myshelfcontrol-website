@@ -20,6 +20,7 @@ import {
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { addBook } from '@/lib/repositories/books';
 import { GenrePicker } from '@/components/pickers/genre-picker';
+import { SeriesPicker, type SeriesSelection } from '@/components/pickers/series-picker';
 import type { PhysicalFormat } from '@/lib/types';
 
 // Book search result from API
@@ -150,6 +151,13 @@ export default function AddBookPage() {
   const [notes, setNotes] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [genreSuggestions, setGenreSuggestions] = useState<string[]>([]);
+  const [seriesSelection, setSeriesSelection] = useState<SeriesSelection>({
+    seriesId: null,
+    seriesName: '',
+    position: null,
+  });
+  const [suggestedSeriesName, setSuggestedSeriesName] = useState<string | null>(null);
+  const [suggestedSeriesPosition, setSuggestedSeriesPosition] = useState<number | null>(null);
 
   // Search for books
   const handleSearch = async () => {
@@ -212,6 +220,9 @@ export default function AddBookPage() {
     setNotes('');
     setSelectedGenres([]);
     setGenreSuggestions([]);
+    setSeriesSelection({ seriesId: null, seriesName: '', position: null });
+    setSuggestedSeriesName(null);
+    setSuggestedSeriesPosition(null);
     setDataSource(null);
   };
 
@@ -242,6 +253,8 @@ export default function AddBookPage() {
         rating: rating || undefined,
         notes: notes.trim() || undefined,
         genres: selectedGenres,
+        seriesId: seriesSelection.seriesId || undefined,
+        seriesPosition: seriesSelection.position || undefined,
         reads: [],
       });
 
@@ -456,11 +469,17 @@ export default function AddBookPage() {
                 />
               )}
 
-              {/* Series Picker placeholder */}
-              <div id="series-picker">
-                <label className="block font-semibold text-gray-700 mb-1">Series</label>
-                <p className="text-sm text-gray-500">Series picker coming soon</p>
-              </div>
+              {/* Series Picker */}
+              {user && (
+                <SeriesPicker
+                  userId={user.uid}
+                  selectedId={seriesSelection.seriesId}
+                  position={seriesSelection.position}
+                  onChange={setSeriesSelection}
+                  suggestedName={suggestedSeriesName}
+                  suggestedPosition={suggestedSeriesPosition}
+                />
+              )}
 
               {/* Cover Picker placeholder */}
               <div id="cover-picker">

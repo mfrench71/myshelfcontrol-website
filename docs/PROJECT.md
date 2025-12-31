@@ -291,6 +291,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 - [ ] Drag and drop reordering within lists
 
 ### Future Series Enhancements
+- [ ] Remove book from series (without deleting book) - button on view page
 - [ ] Auto-create series when accepting API suggestion
 - [ ] Limit series position to totalBooks max
 - [ ] External series lookup API (Wikidata SPARQL)

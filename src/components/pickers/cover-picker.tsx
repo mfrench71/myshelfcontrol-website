@@ -16,6 +16,7 @@ export interface CoverOptions {
   googleBooks?: string;
   openLibrary?: string;
   userUpload?: string;
+  [key: string]: string | undefined;
 }
 
 export interface CoverPickerProps {

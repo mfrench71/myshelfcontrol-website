@@ -246,7 +246,7 @@ export default function BooksPage() {
   // Show loading state
   if (authLoading || loading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div id="loading" className="max-w-6xl mx-auto px-4 py-6">
         {/* Header skeleton */}
         <div className="flex items-center justify-between mb-6">
           <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
@@ -322,6 +322,7 @@ export default function BooksPage() {
         <div className="flex gap-2 mb-4 md:hidden">
           <MobileSortDropdown value={sortValue} onChange={handleSortChange} />
           <button
+            id="filter-btn"
             onClick={() => setShowFilterSheet(true)}
             className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border transition-colors min-w-[44px] min-h-[44px] ${
               hasActiveFilters
@@ -390,7 +391,7 @@ export default function BooksPage() {
         <div className="flex-1 min-w-0">
           {/* Empty State */}
           {books.length === 0 ? (
-            <div className="text-center py-12">
+            <div id="empty-state" className="text-center py-12">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
               <h2 className="text-lg font-medium text-gray-900 mt-4">No books yet</h2>
               <p className="text-gray-500 mt-1">
@@ -418,7 +419,7 @@ export default function BooksPage() {
             </div>
           ) : (
             /* Books List */
-            <div className="space-y-4">
+            <div id="book-list" className="space-y-4">
               {filteredAndSortedBooks.map((book) => (
                 <BookCard
                   key={book.id}

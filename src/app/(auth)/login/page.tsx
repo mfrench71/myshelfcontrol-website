@@ -26,7 +26,8 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const formRef = useRef<HTMLFormElement>(null);
+  const loginFormRef = useRef<HTMLFormElement>(null);
+  const registerFormRef = useRef<HTMLFormElement>(null);
 
   /**
    * Create session cookie via API route
@@ -105,7 +106,8 @@ function LoginForm() {
     setIsLogin(toLogin);
     setError(null);
     setShowPassword(false);
-    formRef.current?.reset();
+    loginFormRef.current?.reset();
+    registerFormRef.current?.reset();
   };
 
   return (
@@ -130,15 +132,21 @@ function LoginForm() {
           </div>
         )}
 
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+        {/* Login Form */}
+        <form
+          id="login-form"
+          ref={loginFormRef}
+          onSubmit={handleSubmit}
+          className={`space-y-4 ${isLogin ? '' : 'hidden'}`}
+        >
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
               <input
-                id="email"
+                id="login-email"
                 name="email"
                 type="email"
                 autoComplete="email"
@@ -151,16 +159,16 @@ function LoginForm() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
               <input
-                id="password"
+                id="login-password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
-                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                autoComplete="current-password"
                 required
                 minLength={8}
                 disabled={loading}
@@ -177,34 +185,10 @@ function LoginForm() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            {!isLogin && (
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
-            )}
           </div>
 
-          {!isLogin && (
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  minLength={8}
-                  disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-          )}
-
           <button
+            id="login-btn"
             type="submit"
             disabled={loading}
             className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed btn-press"
@@ -212,10 +196,103 @@ function LoginForm() {
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {isLogin ? 'Signing in...' : 'Creating account...'}
+                Signing in...
               </span>
             ) : (
-              <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+              <span>Sign In</span>
+            )}
+          </button>
+        </form>
+
+        {/* Register Form */}
+        <form
+          id="register-form"
+          ref={registerFormRef}
+          onSubmit={handleSubmit}
+          className={`space-y-4 ${isLogin ? 'hidden' : ''}`}
+        >
+          <div>
+            <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
+              <input
+                id="register-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                disabled={loading}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="you@example.com"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
+              <input
+                id="register-password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                required
+                minLength={8}
+                disabled={loading}
+                className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 disabled:cursor-not-allowed"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+          </div>
+
+          <div>
+            <label htmlFor="register-password-confirm" className="block text-sm font-medium text-gray-700 mb-1">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
+              <input
+                id="register-password-confirm"
+                name="confirmPassword"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                required
+                minLength={8}
+                disabled={loading}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          <button
+            id="register-btn"
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed btn-press"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Creating account...
+              </span>
+            ) : (
+              <span>Create Account</span>
             )}
           </button>
         </form>
@@ -225,6 +302,7 @@ function LoginForm() {
             <>
               Don&apos;t have an account?{' '}
               <button
+                id="show-register-btn"
                 type="button"
                 onClick={() => switchMode(false)}
                 disabled={loading}
@@ -237,6 +315,7 @@ function LoginForm() {
             <>
               Already have an account?{' '}
               <button
+                id="show-login-btn"
                 type="button"
                 onClick={() => switchMode(true)}
                 disabled={loading}

@@ -11,3 +11,6 @@ export type { SeriesPickerProps, SeriesSelection } from './series-picker';
 
 export { AuthorPicker } from './author-picker';
 export type { AuthorPickerProps } from './author-picker';
+
+export { CoverPicker } from './cover-picker';
+export type { CoverPickerProps, CoverOptions, CoverSource } from './cover-picker';

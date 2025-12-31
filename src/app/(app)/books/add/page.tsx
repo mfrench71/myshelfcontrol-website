@@ -19,7 +19,15 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { addBook } from '@/lib/repositories/books';
-import { GenrePicker, SeriesPicker, AuthorPicker, type SeriesSelection } from '@/components/pickers';
+import {
+  GenrePicker,
+  SeriesPicker,
+  AuthorPicker,
+  CoverPicker,
+  type SeriesSelection,
+  type CoverOptions,
+  type CoverSource,
+} from '@/components/pickers';
 import type { PhysicalFormat } from '@/lib/types';
 
 // Book search result from API
@@ -157,6 +165,7 @@ export default function AddBookPage() {
   });
   const [suggestedSeriesName, setSuggestedSeriesName] = useState<string | null>(null);
   const [suggestedSeriesPosition, setSuggestedSeriesPosition] = useState<number | null>(null);
+  const [coverOptions, setCoverOptions] = useState<CoverOptions>({});
 
   // Search for books
   const handleSearch = async () => {
@@ -188,6 +197,12 @@ export default function AddBookPage() {
     setDataSource('Google Books');
     setShowForm(true);
     setSearchResults([]);
+    // Set cover options from Google Books
+    if (result.coverUrl) {
+      setCoverOptions({ googleBooks: result.coverUrl });
+    } else {
+      setCoverOptions({});
+    }
     // Extract genre suggestions from categories (Google Books uses "Fiction / Mystery" format)
     if (result.categories) {
       const suggestions = result.categories
@@ -196,6 +211,11 @@ export default function AddBookPage() {
         .filter((s) => s.length > 0 && s.toLowerCase() !== 'fiction' && s.toLowerCase() !== 'nonfiction');
       setGenreSuggestions([...new Set(suggestions)]); // Remove duplicates
     }
+  };
+
+  // Handle cover selection from CoverPicker
+  const handleCoverSelect = (url: string, _source: CoverSource) => {
+    setCoverUrl(url);
   };
 
   // Add book manually
@@ -211,6 +231,7 @@ export default function AddBookPage() {
     setAuthor('');
     setIsbn('');
     setCoverUrl('');
+    setCoverOptions({});
     setPublisher('');
     setPublishedDate('');
     setPhysicalFormat('' as PhysicalFormat);
@@ -475,34 +496,12 @@ export default function AddBookPage() {
                 />
               )}
 
-              {/* Cover Picker placeholder */}
-              <div id="cover-picker">
-                <label className="block font-semibold text-gray-700 mb-1">Cover Image</label>
-                {coverUrl ? (
-                  <div className="flex gap-4">
-                    <div className="w-24 h-36 bg-gray-100 rounded overflow-hidden">
-                      <Image
-                        src={coverUrl}
-                        alt=""
-                        width={96}
-                        height={144}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setCoverUrl('')}
-                      className="text-sm text-gray-500 hover:text-gray-700"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div className="w-24 h-36 bg-gray-100 rounded flex items-center justify-center">
-                    <BookOpen className="w-8 h-8 text-gray-400" aria-hidden="true" />
-                  </div>
-                )}
-              </div>
+              {/* Cover Picker */}
+              <CoverPicker
+                covers={coverOptions}
+                selectedUrl={coverUrl}
+                onChange={handleCoverSelect}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

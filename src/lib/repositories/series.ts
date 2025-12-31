@@ -35,6 +35,7 @@ function docToSeries(doc: QueryDocumentSnapshot<DocumentData>): Series {
   return {
     id: doc.id,
     name: data.name || '',
+    totalBooks: data.totalBooks ?? null,
     expectedBooks: data.expectedBooks,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
@@ -72,13 +73,14 @@ export async function getSeriesById(userId: string, seriesId: string): Promise<S
 export async function createSeries(
   userId: string,
   name: string,
-  expectedBooks?: number
+  totalBooks?: number
 ): Promise<string> {
   const seriesRef = getSeriesCollection(userId);
 
   const docRef = await addDoc(seriesRef, {
     name,
-    expectedBooks: expectedBooks || null,
+    totalBooks: totalBooks && totalBooks > 0 ? totalBooks : null,
+    expectedBooks: [],
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   });
@@ -92,12 +94,19 @@ export async function createSeries(
 export async function updateSeries(
   userId: string,
   seriesId: string,
-  updates: Partial<Pick<Series, 'name' | 'expectedBooks'>>
+  updates: Partial<Pick<Series, 'name' | 'totalBooks'>>
 ): Promise<void> {
   const seriesRef = doc(db, 'users', userId, 'series', seriesId);
 
+  // Sanitize totalBooks: ensure it's a positive number or null
+  const sanitizedUpdates: Record<string, unknown> = { ...updates };
+  if ('totalBooks' in updates) {
+    const tb = updates.totalBooks;
+    sanitizedUpdates.totalBooks = tb && tb > 0 ? tb : null;
+  }
+
   await updateDoc(seriesRef, {
-    ...updates,
+    ...sanitizedUpdates,
     updatedAt: Timestamp.now(),
   });
 }

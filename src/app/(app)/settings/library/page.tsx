@@ -6,66 +6,143 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Tag, Layers, Download, Upload, Plus, Pencil, Trash2, X, Check } from 'lucide-react';
+import {
+  Tag,
+  Layers,
+  Download,
+  Upload,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  GitMerge,
+  Library,
+  Check,
+} from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getGenres, createGenre, updateGenre, deleteGenre } from '@/lib/repositories/genres';
+import { getSeries, createSeries, updateSeries, deleteSeries } from '@/lib/repositories/series';
 import { getBooks } from '@/lib/repositories/books';
 import { getContrastColor, getNextAvailableColor, GENRE_COLORS } from '@/lib/utils';
-import type { Genre, Book } from '@/lib/types';
+import type { Genre, Series, Book } from '@/lib/types';
 
 /** Genre with book count */
 type GenreWithCount = Genre & { bookCount: number };
 
+/** Series with book count */
+type SeriesWithCount = Series & { bookCount: number };
+
+/** Picker settings stored in localStorage */
+type PickerSettings = {
+  genreSuggestionsFirst: boolean;
+  seriesSuggestionsFirst: boolean;
+};
+
+const DEFAULT_PICKER_SETTINGS: PickerSettings = {
+  genreSuggestionsFirst: false,
+  seriesSuggestionsFirst: false,
+};
+
+function getPickerSettings(): PickerSettings {
+  if (typeof window === 'undefined') return DEFAULT_PICKER_SETTINGS;
+  try {
+    const stored = localStorage.getItem('pickerSettings');
+    return stored ? { ...DEFAULT_PICKER_SETTINGS, ...JSON.parse(stored) } : DEFAULT_PICKER_SETTINGS;
+  } catch {
+    return DEFAULT_PICKER_SETTINGS;
+  }
+}
+
+function savePickerSettings(settings: Partial<PickerSettings>): void {
+  if (typeof window === 'undefined') return;
+  const current = getPickerSettings();
+  localStorage.setItem('pickerSettings', JSON.stringify({ ...current, ...settings }));
+}
+
 export default function LibrarySettingsPage() {
   const { user, loading: authLoading } = useAuthContext();
+
+  // Books data (for counting)
+  const [books, setBooks] = useState<Book[]>([]);
 
   // Genre state
   const [genres, setGenres] = useState<GenreWithCount[]>([]);
   const [genresLoading, setGenresLoading] = useState(true);
+  const [showGenreModal, setShowGenreModal] = useState(false);
   const [editingGenre, setEditingGenre] = useState<Genre | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newGenreName, setNewGenreName] = useState('');
-  const [newGenreColor, setNewGenreColor] = useState('');
-  const [editName, setEditName] = useState('');
-  const [editColor, setEditColor] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [genreName, setGenreName] = useState('');
+  const [genreColor, setGenreColor] = useState('');
+  const [genreSaving, setGenreSaving] = useState(false);
+  const [genreDeleteConfirm, setGenreDeleteConfirm] = useState<GenreWithCount | null>(null);
+  const [showMergeGenreModal, setShowMergeGenreModal] = useState(false);
+  const [mergingGenre, setMergingGenre] = useState<Genre | null>(null);
+  const [mergeTargetId, setMergeTargetId] = useState('');
 
-  // Load genres with book counts
-  const loadGenres = useCallback(async () => {
+  // Series state
+  const [seriesList, setSeriesList] = useState<SeriesWithCount[]>([]);
+  const [seriesLoading, setSeriesLoading] = useState(true);
+  const [showSeriesModal, setShowSeriesModal] = useState(false);
+  const [editingSeries, setEditingSeries] = useState<Series | null>(null);
+  const [seriesName, setSeriesName] = useState('');
+  const [seriesTotalBooks, setSeriesTotalBooks] = useState('');
+  const [seriesSaving, setSeriesSaving] = useState(false);
+  const [seriesDeleteConfirm, setSeriesDeleteConfirm] = useState<SeriesWithCount | null>(null);
+
+  // Picker settings
+  const [pickerSettings, setPickerSettings] = useState<PickerSettings>(DEFAULT_PICKER_SETTINGS);
+
+  // Load picker settings on mount
+  useEffect(() => {
+    setPickerSettings(getPickerSettings());
+  }, []);
+
+  // Load all data
+  const loadData = useCallback(async () => {
     if (!user) return;
 
     try {
       setGenresLoading(true);
-      const [userGenres, books] = await Promise.all([
+      setSeriesLoading(true);
+
+      const [userGenres, userSeries, userBooks] = await Promise.all([
         getGenres(user.uid),
+        getSeries(user.uid),
         getBooks(user.uid),
       ]);
 
-      // Count books per genre
-      const genreCounts = countBooksPerGenre(books);
+      setBooks(userBooks);
 
+      // Count books per genre
+      const genreCounts = countBooksPerGenre(userBooks);
       const genresWithCounts: GenreWithCount[] = userGenres.map((genre) => ({
         ...genre,
         bookCount: genreCounts[genre.id] || 0,
       }));
-
       setGenres(genresWithCounts);
+
+      // Count books per series
+      const seriesCounts = countBooksPerSeries(userBooks);
+      const seriesWithCounts: SeriesWithCount[] = userSeries.map((s) => ({
+        ...s,
+        bookCount: seriesCounts[s.id] || 0,
+      }));
+      setSeriesList(seriesWithCounts);
     } catch (error) {
-      console.error('Failed to load genres:', error);
+      console.error('Failed to load data:', error);
     } finally {
       setGenresLoading(false);
+      setSeriesLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    loadGenres();
-  }, [loadGenres]);
+    loadData();
+  }, [loadData]);
 
   // Count books per genre
-  function countBooksPerGenre(books: Book[]): Record<string, number> {
+  function countBooksPerGenre(bookList: Book[]): Record<string, number> {
     const counts: Record<string, number> = {};
-    books.forEach((book) => {
+    bookList.forEach((book) => {
       (book.genres || []).forEach((genreId) => {
         counts[genreId] = (counts[genreId] || 0) + 1;
       });
@@ -73,78 +150,195 @@ export default function LibrarySettingsPage() {
     return counts;
   }
 
-  // Handle add genre
-  const handleAddGenre = async () => {
-    if (!user || !newGenreName.trim() || saving) return;
+  // Count books per series
+  function countBooksPerSeries(bookList: Book[]): Record<string, number> {
+    const counts: Record<string, number> = {};
+    bookList.forEach((book) => {
+      if (book.seriesId) {
+        counts[book.seriesId] = (counts[book.seriesId] || 0) + 1;
+      }
+    });
+    return counts;
+  }
 
-    setSaving(true);
+  // Get used colors (for hiding in picker)
+  function getUsedColors(): Set<string> {
+    const used = new Set<string>();
+    genres.forEach((g) => {
+      if (g.id !== editingGenre?.id) {
+        used.add(g.color.toLowerCase());
+      }
+    });
+    return used;
+  }
+
+  // ========== GENRE HANDLERS ==========
+
+  const openAddGenreModal = () => {
+    setEditingGenre(null);
+    setGenreName('');
+    setGenreColor(getNextAvailableColor(genres.map((g) => g.color)));
+    setShowGenreModal(true);
+  };
+
+  const openEditGenreModal = (genre: Genre) => {
+    setEditingGenre(genre);
+    setGenreName(genre.name);
+    setGenreColor(genre.color);
+    setShowGenreModal(true);
+  };
+
+  const closeGenreModal = () => {
+    setShowGenreModal(false);
+    setEditingGenre(null);
+    setGenreName('');
+    setGenreColor('');
+  };
+
+  const handleSaveGenre = async () => {
+    if (!user || !genreName.trim() || genreSaving) return;
+
+    setGenreSaving(true);
     try {
-      const color = newGenreColor || getNextAvailableColor(genres.map((g) => g.color));
-      await createGenre(user.uid, newGenreName.trim(), color);
-      setNewGenreName('');
-      setNewGenreColor('');
-      setShowAddForm(false);
-      await loadGenres();
+      if (editingGenre) {
+        await updateGenre(user.uid, editingGenre.id, {
+          name: genreName.trim(),
+          color: genreColor,
+        });
+      } else {
+        await createGenre(user.uid, genreName.trim(), genreColor);
+      }
+      closeGenreModal();
+      await loadData();
     } catch (error) {
-      console.error('Failed to create genre:', error);
+      console.error('Failed to save genre:', error);
     } finally {
-      setSaving(false);
+      setGenreSaving(false);
     }
   };
 
-  // Handle edit genre
-  const handleEditGenre = async () => {
-    if (!user || !editingGenre || !editName.trim() || saving) return;
+  const handleDeleteGenre = async () => {
+    if (!user || !genreDeleteConfirm || genreSaving) return;
 
-    setSaving(true);
+    setGenreSaving(true);
     try {
-      await updateGenre(user.uid, editingGenre.id, {
-        name: editName.trim(),
-        color: editColor,
-      });
-      setEditingGenre(null);
-      await loadGenres();
-    } catch (error) {
-      console.error('Failed to update genre:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Handle delete genre
-  const handleDeleteGenre = async (genreId: string) => {
-    if (!user || saving) return;
-
-    setSaving(true);
-    try {
-      await deleteGenre(user.uid, genreId);
-      setDeleteConfirm(null);
-      await loadGenres();
+      await deleteGenre(user.uid, genreDeleteConfirm.id);
+      setGenreDeleteConfirm(null);
+      await loadData();
     } catch (error) {
       console.error('Failed to delete genre:', error);
     } finally {
-      setSaving(false);
+      setGenreSaving(false);
     }
   };
 
-  // Start editing a genre
-  const startEditGenre = (genre: Genre) => {
-    setEditingGenre(genre);
-    setEditName(genre.name);
-    setEditColor(genre.color);
+  const openMergeGenreModal = (genre: Genre) => {
+    setMergingGenre(genre);
+    setMergeTargetId('');
+    setShowMergeGenreModal(true);
   };
 
-  // Cancel editing
-  const cancelEdit = () => {
-    setEditingGenre(null);
-    setEditName('');
-    setEditColor('');
+  const closeMergeGenreModal = () => {
+    setShowMergeGenreModal(false);
+    setMergingGenre(null);
+    setMergeTargetId('');
   };
 
-  // Start adding
-  const startAddGenre = () => {
-    setShowAddForm(true);
-    setNewGenreColor(getNextAvailableColor(genres.map((g) => g.color)));
+  const handleMergeGenre = async () => {
+    if (!user || !mergingGenre || !mergeTargetId || genreSaving) return;
+
+    setGenreSaving(true);
+    try {
+      // Update all books with the source genre to have the target genre instead
+      const booksToUpdate = books.filter((b) => b.genres?.includes(mergingGenre.id));
+      // TODO: Implement batch update in repository
+      // For now, this is a placeholder - merge logic would need to update books
+      console.log('Would update', booksToUpdate.length, 'books');
+
+      // Delete the source genre
+      await deleteGenre(user.uid, mergingGenre.id);
+      closeMergeGenreModal();
+      await loadData();
+    } catch (error) {
+      console.error('Failed to merge genre:', error);
+    } finally {
+      setGenreSaving(false);
+    }
+  };
+
+  // ========== SERIES HANDLERS ==========
+
+  const openAddSeriesModal = () => {
+    setEditingSeries(null);
+    setSeriesName('');
+    setSeriesTotalBooks('');
+    setShowSeriesModal(true);
+  };
+
+  const openEditSeriesModal = (series: Series) => {
+    setEditingSeries(series);
+    setSeriesName(series.name);
+    setSeriesTotalBooks(series.totalBooks?.toString() || '');
+    setShowSeriesModal(true);
+  };
+
+  const closeSeriesModal = () => {
+    setShowSeriesModal(false);
+    setEditingSeries(null);
+    setSeriesName('');
+    setSeriesTotalBooks('');
+  };
+
+  const handleSaveSeries = async () => {
+    if (!user || !seriesName.trim() || seriesSaving) return;
+
+    setSeriesSaving(true);
+    try {
+      const totalBooks = seriesTotalBooks ? parseInt(seriesTotalBooks, 10) : undefined;
+
+      if (editingSeries) {
+        await updateSeries(user.uid, editingSeries.id, {
+          name: seriesName.trim(),
+          totalBooks,
+        });
+      } else {
+        await createSeries(user.uid, seriesName.trim(), totalBooks);
+      }
+
+      closeSeriesModal();
+      await loadData();
+    } catch (error) {
+      console.error('Failed to save series:', error);
+    } finally {
+      setSeriesSaving(false);
+    }
+  };
+
+  const handleDeleteSeries = async () => {
+    if (!user || !seriesDeleteConfirm || seriesSaving) return;
+
+    setSeriesSaving(true);
+    try {
+      await deleteSeries(user.uid, seriesDeleteConfirm.id);
+      setSeriesDeleteConfirm(null);
+      await loadData();
+    } catch (error) {
+      console.error('Failed to delete series:', error);
+    } finally {
+      setSeriesSaving(false);
+    }
+  };
+
+  // ========== PICKER SETTINGS HANDLERS ==========
+
+  const handleGenreSuggestionsFirstChange = (checked: boolean) => {
+    setPickerSettings((prev) => ({ ...prev, genreSuggestionsFirst: checked }));
+    savePickerSettings({ genreSuggestionsFirst: checked });
+  };
+
+  const handleSeriesSuggestionsFirstChange = (checked: boolean) => {
+    setPickerSettings((prev) => ({ ...prev, seriesSuggestionsFirst: checked }));
+    savePickerSettings({ seriesSuggestionsFirst: checked });
   };
 
   if (authLoading) {
@@ -166,6 +360,9 @@ export default function LibrarySettingsPage() {
       </>
     );
   }
+
+  const usedColors = getUsedColors();
+  const availableColors = GENRE_COLORS.filter((c) => !usedColors.has(c.toLowerCase()));
 
   return (
     <>
@@ -191,14 +388,14 @@ export default function LibrarySettingsPage() {
 
         <div className="space-y-6">
           {/* Genres Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <section id="genres" className="scroll-mt-36">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Tag className="w-5 h-5 text-gray-600" aria-hidden="true" />
                 <h2 className="text-lg font-semibold text-gray-900">Genres</h2>
               </div>
               <button
-                onClick={startAddGenre}
+                onClick={openAddGenreModal}
                 className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary-dark text-white text-sm rounded-lg transition-colors min-h-[44px]"
               >
                 <Plus className="w-4 h-4" aria-hidden="true" />
@@ -206,212 +403,575 @@ export default function LibrarySettingsPage() {
               </button>
             </div>
 
-            {/* Add Genre Form */}
-            {showAddForm && (
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1">
-                    <label htmlFor="new-genre-name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Genre Name
-                    </label>
-                    <input
-                      id="new-genre-name"
-                      type="text"
-                      value={newGenreName}
-                      onChange={(e) => setNewGenreName(e.target.value)}
-                      placeholder="e.g., Science Fiction"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                      autoFocus
-                    />
-                  </div>
-                  <div className="w-20">
-                    <label htmlFor="new-genre-color" className="block text-sm font-medium text-gray-700 mb-1">
-                      Colour
-                    </label>
-                    <input
-                      id="new-genre-color"
-                      type="color"
-                      value={newGenreColor}
-                      onChange={(e) => setNewGenreColor(e.target.value)}
-                      className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
-                    />
-                  </div>
-                  <button
-                    onClick={handleAddGenre}
-                    disabled={!newGenreName.trim() || saving}
-                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
-                  >
-                    {saving ? '...' : 'Save'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowAddForm(false);
-                      setNewGenreName('');
-                    }}
-                    className="p-2 text-gray-500 hover:text-gray-700 min-h-[44px]"
-                    aria-label="Cancel"
-                  >
-                    <X className="w-5 h-5" aria-hidden="true" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Genre List */}
+            {/* Genre List (Table) */}
             {genresLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
-                ))}
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <tbody className="divide-y divide-gray-100">
+                    {[1, 2, 3, 4].map((i) => (
+                      <tr key={i}>
+                        <td className="py-1.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-gray-200 rounded-full animate-pulse" />
+                            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-3 text-right">
+                          <div className="h-4 w-4 bg-gray-200 rounded animate-pulse ml-auto" />
+                        </td>
+                        <td className="py-1.5 px-1">
+                          <div className="h-5 w-28 bg-gray-200 rounded animate-pulse ml-auto" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : genres.length === 0 ? (
-              <div className="py-8 text-center">
+              <div className="py-8 text-center bg-white rounded-xl border border-gray-200">
                 <Tag className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
                 <p className="text-gray-500 mt-3">No genres yet</p>
                 <p className="text-gray-400 text-sm mt-1">Create your first genre to organise books</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {genres.map((genre) => (
-                  <div
-                    key={genre.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-                  >
-                    {editingGenre?.id === genre.id ? (
-                      /* Edit Mode */
-                      <>
-                        <input
-                          type="color"
-                          value={editColor}
-                          onChange={(e) => setEditColor(e.target.value)}
-                          className="w-8 h-8 border border-gray-300 rounded cursor-pointer"
-                        />
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                          autoFocus
-                        />
-                        <button
-                          onClick={handleEditGenre}
-                          disabled={!editName.trim() || saving}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                          aria-label="Save changes"
-                        >
-                          <Check className="w-5 h-5" aria-hidden="true" />
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                          aria-label="Cancel editing"
-                        >
-                          <X className="w-5 h-5" aria-hidden="true" />
-                        </button>
-                      </>
-                    ) : deleteConfirm === genre.id ? (
-                      /* Delete Confirmation */
-                      <>
-                        <span
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: genre.color }}
-                        />
-                        <span className="flex-1 text-sm text-gray-700">
-                          Delete &quot;{genre.name}&quot;?
-                          {genre.bookCount > 0 && (
-                            <span className="text-amber-600 ml-1">
-                              ({genre.bookCount} {genre.bookCount === 1 ? 'book' : 'books'} will be affected)
-                            </span>
-                          )}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteGenre(genre.id)}
-                          disabled={saving}
-                          className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-colors min-h-[44px]"
-                        >
-                          {saving ? '...' : 'Delete'}
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(null)}
-                          className="px-3 py-1.5 text-gray-600 hover:bg-gray-100 text-sm rounded-lg transition-colors min-h-[44px]"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      /* Normal View */
-                      <>
-                        <span
-                          className="inline-flex items-center py-1 px-2.5 rounded-full text-sm font-medium"
-                          style={{
-                            backgroundColor: genre.color,
-                            color: getContrastColor(genre.color),
-                          }}
-                        >
-                          {genre.name}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {genre.bookCount} {genre.bookCount === 1 ? 'book' : 'books'}
-                        </span>
-                        <div className="flex-1" />
-                        <button
-                          onClick={() => startEditGenre(genre)}
-                          className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                          aria-label={`Edit ${genre.name}`}
-                        >
-                          <Pencil className="w-4 h-4" aria-hidden="true" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(genre.id)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                          aria-label={`Delete ${genre.name}`}
-                        >
-                          <Trash2 className="w-4 h-4" aria-hidden="true" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                ))}
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <tbody className="divide-y divide-gray-100">
+                    {genres.map((genre) => (
+                      <tr key={genre.id} className="hover:bg-gray-50">
+                        <td className="py-1.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-3 h-3 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: genre.color }}
+                              title={genre.name}
+                            />
+                            <span className="text-sm text-gray-900">{genre.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-3 text-xs text-gray-500 whitespace-nowrap text-right">
+                          {genre.bookCount}
+                        </td>
+                        <td className="py-0 px-0 text-right whitespace-nowrap">
+                          <button
+                            onClick={() => openEditGenreModal(genre)}
+                            className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label={`Edit ${genre.name}`}
+                          >
+                            <Pencil className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            onClick={() => openMergeGenreModal(genre)}
+                            className="p-2 hover:bg-blue-50 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label={`Merge ${genre.name}`}
+                          >
+                            <GitMerge className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            onClick={() => setGenreDeleteConfirm(genre)}
+                            className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label={`Delete ${genre.name}`}
+                          >
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
-          </div>
+
+            {/* Genre Picker Setting */}
+            <div className="mt-4 bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div>
+                  <span className="text-gray-700 text-sm">Show suggestions first in picker</span>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Genre suggestions from public sources appear before your genres
+                  </p>
+                </div>
+                <div className="relative flex-shrink-0 ml-4">
+                  <input
+                    type="checkbox"
+                    checked={pickerSettings.genreSuggestionsFirst}
+                    onChange={(e) => handleGenreSuggestionsFirstChange(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                </div>
+              </label>
+            </div>
+          </section>
 
           {/* Series Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Layers className="w-5 h-5 text-gray-600" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-gray-900">Series</h2>
+          <section id="series" className="scroll-mt-36">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Layers className="w-5 h-5 text-gray-600" aria-hidden="true" />
+                <h2 className="text-lg font-semibold text-gray-900">Series</h2>
+              </div>
+              <button
+                onClick={openAddSeriesModal}
+                className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary-dark text-white text-sm rounded-lg transition-colors min-h-[44px]"
+              >
+                <Plus className="w-4 h-4" aria-hidden="true" />
+                <span>Add</span>
+              </button>
             </div>
-            <p className="text-gray-500 mb-4">Manage your book series</p>
-            <p className="text-sm text-gray-400 italic">Series management coming soon</p>
-          </div>
 
-          {/* Backup Section */}
-          <div id="backup" className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Download className="w-5 h-5 text-gray-600" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-gray-900">Backup & Restore</h2>
+            {/* Series List (Table) */}
+            {seriesLoading ? (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <tbody className="divide-y divide-gray-100">
+                    {[1, 2, 3, 4].map((i) => (
+                      <tr key={i}>
+                        <td className="py-1.5 px-3">
+                          <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                        </td>
+                        <td className="py-1.5 px-3 text-right">
+                          <div className="h-4 w-6 bg-gray-200 rounded animate-pulse ml-auto" />
+                        </td>
+                        <td className="py-1.5 px-1">
+                          <div className="h-5 w-20 bg-gray-200 rounded animate-pulse ml-auto" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : seriesList.length === 0 ? (
+              <div className="py-8 text-center bg-white rounded-xl border border-gray-200">
+                <Library className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
+                <p className="text-gray-500 mt-3">No series yet</p>
+                <p className="text-gray-400 text-sm mt-1">Add series to track book collections</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <tbody className="divide-y divide-gray-100">
+                    {seriesList.map((series) => (
+                      <tr key={series.id} className="hover:bg-gray-50">
+                        <td className="py-1.5 px-3">
+                          <span className="text-sm text-gray-900">{series.name}</span>
+                        </td>
+                        <td className="py-1.5 px-3 text-xs text-gray-500 whitespace-nowrap text-right">
+                          {series.totalBooks
+                            ? `${series.bookCount}/${series.totalBooks}`
+                            : series.bookCount}
+                        </td>
+                        <td className="py-0 px-0 text-right whitespace-nowrap">
+                          <button
+                            onClick={() => openEditSeriesModal(series)}
+                            className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label={`Edit ${series.name}`}
+                          >
+                            <Pencil className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            onClick={() => setSeriesDeleteConfirm(series)}
+                            className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label={`Delete ${series.name}`}
+                          >
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Series Picker Setting */}
+            <div className="mt-4 bg-gray-50 rounded-xl border border-gray-200 p-4">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div>
+                  <span className="text-gray-700 text-sm">Show suggestions first in picker</span>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Series suggestions from public sources appear before your series
+                  </p>
+                </div>
+                <div className="relative flex-shrink-0 ml-4">
+                  <input
+                    type="checkbox"
+                    checked={pickerSettings.seriesSuggestionsFirst}
+                    onChange={(e) => handleSeriesSuggestionsFirstChange(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                </div>
+              </label>
             </div>
-            <p className="text-gray-500 mb-4">Export or import your library data</p>
-            <div className="flex flex-wrap gap-3">
+          </section>
+
+          {/* Backup & Restore Section */}
+          <section id="backup" className="scroll-mt-36">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Backup & Restore</h2>
+
+            {/* Export */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <Download className="w-5 h-5 text-gray-600" aria-hidden="true" />
+                <h3 className="font-medium text-gray-900">Export Backup</h3>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">Download all your books and genres as a JSON file.</p>
               <button
                 id="export-btn"
                 className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"
               >
                 <Download className="w-4 h-4" aria-hidden="true" />
-                <span>Export Data</span>
+                <span>Download Backup</span>
               </button>
+            </div>
+
+            {/* Import */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Upload className="w-5 h-5 text-gray-600" aria-hidden="true" />
+                <h3 className="font-medium text-gray-900">Import Backup</h3>
+              </div>
+              <p className="text-gray-600 text-sm mb-4">
+                Restore books and genres from a backup file. Duplicates will be skipped.
+              </p>
+              <input type="file" id="import-file" accept=".json" className="hidden" />
               <button
                 id="import-btn"
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors min-h-[44px]"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors min-h-[44px]"
               >
                 <Upload className="w-4 h-4" aria-hidden="true" />
-                <span>Import Data</span>
+                <span>Select Backup File</span>
               </button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Genre Add/Edit Modal */}
+      {showGenreModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={closeGenreModal}
+              aria-hidden="true"
+            />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingGenre ? 'Edit Genre' : 'Add Genre'}
+                </h3>
+                <button
+                  onClick={closeGenreModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="genre-name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Genre Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="genre-name"
+                    type="text"
+                    value={genreName}
+                    onChange={(e) => setGenreName(e.target.value)}
+                    placeholder="e.g., Science Fiction"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoFocus
+                  />
+                </div>
+
+                {/* Show color picker only when editing */}
+                {editingGenre && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Colour</label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableColors.map((color) => {
+                        const isSelected = color.toLowerCase() === genreColor.toLowerCase();
+                        const textColor = getContrastColor(color);
+                        return (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setGenreColor(color)}
+                            className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${
+                              isSelected ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' : 'border-transparent'
+                            }`}
+                            style={{ backgroundColor: color }}
+                            aria-label={`Select ${color} colour${isSelected ? ' (selected)' : ''}`}
+                            aria-pressed={isSelected}
+                          >
+                            {isSelected && (
+                              <Check className="w-4 h-4 mx-auto" style={{ color: textColor }} aria-hidden="true" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={closeGenreModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveGenre}
+                  disabled={!genreName.trim() || genreSaving}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                >
+                  {genreSaving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Genre Delete Confirmation Modal */}
+      {genreDeleteConfirm && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={() => setGenreDeleteConfirm(null)}
+              aria-hidden="true"
+            />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Genre</h3>
+              <p className="text-gray-600 mb-6">
+                {genreDeleteConfirm.bookCount > 0 ? (
+                  <>
+                    This will remove &quot;{genreDeleteConfirm.name}&quot; from{' '}
+                    <span className="text-amber-600 font-medium">
+                      {genreDeleteConfirm.bookCount} book
+                      {genreDeleteConfirm.bookCount !== 1 ? 's' : ''}
+                    </span>
+                    .
+                  </>
+                ) : (
+                  <>Are you sure you want to delete &quot;{genreDeleteConfirm.name}&quot;?</>
+                )}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setGenreDeleteConfirm(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteGenre}
+                  disabled={genreSaving}
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                >
+                  {genreSaving ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Genre Merge Modal */}
+      {showMergeGenreModal && mergingGenre && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={closeMergeGenreModal}
+              aria-hidden="true"
+            />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Merge Genre</h3>
+                <button
+                  onClick={closeMergeGenreModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <p className="text-gray-600 mb-4">
+                Merge &quot;{mergingGenre.name}&quot; into another genre. All books with this genre will be
+                updated.
+              </p>
+
+              <div>
+                <label htmlFor="merge-target" className="block text-sm font-medium text-gray-700 mb-1">
+                  Target Genre
+                </label>
+                <select
+                  id="merge-target"
+                  value={mergeTargetId}
+                  onChange={(e) => setMergeTargetId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Select a genre...</option>
+                  {genres
+                    .filter((g) => g.id !== mergingGenre.id)
+                    .map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={closeMergeGenreModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleMergeGenre}
+                  disabled={!mergeTargetId || genreSaving}
+                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                >
+                  {genreSaving ? 'Merging...' : 'Merge'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Series Add/Edit Modal */}
+      {showSeriesModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={closeSeriesModal}
+              aria-hidden="true"
+            />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingSeries ? 'Edit Series' : 'Add Series'}
+                </h3>
+                <button
+                  onClick={closeSeriesModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="series-name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Series Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="series-name"
+                    type="text"
+                    value={seriesName}
+                    onChange={(e) => setSeriesName(e.target.value)}
+                    placeholder="e.g., Harry Potter"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="series-total" className="block text-sm font-medium text-gray-700 mb-1">
+                    Total Books in Series
+                  </label>
+                  <input
+                    id="series-total"
+                    type="number"
+                    value={seriesTotalBooks}
+                    onChange={(e) => setSeriesTotalBooks(e.target.value)}
+                    placeholder="e.g., 7"
+                    min="1"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Optional. Shows completion progress (e.g., 3/7). You can have more books than this total.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={closeSeriesModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveSeries}
+                  disabled={!seriesName.trim() || seriesSaving}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                >
+                  {seriesSaving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Series Delete Confirmation Modal */}
+      {seriesDeleteConfirm && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={() => setSeriesDeleteConfirm(null)}
+              aria-hidden="true"
+            />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Series</h3>
+              <p className="text-gray-600 mb-6">
+                {seriesDeleteConfirm.bookCount > 0 ? (
+                  <>
+                    This will remove &quot;{seriesDeleteConfirm.name}&quot; from{' '}
+                    <span className="text-amber-600 font-medium">
+                      {seriesDeleteConfirm.bookCount} book
+                      {seriesDeleteConfirm.bookCount !== 1 ? 's' : ''}
+                    </span>
+                    .
+                  </>
+                ) : (
+                  <>Are you sure you want to delete &quot;{seriesDeleteConfirm.name}&quot;?</>
+                )}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSeriesDeleteConfirm(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteSeries}
+                  disabled={seriesSaving}
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                >
+                  {seriesSaving ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

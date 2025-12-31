@@ -746,6 +746,15 @@ function BooksPageContent() {
               onRemove={() => removeFilter(key, value)}
             />
           ))}
+          {/* Clear All button */}
+          {activeFilterLabels.length > 1 && (
+            <button
+              onClick={handleReset}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors min-h-[36px]"
+            >
+              Clear All
+            </button>
+          )}
         </div>
       )}
 
@@ -805,6 +814,15 @@ function BooksPageContent() {
                   onRemove={() => removeFilter(key, value)}
                 />
               ))}
+              {/* Clear All button */}
+              {activeFilterLabels.length > 1 && (
+                <button
+                  onClick={handleReset}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors min-h-[36px]"
+                >
+                  Clear All
+                </button>
+              )}
             </div>
           )}
           {/* Empty State */}

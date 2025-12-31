@@ -815,21 +815,34 @@ export function FilterBottomSheet({
   );
 }
 
+/** Chip colour styles by filter type */
+const CHIP_COLOURS: Record<string, string> = {
+  rating: 'bg-amber-100 text-amber-800 hover:bg-amber-200',
+  genre: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
+  status: 'bg-green-100 text-green-800 hover:bg-green-200',
+  series: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+  author: 'bg-rose-100 text-rose-800 hover:bg-rose-200',
+};
+
 /**
  * Active filter chip - clickable button to remove filter
  * Entire chip is tappable for better mobile UX (44px min touch target)
  */
 export function ActiveFilterChip({
   label,
+  type,
   onRemove,
 }: {
   label: string;
+  type?: 'status' | 'genre' | 'series' | 'rating' | 'author';
   onRemove: () => void;
 }) {
+  const colours = type ? CHIP_COLOURS[type] : 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+
   return (
     <button
       onClick={onRemove}
-      className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] bg-primary/10 text-primary hover:bg-primary/20 rounded-full text-sm font-medium transition-colors"
+      className={`inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] ${colours} rounded-full text-sm font-medium transition-colors`}
       aria-label={`Remove ${label} filter`}
     >
       <span>{label}</span>

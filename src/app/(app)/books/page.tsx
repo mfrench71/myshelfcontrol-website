@@ -295,6 +295,20 @@ export default function BooksPage() {
     scrollToTop();
   };
 
+  /**
+   * Map filter key to chip colour type
+   */
+  const getChipType = (key: keyof BookFilters): 'status' | 'genre' | 'series' | 'rating' | 'author' | undefined => {
+    switch (key) {
+      case 'statuses': return 'status';
+      case 'genreIds': return 'genre';
+      case 'seriesIds': return 'series';
+      case 'minRating': return 'rating';
+      case 'author': return 'author';
+      default: return undefined;
+    }
+  };
+
   // Get active filter labels for chips (with value for multi-select removal)
   const getActiveFilterLabels = (): { label: string; key: keyof BookFilters; value?: string }[] => {
     const labels: { label: string; key: keyof BookFilters; value?: string }[] = [];
@@ -451,6 +465,7 @@ export default function BooksPage() {
             <ActiveFilterChip
               key={`${key}-${value || index}`}
               label={label}
+              type={getChipType(key)}
               onRemove={() => removeFilter(key, value)}
             />
           ))}
@@ -509,6 +524,7 @@ export default function BooksPage() {
                 <ActiveFilterChip
                   key={`${key}-${value || index}`}
                   label={label}
+                  type={getChipType(key)}
                   onRemove={() => removeFilter(key, value)}
                 />
               ))}

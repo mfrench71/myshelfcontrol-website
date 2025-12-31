@@ -8,16 +8,45 @@ import Link from 'next/link';
 import { Info, BookOpen, ExternalLink } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 
-// Changelog entries
+// Current app version
+const APP_VERSION = '0.2.0';
+
+// Changelog entries - newest first
 const CHANGELOG = [
   {
-    version: '0.1.0',
-    date: 'December 2024',
+    date: '31 December 2024',
     changes: [
-      'Initial Next.js migration',
+      'Add Gravatar support for profile avatars',
+      'Add email verification status with resend option',
+      'Fix bottom sheet consistency across mobile/tablet',
+      'Add password strength indicator to change password modal',
+      'Add floating action button for quick book addition',
+      'Add dirty state tracking for form save buttons',
+      'Add double confirmation for account deletion',
+    ],
+  },
+  {
+    date: '30 December 2024',
+    changes: [
+      'Add widget system for home dashboard',
+      'Add series progress tracking widget',
+      'Add recently finished books widget',
+      'Add top rated books widget',
+      'Add infinite scroll pagination to books list',
+      'Add multi-select filters (genre, status, series)',
+      'Add faceted filter counts',
+      'Add URL state for shareable filtered views',
+    ],
+  },
+  {
+    date: '29 December 2024',
+    changes: [
+      'Initial Next.js migration from 11ty',
       'Book list with filtering and sorting',
-      'Add and edit book forms',
-      'Settings pages',
+      'Add and edit book forms with validation',
+      'ISBN barcode scanner for quick book entry',
+      'Settings pages (Profile, Library, Preferences, Maintenance)',
+      'PWA support with service worker',
     ],
   },
 ];
@@ -71,7 +100,7 @@ export default function AboutPage() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">MyShelfControl</h2>
-              <p className="text-gray-500">Version 0.1.0</p>
+              <p className="text-gray-500">Version {APP_VERSION}</p>
             </div>
           </div>
           <p className="text-gray-600">
@@ -96,13 +125,12 @@ export default function AboutPage() {
 
         {/* Changelog */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Changelog</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">What&apos;s New</h2>
           <div className="space-y-6">
-            {CHANGELOG.map((release) => (
-              <div key={release.version}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium text-gray-900">v{release.version}</span>
-                  <span className="text-sm text-gray-500">{release.date}</span>
+            {CHANGELOG.map((release, releaseIndex) => (
+              <div key={release.date}>
+                <div className="mb-2">
+                  <span className="font-medium text-gray-900">{release.date}</span>
                 </div>
                 <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
                   {release.changes.map((change, index) => (

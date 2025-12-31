@@ -1094,6 +1094,179 @@ See `/Users/matthewfrench/.claude/plans/sleepy-rolling-haven.md` for detailed im
 
 ---
 
+## Security Considerations
+
+### Authentication & Session Security
+
+| Measure | Implementation | Status |
+|---------|----------------|--------|
+| **Firebase Auth** | Industry-standard auth provider | ✓ Active |
+| **Session cookies** | httpOnly, secure, sameSite=strict | ✓ Active |
+| **CSRF protection** | Token-based for mutations | ✓ Active |
+| **Rate limiting** | Firebase security rules throttling | ✓ Active |
+
+### Data Protection
+
+| Measure | Implementation | Status |
+|---------|----------------|--------|
+| **Firestore rules** | User can only access own data | ✓ Active |
+| **Storage rules** | User can only access own uploads | ✓ Active |
+| **Input validation** | Zod schemas on all API routes | ✓ Active |
+| **XSS prevention** | React auto-escaping, no dangerouslySetInnerHTML | ✓ Active |
+
+### Future Security (Multi-User)
+
+| Concern | Mitigation |
+|---------|------------|
+| **Public content moderation** | Report mechanism, admin review queue |
+| **Rate limiting API** | Per-user request quotas |
+| **Content size limits** | Max review length, image dimensions |
+| **Spam prevention** | Captcha for public forms, email verification |
+
+### Security Checklist
+
+- [x] No secrets in client code (all in env vars)
+- [x] Firebase Admin SDK on server only
+- [x] User input sanitised before database writes
+- [x] File uploads validated (type, size)
+- [x] API routes validate authentication
+- [ ] CSP headers (future hardening)
+- [ ] Subresource Integrity for CDN assets (future)
+
+---
+
+## Performance Targets
+
+### Core Web Vitals
+
+| Metric | Target | Notes |
+|--------|--------|-------|
+| **LCP** (Largest Contentful Paint) | < 2.5s | Book list initial load |
+| **FID** (First Input Delay) | < 100ms | Interaction responsiveness |
+| **CLS** (Cumulative Layout Shift) | < 0.1 | Stable layout during load |
+| **TTFB** (Time to First Byte) | < 800ms | Server response time |
+
+### App-Specific Targets
+
+| Action | Target | Notes |
+|--------|--------|-------|
+| **Book list render** | < 500ms | For 100 books with covers |
+| **Book lookup (API)** | < 2s | Google Books / Open Library |
+| **Image upload** | < 3s | Up to 5MB image |
+| **Filter/sort change** | < 100ms | Client-side operation |
+| **Offline fallback** | Instant | Service worker cached shell |
+
+### Optimisation Strategies
+
+| Strategy | Implementation |
+|----------|----------------|
+| **Image optimisation** | Next.js Image component, WebP format |
+| **Code splitting** | Dynamic imports for settings pages |
+| **Firestore indexing** | Compound indexes for common queries |
+| **Client caching** | SWR for book data, 5-minute stale time |
+| **Static generation** | Marketing pages pre-rendered at build |
+
+### Monitoring
+
+| Metric | Tool | Frequency |
+|--------|------|-----------|
+| Core Web Vitals | Lighthouse CI | Per deploy |
+| Firebase usage | Firebase Console | Weekly review |
+| Error rates | Error logging (future) | Continuous |
+
+---
+
+## Testing Strategy
+
+### Current Coverage
+
+| Type | Tool | Status | Coverage |
+|------|------|--------|----------|
+| **E2E Tests** | Playwright | ✅ Active | 74 tests |
+| **Unit Tests** | Vitest | 🔄 Planned | — |
+| **Component Tests** | Vitest + RTL | 🔄 Planned | — |
+
+### E2E Test Categories
+
+| Category | Tests | Notes |
+|----------|-------|-------|
+| Authentication | Login, logout, session | Firebase Auth mocked |
+| Book CRUD | Add, view, edit, delete | Full user flows |
+| Book list | Filters, sorting, search | All combinations |
+| Settings | All settings pages | Toggle states |
+| Widgets | Dashboard widget config | Drag-drop, visibility |
+| PWA | Offline behaviour | Service worker |
+
+### Unit Test Priorities (Planned)
+
+| Priority | Area | Reason |
+|----------|------|--------|
+| High | Utility functions | Pure functions, easy to test |
+| High | Zod schemas | Validation edge cases |
+| Medium | Hooks | Data fetching, state logic |
+| Medium | Repository layer | Firestore query building |
+| Low | UI components | Covered by E2E |
+
+### Test Commands
+
+```bash
+npm test              # Run unit tests (Vitest)
+npm run test:e2e      # Run E2E tests (Playwright)
+npm run test:e2e:ui   # Playwright with UI
+npm run test:coverage # Unit test coverage report
+```
+
+### CI/CD Integration
+
+| Stage | Tests Run | Blocking |
+|-------|-----------|----------|
+| Pre-commit | Lint only | Yes |
+| PR opened | E2E full suite | Yes |
+| Merge to main | E2E + deploy preview | Yes |
+| Production deploy | E2E smoke tests | Yes |
+
+---
+
+## Known Limitations
+
+### Technical Limitations
+
+| Limitation | Impact | Mitigation |
+|------------|--------|------------|
+| **Firebase free tier** | 50K reads/day, 20K writes/day | Monitor usage, optimize queries |
+| **Google Books API** | 1000 requests/day | Open Library fallback, client caching |
+| **Netlify free tier** | 100GB bandwidth/month | Image optimization, CDN caching |
+| **No server-side search** | Full-text search client-side only | Consider Algolia at scale |
+
+### Feature Limitations
+
+| Limitation | Impact | Future Solution |
+|------------|--------|-----------------|
+| **Single user only** | No sharing or social features | Multi-user architecture planned |
+| **No dark mode** | User preference not respected | Planned feature |
+| **English only** | Limited international audience | i18n infrastructure planned |
+| **Manual book entry** | No auto-import from other apps | Import feature planned |
+| **No reading timer** | Can't track reading sessions | Timer feature planned |
+
+### Browser Support
+
+| Browser | Support | Notes |
+|---------|---------|-------|
+| Chrome/Edge | ✅ Full | Primary development browser |
+| Safari | ✅ Full | iOS PWA tested |
+| Firefox | ✅ Full | — |
+| IE11 | ❌ None | No polyfills provided |
+
+### Known Issues
+
+| Issue | Severity | Workaround |
+|-------|----------|------------|
+| Large libraries (500+ books) may have slow initial load | Medium | Pagination planned |
+| Barcode scanner requires HTTPS | Low | Use production URL |
+| Some ISBNs not found in APIs | Low | Manual entry available |
+
+---
+
 ## Technical Reference
 
 ### Colour Scheme (Semantic)

@@ -241,27 +241,43 @@ export function FilterSidebar({
   onReset,
 }: FilterPanelProps) {
   const id = useId();
-  const [showMoreFilters, setShowMoreFilters] = useState(!!filters.seriesId || !!filters.author);
+  const [showMoreFilters, setShowMoreFilters] = useState(
+    !!(filters.seriesIds && filters.seriesIds.length > 0) || !!filters.author
+  );
 
   const handleStatusChange = (status: string, checked: boolean) => {
-    // Single-select for now (matching old behaviour more closely)
+    const currentStatuses = filters.statuses || [];
+    const newStatuses = checked
+      ? [...currentStatuses, status as 'reading' | 'finished' | 'want-to-read']
+      : currentStatuses.filter((s) => s !== status);
+
     onFiltersChange({
       ...filters,
-      status: checked ? (status as BookFilters['status']) : undefined,
+      statuses: newStatuses.length > 0 ? newStatuses : undefined,
     });
   };
 
   const handleGenreChange = (genreId: string, checked: boolean) => {
+    const currentGenres = filters.genreIds || [];
+    const newGenres = checked
+      ? [...currentGenres, genreId]
+      : currentGenres.filter((g) => g !== genreId);
+
     onFiltersChange({
       ...filters,
-      genreId: checked ? genreId : undefined,
+      genreIds: newGenres.length > 0 ? newGenres : undefined,
     });
   };
 
   const handleSeriesChange = (seriesId: string, checked: boolean) => {
+    const currentSeries = filters.seriesIds || [];
+    const newSeries = checked
+      ? [...currentSeries, seriesId]
+      : currentSeries.filter((s) => s !== seriesId);
+
     onFiltersChange({
       ...filters,
-      seriesId: checked ? seriesId : undefined,
+      seriesIds: newSeries.length > 0 ? newSeries : undefined,
     });
   };
 
@@ -280,10 +296,14 @@ export function FilterSidebar({
   };
 
   const hasActiveFilters =
-    filters.status || filters.genreId || filters.seriesId || filters.minRating || filters.author;
+    (filters.statuses && filters.statuses.length > 0) ||
+    (filters.genreIds && filters.genreIds.length > 0) ||
+    (filters.seriesIds && filters.seriesIds.length > 0) ||
+    filters.minRating ||
+    filters.author;
 
   // Include series sort option only when filtering by a series
-  const sortOptions = filters.seriesId
+  const sortOptions = filters.seriesIds && filters.seriesIds.length > 0
     ? [SERIES_SORT_OPTION, ...BASE_SORT_OPTIONS]
     : BASE_SORT_OPTIONS;
 
@@ -322,7 +342,7 @@ export function FilterSidebar({
               <input
                 type="checkbox"
                 id={`${id}-status-${option.value}`}
-                checked={filters.status === option.value}
+                checked={filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read') || false}
                 onChange={(e) => handleStatusChange(option.value, e.target.checked)}
                 className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
               />
@@ -365,7 +385,7 @@ export function FilterSidebar({
                 <input
                   type="checkbox"
                   id={`${id}-genre-${genre.id}`}
-                  checked={filters.genreId === genre.id}
+                  checked={filters.genreIds?.includes(genre.id) || false}
                   onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
                   className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
                 />
@@ -421,7 +441,7 @@ export function FilterSidebar({
                         <input
                           type="checkbox"
                           id={`${id}-series-${s.id}`}
-                          checked={filters.seriesId === s.id}
+                          checked={filters.seriesIds?.includes(s.id) || false}
                           onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
                           className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
                         />
@@ -503,26 +523,43 @@ export function FilterBottomSheet({
   onReset: () => void;
 }) {
   const id = useId();
-  const [showMoreFilters, setShowMoreFilters] = useState(!!filters.seriesId || !!filters.author);
+  const [showMoreFilters, setShowMoreFilters] = useState(
+    !!(filters.seriesIds && filters.seriesIds.length > 0) || !!filters.author
+  );
 
   const handleStatusChange = (status: string, checked: boolean) => {
+    const currentStatuses = filters.statuses || [];
+    const newStatuses = checked
+      ? [...currentStatuses, status as 'reading' | 'finished' | 'want-to-read']
+      : currentStatuses.filter((s) => s !== status);
+
     onFiltersChange({
       ...filters,
-      status: checked ? (status as BookFilters['status']) : undefined,
+      statuses: newStatuses.length > 0 ? newStatuses : undefined,
     });
   };
 
   const handleGenreChange = (genreId: string, checked: boolean) => {
+    const currentGenres = filters.genreIds || [];
+    const newGenres = checked
+      ? [...currentGenres, genreId]
+      : currentGenres.filter((g) => g !== genreId);
+
     onFiltersChange({
       ...filters,
-      genreId: checked ? genreId : undefined,
+      genreIds: newGenres.length > 0 ? newGenres : undefined,
     });
   };
 
   const handleSeriesChange = (seriesId: string, checked: boolean) => {
+    const currentSeries = filters.seriesIds || [];
+    const newSeries = checked
+      ? [...currentSeries, seriesId]
+      : currentSeries.filter((s) => s !== seriesId);
+
     onFiltersChange({
       ...filters,
-      seriesId: checked ? seriesId : undefined,
+      seriesIds: newSeries.length > 0 ? newSeries : undefined,
     });
   };
 
@@ -589,7 +626,7 @@ export function FilterBottomSheet({
                   <input
                     type="checkbox"
                     id={`${id}-mobile-status-${option.value}`}
-                    checked={filters.status === option.value}
+                    checked={filters.statuses?.includes(option.value as 'reading' | 'finished' | 'want-to-read') || false}
                     onChange={(e) => handleStatusChange(option.value, e.target.checked)}
                     className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
                   />
@@ -635,7 +672,7 @@ export function FilterBottomSheet({
                     <input
                       type="checkbox"
                       id={`${id}-mobile-genre-${genre.id}`}
-                      checked={filters.genreId === genre.id}
+                      checked={filters.genreIds?.includes(genre.id) || false}
                       onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
                       className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
                     />
@@ -690,7 +727,7 @@ export function FilterBottomSheet({
                             <input
                               type="checkbox"
                               id={`${id}-mobile-series-${s.id}`}
-                              checked={filters.seriesId === s.id}
+                              checked={filters.seriesIds?.includes(s.id) || false}
                               onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
                               className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
                             />

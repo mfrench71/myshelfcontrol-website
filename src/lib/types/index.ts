@@ -159,10 +159,10 @@ export type BookSortField =
 
 export type BookFilters = {
   search?: string;
-  genreId?: string;
-  seriesId?: string;
+  genreIds?: string[];
+  seriesIds?: string[];
   minRating?: number;
-  status?: 'reading' | 'finished' | 'want-to-read';
+  statuses?: ('reading' | 'finished' | 'want-to-read')[];
   author?: string;
 };
 

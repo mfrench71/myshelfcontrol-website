@@ -42,7 +42,7 @@ function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
 }
 
 /**
- * Filter books based on active filters
+ * Filter books based on active filters (multi-select for status, genre, series)
  */
 function filterBooks(books: Book[], filters: BookFilters): Book[] {
   return books.filter((book) => {
@@ -54,21 +54,22 @@ function filterBooks(books: Book[], filters: BookFilters): Book[] {
       if (!matchesTitle && !matchesAuthor) return false;
     }
 
-    // Status filter
-    if (filters.status) {
+    // Status filter (multi-select: book must match ANY selected status)
+    if (filters.statuses && filters.statuses.length > 0) {
       const bookStatus = getBookStatus(book);
-      if (bookStatus !== filters.status) return false;
+      if (!filters.statuses.includes(bookStatus)) return false;
     }
 
-    // Genre filter
-    if (filters.genreId) {
+    // Genre filter (multi-select: book must have ANY selected genre)
+    if (filters.genreIds && filters.genreIds.length > 0) {
       const bookGenres = book.genres || [];
-      if (!bookGenres.includes(filters.genreId)) return false;
+      const hasMatchingGenre = filters.genreIds.some((genreId) => bookGenres.includes(genreId));
+      if (!hasMatchingGenre) return false;
     }
 
-    // Series filter
-    if (filters.seriesId) {
-      if (book.seriesId !== filters.seriesId) return false;
+    // Series filter (multi-select: book must be in ANY selected series)
+    if (filters.seriesIds && filters.seriesIds.length > 0) {
+      if (!book.seriesId || !filters.seriesIds.includes(book.seriesId)) return false;
     }
 
     // Rating filter
@@ -212,12 +213,14 @@ export default function BooksPage() {
   const handleFiltersChange = (newFilters: BookFilters) => {
     setFilters(newFilters);
 
-    // Auto-switch to series order when selecting a series filter
-    if (newFilters.seriesId && !filters.seriesId) {
+    // Auto-switch to series order when selecting a series filter (any series)
+    const hadSeries = filters.seriesIds && filters.seriesIds.length > 0;
+    const hasSeries = newFilters.seriesIds && newFilters.seriesIds.length > 0;
+    if (hasSeries && !hadSeries) {
       setSortValue('seriesPosition-asc');
     }
     // Switch away from series order when clearing series filter
-    else if (!newFilters.seriesId && sortValue === 'seriesPosition-asc') {
+    else if (!hasSeries && sortValue === 'seriesPosition-asc') {
       setSortValue('createdAt-desc');
     }
   };
@@ -231,24 +234,34 @@ export default function BooksPage() {
     setSortValue('createdAt-desc');
   };
 
-  // Get active filter labels for chips
-  const getActiveFilterLabels = (): { label: string; key: keyof BookFilters }[] => {
-    const labels: { label: string; key: keyof BookFilters }[] = [];
+  // Get active filter labels for chips (with value for multi-select removal)
+  const getActiveFilterLabels = (): { label: string; key: keyof BookFilters; value?: string }[] => {
+    const labels: { label: string; key: keyof BookFilters; value?: string }[] = [];
 
-    if (filters.status) {
-      labels.push({
-        label: filters.status === 'reading' ? 'Reading' : 'Finished',
-        key: 'status'
+    // Status filters
+    if (filters.statuses && filters.statuses.length > 0) {
+      filters.statuses.forEach((status) => {
+        const label = status === 'reading' ? 'Reading' : status === 'finished' ? 'Finished' : 'To Read';
+        labels.push({ label, key: 'statuses', value: status });
       });
     }
-    if (filters.genreId) {
-      const genre = genres.find(g => g.id === filters.genreId);
-      if (genre) labels.push({ label: genre.name, key: 'genreId' });
+
+    // Genre filters
+    if (filters.genreIds && filters.genreIds.length > 0) {
+      filters.genreIds.forEach((genreId) => {
+        const genre = genres.find((g) => g.id === genreId);
+        if (genre) labels.push({ label: genre.name, key: 'genreIds', value: genreId });
+      });
     }
-    if (filters.seriesId) {
-      const s = series.find(s => s.id === filters.seriesId);
-      if (s) labels.push({ label: s.name, key: 'seriesId' });
+
+    // Series filters
+    if (filters.seriesIds && filters.seriesIds.length > 0) {
+      filters.seriesIds.forEach((seriesId) => {
+        const s = series.find((s) => s.id === seriesId);
+        if (s) labels.push({ label: s.name, key: 'seriesIds', value: seriesId });
+      });
     }
+
     if (filters.minRating) {
       labels.push({ label: `${filters.minRating}+ Stars`, key: 'minRating' });
     }
@@ -259,16 +272,34 @@ export default function BooksPage() {
     return labels;
   };
 
-  const removeFilter = (key: keyof BookFilters) => {
-    setFilters(prev => {
+  const removeFilter = (key: keyof BookFilters, value?: string) => {
+    setFilters((prev) => {
       const newFilters = { ...prev };
-      delete newFilters[key];
+
+      // Handle array filters (remove specific value)
+      if (key === 'statuses' && value && prev.statuses) {
+        newFilters.statuses = prev.statuses.filter((s) => s !== value);
+        if (newFilters.statuses.length === 0) delete newFilters.statuses;
+      } else if (key === 'genreIds' && value && prev.genreIds) {
+        newFilters.genreIds = prev.genreIds.filter((g) => g !== value);
+        if (newFilters.genreIds.length === 0) delete newFilters.genreIds;
+      } else if (key === 'seriesIds' && value && prev.seriesIds) {
+        newFilters.seriesIds = prev.seriesIds.filter((s) => s !== value);
+        if (newFilters.seriesIds.length === 0) delete newFilters.seriesIds;
+      } else {
+        delete newFilters[key];
+      }
+
       return newFilters;
     });
   };
 
   const hasActiveFilters =
-    filters.status || filters.genreId || filters.seriesId || filters.minRating || filters.author;
+    (filters.statuses && filters.statuses.length > 0) ||
+    (filters.genreIds && filters.genreIds.length > 0) ||
+    (filters.seriesIds && filters.seriesIds.length > 0) ||
+    filters.minRating ||
+    filters.author;
   const activeFilterLabels = getActiveFilterLabels();
 
   // Show loading state
@@ -348,7 +379,7 @@ export default function BooksPage() {
       {/* Mobile Sort & Filter Bar */}
       {books.length > 0 && (
         <div className="flex gap-2 mb-4 md:hidden">
-          <MobileSortDropdown value={sortValue} onChange={handleSortChange} hasSeriesFilter={!!filters.seriesId} />
+          <MobileSortDropdown value={sortValue} onChange={handleSortChange} hasSeriesFilter={!!(filters.seriesIds && filters.seriesIds.length > 0)} />
           <button
             id="filter-btn"
             onClick={() => setShowFilterSheet(true)}
@@ -370,11 +401,11 @@ export default function BooksPage() {
       {/* Active Filter Chips (Mobile) */}
       {hasActiveFilters && activeFilterLabels.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4 md:hidden">
-          {activeFilterLabels.map(({ label, key }) => (
+          {activeFilterLabels.map(({ label, key, value }, index) => (
             <ActiveFilterChip
-              key={key}
+              key={`${key}-${value || index}`}
               label={label}
-              onRemove={() => removeFilter(key)}
+              onRemove={() => removeFilter(key, value)}
             />
           ))}
         </div>

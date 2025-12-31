@@ -203,7 +203,7 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
         )}
 
         {/* Rating */}
-        {book.rating && (
+        {book.rating != null && book.rating > 0 && (
           <div className="mt-1">
             <StarRating rating={book.rating} />
           </div>

@@ -20,6 +20,7 @@ import {
   Images,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { useToast } from '@/components/ui/toast';
 import { getBook, softDeleteBook, getBooksBySeries } from '@/lib/repositories/books';
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
 import { getSeries, deleteSeries } from '@/lib/repositories/series';
@@ -189,6 +190,7 @@ export default function BookDetailPage() {
   const router = useRouter();
   const bookId = params.id as string;
   const { user, loading: authLoading } = useAuthContext();
+  const { showToast } = useToast();
 
   const [book, setBook] = useState<Book | null>(null);
   const [genres, setGenres] = useState<Genre[]>([]);
@@ -292,18 +294,32 @@ export default function BookDetailPage() {
       await softDeleteBook(user.uid, bookId);
 
       // Also delete the series if checked and this was the last book
+      let seriesDeletedOk = false;
       if (deleteSeriesChecked && book.seriesId && seriesBooks.length === 1) {
         try {
           await deleteSeries(user.uid, book.seriesId);
+          seriesDeletedOk = true;
         } catch (seriesErr) {
           console.error('Failed to delete series:', seriesErr);
           // Continue anyway - book was deleted successfully
         }
       }
 
+      // Show appropriate toast
+      if (deleteSeriesChecked && book.seriesId && seriesBooks.length === 1) {
+        if (seriesDeletedOk) {
+          showToast('Book and series moved to bin', { type: 'success' });
+        } else {
+          showToast('Book moved to bin (series deletion failed)', { type: 'info' });
+        }
+      } else {
+        showToast('Book moved to bin', { type: 'success' });
+      }
+
       router.push('/books');
     } catch (err) {
       console.error('Failed to delete book:', err);
+      showToast('Error moving book to bin', { type: 'error' });
       setDeleting(false);
     }
   };

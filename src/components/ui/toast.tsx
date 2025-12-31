@@ -10,6 +10,7 @@ import {
   useCallback,
   useState,
   useEffect,
+  useRef,
   type ReactNode,
 } from 'react';
 import { CheckCircle, XCircle, Info, X } from 'lucide-react';
@@ -60,26 +61,27 @@ function ToastItem({
 }) {
   const [isExiting, setIsExiting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [remainingTime, setRemainingTime] = useState(toast.duration);
+  const remainingTimeRef = useRef(toast.duration);
+  const startTimeRef = useRef(Date.now());
 
   // Auto-dismiss timer
   useEffect(() => {
     if (isPaused) return;
 
+    startTimeRef.current = Date.now();
+
     const timer = setTimeout(() => {
       setIsExiting(true);
       setTimeout(() => onDismiss(toast.id), 150);
-    }, remainingTime);
-
-    const startTime = Date.now();
+    }, remainingTimeRef.current);
 
     return () => {
       clearTimeout(timer);
-      if (!isPaused) {
-        setRemainingTime((prev) => prev - (Date.now() - startTime));
-      }
+      // Update remaining time based on how long the timer ran
+      const elapsed = Date.now() - startTimeRef.current;
+      remainingTimeRef.current = Math.max(0, remainingTimeRef.current - elapsed);
     };
-  }, [isPaused, remainingTime, toast.id, onDismiss]);
+  }, [isPaused, toast.id, onDismiss]);
 
   const handleDismiss = useCallback(() => {
     setIsExiting(true);

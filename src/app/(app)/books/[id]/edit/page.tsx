@@ -14,9 +14,9 @@ import {
   ChevronRight,
   Calendar,
   Loader2,
-  Check,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { useToast } from '@/components/ui/toast';
 import { getBook, updateBook } from '@/lib/repositories/books';
 import { GenrePicker, SeriesPicker, AuthorPicker, CoverPicker } from '@/components/pickers';
 import { ImageGallery, type GalleryImage } from '@/components/image-gallery';
@@ -118,13 +118,13 @@ export default function EditBookPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { user, loading: authLoading } = useAuthContext();
+  const { showToast } = useToast();
 
   // Page state
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
   const [book, setBook] = useState<Book | null>(null);
 
   // Form state - basic fields
@@ -405,7 +405,6 @@ export default function EditBookPage({ params }: PageProps) {
     if (!isbn && !title) return;
 
     setRefreshing(true);
-    setRefreshMessage(null);
 
     try {
       const changedFields: string[] = [];
@@ -462,21 +461,17 @@ export default function EditBookPage({ params }: PageProps) {
       }
 
       if (changedFields.length > 0) {
-        setRefreshMessage(`Updated: ${changedFields.join(', ')}`);
+        showToast(`Updated: ${changedFields.join(', ')}`, { type: 'success' });
       } else {
-        setRefreshMessage('No new data found');
+        showToast('No new data found', { type: 'info' });
       }
-
-      // Clear message after 3 seconds
-      setTimeout(() => setRefreshMessage(null), 3000);
     } catch (err) {
       console.error('Failed to refresh data:', err);
-      setRefreshMessage('Failed to fetch data');
-      setTimeout(() => setRefreshMessage(null), 3000);
+      showToast('Error fetching book data', { type: 'error' });
     } finally {
       setRefreshing(false);
     }
-  }, [isbn, title, author, publisher, publishedDate, physicalFormat, pageCount, coverUrl]);
+  }, [isbn, title, author, publisher, publishedDate, physicalFormat, pageCount, coverUrl, showToast]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -514,9 +509,11 @@ export default function EditBookPage({ params }: PageProps) {
       const markSaved = (window as unknown as { __imageGalleryMarkSaved?: () => void }).__imageGalleryMarkSaved;
       if (markSaved) markSaved();
 
+      showToast('Changes saved!', { type: 'success' });
       router.push(`/books/${id}`);
     } catch (err) {
       console.error('Failed to save book:', err);
+      showToast('Error saving changes', { type: 'error' });
       setError('Failed to save changes. Please try again.');
       setSaving(false);
     }
@@ -616,12 +613,6 @@ export default function EditBookPage({ params }: PageProps) {
             </ol>
           </nav>
           <div className="flex items-center gap-2">
-            {refreshMessage && (
-              <span className="text-sm text-gray-600 flex items-center gap-1">
-                <Check className="w-4 h-4 text-green-500" aria-hidden="true" />
-                {refreshMessage}
-              </span>
-            )}
             <button
               type="button"
               onClick={handleRefreshData}

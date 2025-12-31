@@ -19,6 +19,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { useToast } from '@/components/ui/toast';
 import { addBook } from '@/lib/repositories/books';
 import { lookupISBN, searchBooks as searchBooksAPI } from '@/lib/utils/book-api';
 import { isISBN, cleanISBN, checkForDuplicate } from '@/lib/utils/duplicate-checker';
@@ -110,6 +111,7 @@ function RatingInput({
 export default function AddBookPage() {
   const router = useRouter();
   const { user } = useAuthContext();
+  const { showToast } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const resultsContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -237,6 +239,7 @@ export default function AddBookPage() {
         setShowForm(true);
         setSearchResults([]);
         setSearchMessage(null);
+        showToast('Book found!', { type: 'success' });
       } else {
         setSearchMessage({ text: 'Book not found. Try searching by title or add manually.', type: 'error' });
       }
@@ -244,7 +247,7 @@ export default function AddBookPage() {
       console.error('ISBN lookup error:', error);
       setSearchMessage({ text: 'Error looking up ISBN. Please try again.', type: 'error' });
     }
-  }, []);
+  }, [showToast]);
 
   /**
    * Search for books
@@ -422,6 +425,7 @@ export default function AddBookPage() {
       setDataSource('Google Books');
       setShowForm(true);
       setSearchResults([]);
+      showToast('Book selected!', { type: 'success' });
     } finally {
       setSelectingResult(null);
     }
@@ -506,7 +510,7 @@ export default function AddBookPage() {
   const openScanner = async () => {
     // Check for HTTPS
     if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-      alert('Camera requires HTTPS. Please use the deployed site.');
+      showToast('Camera requires HTTPS. Use the deployed site.', { type: 'error' });
       return;
     }
 
@@ -575,6 +579,7 @@ export default function AddBookPage() {
             navigator.vibrate(100);
           }
 
+          showToast(`Scanned: ${code}`, { type: 'success' });
           closeScanner();
           handleISBNLookup(code, true);
         });
@@ -589,7 +594,7 @@ export default function AddBookPage() {
         NotReadableError: 'Camera is in use by another app.',
       };
       const err = error as Error & { name?: string };
-      alert(errorMessages[err.name || ''] || 'Scanner error. Please try again.');
+      showToast(errorMessages[err.name || ''] || 'Scanner error. Please try again.', { type: 'error' });
     }
   };
 
@@ -664,6 +669,7 @@ export default function AddBookPage() {
               : `"${existingBook?.title}" by ${existingBook?.author} already exists`;
 
           setDuplicateWarning(`${matchDesc}. Click "Add Anyway" to add duplicate.`);
+          showToast(`${matchDesc}. Click "Add Anyway" to add duplicate.`, { type: 'error', duration: 5000 });
           return;
         }
       }
@@ -705,10 +711,11 @@ export default function AddBookPage() {
         if (markSaved) markSaved();
       }
 
+      showToast('Book added!', { type: 'success' });
       router.push('/books');
     } catch (error) {
       console.error('Failed to add book:', error);
-      alert('Failed to add book. Please try again.');
+      showToast('Error adding book', { type: 'error' });
       setSubmitting(false);
     }
   };

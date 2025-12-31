@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useId } from 'react';
+import { useState, useId, useRef, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import type { Genre, Series, BookFilters } from '@/lib/types';
 
@@ -14,6 +14,7 @@ export type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'tit
 type FilterPanelProps = {
   genres: Genre[];
   series: Series[];
+  authors: string[];
   filters: BookFilters;
   sortValue: SortOption;
   onFiltersChange: (filters: BookFilters) => void;
@@ -64,11 +65,175 @@ function getContrastColor(hexColor: string): string {
 }
 
 /**
+ * Author Typeahead Input
+ */
+function AuthorTypeahead({
+  id,
+  authors,
+  value,
+  onChange,
+}: {
+  id: string;
+  authors: string[];
+  value: string;
+  onChange: (author: string) => void;
+}) {
+  const [query, setQuery] = useState(value || '');
+  const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Filter authors based on query
+  const filteredAuthors = query
+    ? authors.filter((a) => a.toLowerCase().includes(query.toLowerCase()))
+    : authors;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        !inputRef.current?.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Sync input with external value changes
+  useEffect(() => {
+    setQuery(value || '');
+  }, [value]);
+
+  const handleSelect = (author: string) => {
+    setQuery(author);
+    setIsOpen(false);
+    setFocusedIndex(-1);
+    onChange(author);
+  };
+
+  const handleClear = () => {
+    setQuery('');
+    setIsOpen(false);
+    setFocusedIndex(-1);
+    onChange('');
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen && e.key === 'ArrowDown') {
+      setIsOpen(true);
+      setFocusedIndex(0);
+      return;
+    }
+
+    if (!isOpen) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex((prev) => Math.min(prev + 1, filteredAuthors.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex((prev) => Math.max(prev - 1, 0));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (focusedIndex >= 0 && focusedIndex < filteredAuthors.length) {
+          handleSelect(filteredAuthors[focusedIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setIsOpen(false);
+        setFocusedIndex(-1);
+        break;
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <input
+          ref={inputRef}
+          id={id}
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIsOpen(true);
+            setFocusedIndex(-1);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={handleKeyDown}
+          placeholder="Search authors..."
+          className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"
+          autoComplete="off"
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-controls={`${id}-listbox`}
+          aria-autocomplete="list"
+        />
+        {(query || value) && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
+            aria-label="Clear author filter"
+          >
+            <X className="w-4 h-4 text-gray-400" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+
+      {isOpen && filteredAuthors.length > 0 && (
+        <div
+          ref={dropdownRef}
+          id={`${id}-listbox`}
+          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+          role="listbox"
+        >
+          {filteredAuthors.map((author, index) => (
+            <button
+              key={author}
+              type="button"
+              onClick={() => handleSelect(author)}
+              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 min-h-[44px] ${
+                index === focusedIndex ? 'bg-gray-100' : ''
+              } ${value === author ? 'text-primary font-medium' : 'text-gray-900'}`}
+              role="option"
+              aria-selected={value === author}
+            >
+              {author}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {isOpen && query && filteredAuthors.length === 0 && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+        >
+          <div className="px-3 py-2 text-sm text-gray-500 italic">No authors found</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * Desktop Filter Sidebar
  */
 export function FilterSidebar({
   genres,
   series,
+  authors,
   filters,
   sortValue,
   onFiltersChange,
@@ -76,7 +241,7 @@ export function FilterSidebar({
   onReset,
 }: FilterPanelProps) {
   const id = useId();
-  const [showMoreFilters, setShowMoreFilters] = useState(!!filters.seriesId);
+  const [showMoreFilters, setShowMoreFilters] = useState(!!filters.seriesId || !!filters.author);
 
   const handleStatusChange = (status: string, checked: boolean) => {
     // Single-select for now (matching old behaviour more closely)
@@ -107,8 +272,15 @@ export function FilterSidebar({
     });
   };
 
+  const handleAuthorChange = (author: string) => {
+    onFiltersChange({
+      ...filters,
+      author: author || undefined,
+    });
+  };
+
   const hasActiveFilters =
-    filters.status || filters.genreId || filters.seriesId || filters.minRating;
+    filters.status || filters.genreId || filters.seriesId || filters.minRating || filters.author;
 
   // Include series sort option only when filtering by a series
   const sortOptions = filters.seriesId
@@ -204,7 +376,7 @@ export function FilterSidebar({
       )}
 
       {/* More Filters Toggle */}
-      {series.length > 0 && (
+      {(series.length > 0 || authors.length > 0) && (
         <>
           <button
             onClick={() => setShowMoreFilters(!showMoreFilters)}
@@ -217,29 +389,48 @@ export function FilterSidebar({
             <span>{showMoreFilters ? 'Less' : 'More'}</span>
           </button>
 
-          {/* Series (in More section) */}
           {showMoreFilters && (
-            <div>
-              <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-              <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
-                {series.map((s) => (
-                  <label
-                    key={s.id}
-                    htmlFor={`${id}-series-${s.id}`}
-                    className="flex items-center justify-between cursor-pointer"
-                  >
-                    <span className="text-sm text-gray-900">{s.name}</span>
-                    <input
-                      type="checkbox"
-                      id={`${id}-series-${s.id}`}
-                      checked={filters.seriesId === s.id}
-                      onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
-                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
-                    />
+            <>
+              {/* Author (in More section) */}
+              {authors.length > 0 && (
+                <div>
+                  <label htmlFor={`${id}-author`} className="block text-sm font-semibold text-gray-900 mb-2">
+                    Author
                   </label>
-                ))}
-              </div>
-            </div>
+                  <AuthorTypeahead
+                    id={`${id}-author`}
+                    authors={authors}
+                    value={filters.author || ''}
+                    onChange={handleAuthorChange}
+                  />
+                </div>
+              )}
+
+              {/* Series (in More section) */}
+              {series.length > 0 && (
+                <div>
+                  <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
+                  <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
+                    {series.map((s) => (
+                      <label
+                        key={s.id}
+                        htmlFor={`${id}-series-${s.id}`}
+                        className="flex items-center justify-between cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-900">{s.name}</span>
+                        <input
+                          type="checkbox"
+                          id={`${id}-series-${s.id}`}
+                          checked={filters.seriesId === s.id}
+                          onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
+                          className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </>
       )}
@@ -297,6 +488,7 @@ export function FilterBottomSheet({
   onClose,
   genres,
   series,
+  authors,
   filters,
   onFiltersChange,
   onReset,
@@ -305,12 +497,13 @@ export function FilterBottomSheet({
   onClose: () => void;
   genres: Genre[];
   series: Series[];
+  authors: string[];
   filters: BookFilters;
   onFiltersChange: (filters: BookFilters) => void;
   onReset: () => void;
 }) {
   const id = useId();
-  const [showMoreFilters, setShowMoreFilters] = useState(!!filters.seriesId);
+  const [showMoreFilters, setShowMoreFilters] = useState(!!filters.seriesId || !!filters.author);
 
   const handleStatusChange = (status: string, checked: boolean) => {
     onFiltersChange({
@@ -337,6 +530,13 @@ export function FilterBottomSheet({
     onFiltersChange({
       ...filters,
       minRating: rating || undefined,
+    });
+  };
+
+  const handleAuthorChange = (author: string) => {
+    onFiltersChange({
+      ...filters,
+      author: author || undefined,
     });
   };
 
@@ -445,8 +645,8 @@ export function FilterBottomSheet({
             </div>
           )}
 
-          {/* Series */}
-          {series.length > 0 && (
+          {/* More Filters (Author, Series) */}
+          {(series.length > 0 || authors.length > 0) && (
             <>
               <button
                 onClick={() => setShowMoreFilters(!showMoreFilters)}
@@ -459,27 +659,47 @@ export function FilterBottomSheet({
               </button>
 
               {showMoreFilters && (
-                <div>
-                  <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-                  <div className="space-y-3 max-h-48 overflow-y-auto">
-                    {series.map((s) => (
-                      <label
-                        key={s.id}
-                        htmlFor={`${id}-mobile-series-${s.id}`}
-                        className="flex items-center justify-between cursor-pointer"
-                      >
-                        <span className="text-sm text-gray-900">{s.name}</span>
-                        <input
-                          type="checkbox"
-                          id={`${id}-mobile-series-${s.id}`}
-                          checked={filters.seriesId === s.id}
-                          onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
-                          className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
-                        />
+                <>
+                  {/* Author */}
+                  {authors.length > 0 && (
+                    <div>
+                      <label htmlFor={`${id}-mobile-author`} className="block text-sm font-semibold text-gray-900 mb-2">
+                        Author
                       </label>
-                    ))}
-                  </div>
-                </div>
+                      <AuthorTypeahead
+                        id={`${id}-mobile-author`}
+                        authors={authors}
+                        value={filters.author || ''}
+                        onChange={handleAuthorChange}
+                      />
+                    </div>
+                  )}
+
+                  {/* Series */}
+                  {series.length > 0 && (
+                    <div>
+                      <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
+                      <div className="space-y-3 max-h-48 overflow-y-auto">
+                        {series.map((s) => (
+                          <label
+                            key={s.id}
+                            htmlFor={`${id}-mobile-series-${s.id}`}
+                            className="flex items-center justify-between cursor-pointer"
+                          >
+                            <span className="text-sm text-gray-900">{s.name}</span>
+                            <input
+                              type="checkbox"
+                              id={`${id}-mobile-series-${s.id}`}
+                              checked={filters.seriesId === s.id}
+                              onChange={(e) => handleSeriesChange(s.id, e.target.checked)}
+                              className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}

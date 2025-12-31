@@ -158,6 +158,17 @@ export default function BooksPage() {
   const genreLookup = useMemo(() => createGenreLookup(genres), [genres]);
   const seriesLookup = useMemo(() => createSeriesLookup(series), [series]);
 
+  // Extract unique authors from books, sorted alphabetically
+  const authors = useMemo(() => {
+    const authorSet = new Set<string>();
+    books.forEach((book) => {
+      if (book.author) {
+        authorSet.add(book.author);
+      }
+    });
+    return Array.from(authorSet).sort((a, b) => a.localeCompare(b));
+  }, [books]);
+
   // Filter and sort books
   const filteredAndSortedBooks = useMemo(() => {
     const { sortBy, direction } = parseSortOption(sortValue);
@@ -241,6 +252,9 @@ export default function BooksPage() {
     if (filters.minRating) {
       labels.push({ label: `${filters.minRating}+ Stars`, key: 'minRating' });
     }
+    if (filters.author) {
+      labels.push({ label: filters.author, key: 'author' });
+    }
 
     return labels;
   };
@@ -254,7 +268,7 @@ export default function BooksPage() {
   };
 
   const hasActiveFilters =
-    filters.status || filters.genreId || filters.seriesId || filters.minRating;
+    filters.status || filters.genreId || filters.seriesId || filters.minRating || filters.author;
   const activeFilterLabels = getActiveFilterLabels();
 
   // Show loading state
@@ -391,6 +405,7 @@ export default function BooksPage() {
               <FilterSidebar
                 genres={genres}
                 series={series}
+                authors={authors}
                 filters={filters}
                 sortValue={sortValue}
                 onFiltersChange={handleFiltersChange}
@@ -453,6 +468,7 @@ export default function BooksPage() {
         onClose={() => setShowFilterSheet(false)}
         genres={genres}
         series={series}
+        authors={authors}
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onReset={handleReset}

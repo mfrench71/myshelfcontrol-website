@@ -60,17 +60,21 @@ function docToBook(doc: QueryDocumentSnapshot<DocumentData>): Book {
 
 /**
  * Get all books for a user (excluding soft-deleted)
+ * Note: Fetches all books and filters/sorts in memory to avoid composite index requirement
  */
 export async function getBooks(userId: string): Promise<Book[]> {
   const booksRef = getBooksCollection(userId);
-  const q = query(
-    booksRef,
-    where('deletedAt', '==', null),
-    orderBy('createdAt', 'desc')
-  );
+  const snapshot = await getDocs(booksRef);
 
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(docToBook);
+  return snapshot.docs
+    .map(docToBook)
+    .filter((book) => !book.deletedAt)
+    .sort((a, b) => {
+      // Sort by createdAt descending
+      const aTime = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : (a.createdAt as number) || 0;
+      const bTime = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : (b.createdAt as number) || 0;
+      return bTime - aTime;
+    });
 }
 
 /**

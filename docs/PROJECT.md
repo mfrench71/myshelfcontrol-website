@@ -20,25 +20,21 @@
    - [Multi-User Features](#multi-user-features-research)
    - [Additional Features](#additional-features-research)
    - [Feature Inspiration](#feature-inspiration)
-10. [Legal & Compliance](#legal--compliance)
+10. [Public Frontend (Marketing)](#public-frontend-marketing-site)
+11. [Demo Account & Monetisation](#demo-account--monetisation)
+12. [Legal & Compliance](#legal--compliance)
     - [UK Legal Requirements](#uk-legal-requirements)
     - [Privacy & Data Protection](#privacy--data-protection)
-    - [Multi-User Legal Checklist](#multi-user-legal-checklist)
-11. [Business & Marketing](#business--marketing)
-    - [Public Frontend](#public-frontend-marketing-site)
-    - [Demo Account](#demo-account-options)
-    - [Monetisation](#monetisation-models)
+13. [Operations](#operations)
     - [Growth & Marketing](#growth--marketing)
-12. [Operations](#operations)
-    - [Scalability](#scalability-checkpoints)
-    - [Analytics](#privacy-respecting-analytics)
     - [Import/Export](#importexport--portability)
+    - [Scalability](#scalability-checkpoints)
     - [Internationalisation](#internationalisation-i18n)
-13. [Security](#security-considerations)
-14. [Performance](#performance-targets)
-15. [Testing](#testing-strategy)
-16. [Known Limitations](#known-limitations)
-17. [Technical Reference](#technical-reference)
+14. [Security](#security-considerations)
+15. [Performance](#performance-targets)
+16. [Testing](#testing-strategy)
+17. [Known Limitations](#known-limitations)
+18. [Technical Reference](#technical-reference)
 
 ---
 
@@ -516,6 +512,10 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 | Literal | Yes | $5/mo | Subscription |
 | Hardcover | Yes | $5/mo or $50/yr | Subscription |
 | BookTrack | — | $4.99 once (iOS) | One-time |
+
+---
+
+## Legal & Compliance
 
 ### UK Legal Requirements
 
@@ -1280,6 +1280,15 @@ npm run test:coverage # Unit test coverage report
 | **Amber** | `bg-amber-*`, `text-amber-*` | Maintenance/cleanup tasks |
 | **Gray** | `bg-gray-*`, `text-gray-*` | Neutral, secondary actions |
 
+### Typography
+
+**Current:** System font stack (default Tailwind)
+
+**Future consideration:** Investigate more distinctive font to strengthen brand identity. Options to explore:
+- Serif accent font for headings (literary feel)
+- Custom web font for logo/branding only
+- Variable font for performance
+
 ### API References
 - [Firebase Auth](https://firebase.google.com/docs/auth/web/start)
 - [Firebase Firestore](https://firebase.google.com/docs/firestore/quickstart)
@@ -1288,4 +1297,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2025-12-31* (Added UK multi-user legal requirements)
+*Last updated: 2025-12-31* (Document reorganisation: added TOC, consolidated sections, added Security/Performance/Testing/Known Limitations)

@@ -16,6 +16,15 @@ export const metadata: Metadata = {
   },
   description: 'Track your reading journey. Organise your book collection with ease.',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-96.png', sizes: '96x96', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -26,6 +35,7 @@ export const metadata: Metadata = {
     siteName: 'MyShelfControl',
     title: 'MyShelfControl',
     description: 'Track your reading journey. Organise your book collection with ease.',
+    images: [{ url: '/icons/icon-512.png', width: 512, height: 512 }],
   },
 };
 

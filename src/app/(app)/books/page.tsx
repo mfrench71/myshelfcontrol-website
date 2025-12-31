@@ -15,10 +15,9 @@ import {
   MobileSortDropdown,
   FilterBottomSheet,
   ActiveFilterChip,
+  type SortOption,
 } from '@/components/books/filter-panel';
 import type { Book, Genre, Series, BookFilters } from '@/lib/types';
-
-type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc';
 
 /**
  * Parse sort option string into sortBy and direction
@@ -111,6 +110,12 @@ function sortBooks(
         else if (!b.rating) comparison = -1;
         else comparison = a.rating - b.rating;
         break;
+      case 'seriesPosition':
+        // Books without position go to the end
+        const aPos = a.seriesPosition ?? Number.MAX_SAFE_INTEGER;
+        const bPos = b.seriesPosition ?? Number.MAX_SAFE_INTEGER;
+        comparison = aPos - bPos;
+        break;
       case 'createdAt':
         const aTime = a.createdAt
           ? typeof a.createdAt === 'number'
@@ -195,6 +200,15 @@ export default function BooksPage() {
 
   const handleFiltersChange = (newFilters: BookFilters) => {
     setFilters(newFilters);
+
+    // Auto-switch to series order when selecting a series filter
+    if (newFilters.seriesId && !filters.seriesId) {
+      setSortValue('seriesPosition-asc');
+    }
+    // Switch away from series order when clearing series filter
+    else if (!newFilters.seriesId && sortValue === 'seriesPosition-asc') {
+      setSortValue('createdAt-desc');
+    }
   };
 
   const handleSortChange = (newSort: SortOption) => {
@@ -320,7 +334,7 @@ export default function BooksPage() {
       {/* Mobile Sort & Filter Bar */}
       {books.length > 0 && (
         <div className="flex gap-2 mb-4 md:hidden">
-          <MobileSortDropdown value={sortValue} onChange={handleSortChange} />
+          <MobileSortDropdown value={sortValue} onChange={handleSortChange} hasSeriesFilter={!!filters.seriesId} />
           <button
             id="filter-btn"
             onClick={() => setShowFilterSheet(true)}

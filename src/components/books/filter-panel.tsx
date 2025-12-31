@@ -9,7 +9,7 @@ import { useState, useId } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import type { Genre, Series, BookFilters } from '@/lib/types';
 
-type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc';
+export type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc' | 'seriesPosition-asc';
 
 type FilterPanelProps = {
   genres: Genre[];
@@ -21,7 +21,7 @@ type FilterPanelProps = {
   onReset: () => void;
 };
 
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+const BASE_SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'createdAt-desc', label: 'Date Added (Newest)' },
   { value: 'createdAt-asc', label: 'Date Added (Oldest)' },
   { value: 'title-asc', label: 'Title (A-Z)' },
@@ -31,6 +31,11 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'rating-desc', label: 'Rating (High-Low)' },
   { value: 'rating-asc', label: 'Rating (Low-High)' },
 ];
+
+const SERIES_SORT_OPTION: { value: SortOption; label: string } = {
+  value: 'seriesPosition-asc',
+  label: 'Series Order',
+};
 
 const STATUS_OPTIONS = [
   { value: 'reading', label: 'Reading' },
@@ -105,6 +110,11 @@ export function FilterSidebar({
   const hasActiveFilters =
     filters.status || filters.genreId || filters.seriesId || filters.minRating;
 
+  // Include series sort option only when filtering by a series
+  const sortOptions = filters.seriesId
+    ? [SERIES_SORT_OPTION, ...BASE_SORT_OPTIONS]
+    : BASE_SORT_OPTIONS;
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
       {/* Sort */}
@@ -118,7 +128,7 @@ export function FilterSidebar({
           onChange={(e) => onSortChange(e.target.value as SortOption)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm cursor-pointer"
         >
-          {SORT_OPTIONS.map((option) => (
+          {sortOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -252,10 +262,17 @@ export function FilterSidebar({
 export function MobileSortDropdown({
   value,
   onChange,
+  hasSeriesFilter,
 }: {
   value: SortOption;
   onChange: (sort: SortOption) => void;
+  hasSeriesFilter?: boolean;
 }) {
+  // Include series sort option only when filtering by a series
+  const sortOptions = hasSeriesFilter
+    ? [SERIES_SORT_OPTION, ...BASE_SORT_OPTIONS]
+    : BASE_SORT_OPTIONS;
+
   return (
     <select
       value={value}
@@ -263,7 +280,7 @@ export function MobileSortDropdown({
       className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer"
       aria-label="Sort books by"
     >
-      {SORT_OPTIONS.map((option) => (
+      {sortOptions.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
         </option>

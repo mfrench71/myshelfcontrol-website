@@ -1,19 +1,28 @@
 /**
  * Edit Book Page
- * Edit an existing book's details
+ * Edit an existing book's details with all pickers, image gallery, and reading dates
  */
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useCallback, useMemo, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { BookOpen, AlertCircle, RefreshCw } from 'lucide-react';
+import {
+  AlertCircle,
+  RefreshCw,
+  RotateCcw,
+  ChevronRight,
+  Calendar,
+  Loader2,
+  Check,
+} from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBook, updateBook } from '@/lib/repositories/books';
-import { getGenres } from '@/lib/repositories/genres';
-import { getSeries } from '@/lib/repositories/series';
-import type { Book, Genre, Series, PhysicalFormat } from '@/lib/types';
+import { GenrePicker, SeriesPicker, AuthorPicker, CoverPicker } from '@/components/pickers';
+import { ImageGallery, type GalleryImage } from '@/components/image-gallery';
+import { lookupISBN } from '@/lib/utils/book-api';
+import type { CoverOptions } from '@/components/pickers';
+import type { Book, PhysicalFormat, BookRead, BookCovers } from '@/lib/types';
 
 // Format options
 const FORMAT_OPTIONS = [
@@ -45,7 +54,7 @@ function RatingInput({
           key={star}
           type="button"
           onClick={() => onChange(value === star ? 0 : star)}
-          className="p-1 hover:scale-110 transition-transform"
+          className="p-1 hover:scale-110 transition-transform min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
         >
           <svg
@@ -60,13 +69,45 @@ function RatingInput({
         <button
           type="button"
           onClick={() => onChange(0)}
-          className="ml-2 text-sm text-gray-500 hover:text-gray-700"
+          className="ml-2 text-sm text-gray-500 hover:text-gray-700 min-h-[44px] px-2"
         >
           Clear
         </button>
       )}
     </div>
   );
+}
+
+/**
+ * Get book reading status from reads array
+ */
+function getBookStatus(book: { reads?: BookRead[] }): 'want-to-read' | 'reading' | 'finished' {
+  const reads = book.reads || [];
+  if (reads.length === 0) return 'want-to-read';
+  const latestRead = reads[reads.length - 1];
+  if (latestRead.finishedAt) return 'finished';
+  if (latestRead.startedAt) return 'reading';
+  return 'want-to-read';
+}
+
+/**
+ * Format date for input field
+ */
+function formatDateForInput(timestamp: number | string | Date | null | undefined): string {
+  if (!timestamp) return '';
+  const date = typeof timestamp === 'number' ? new Date(timestamp) : new Date(timestamp);
+  if (isNaN(date.getTime())) return '';
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Format date for display
+ */
+function formatDate(timestamp: number | string | Date | null | undefined): string {
+  if (!timestamp) return '';
+  const date = typeof timestamp === 'number' ? new Date(timestamp) : new Date(timestamp);
+  if (isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 type PageProps = {
@@ -81,20 +122,96 @@ export default function EditBookPage({ params }: PageProps) {
   // Page state
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
   const [book, setBook] = useState<Book | null>(null);
 
-  // Form state
+  // Form state - basic fields
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [isbn, setIsbn] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
+  const [coverOptions, setCoverOptions] = useState<CoverOptions>({});
   const [publisher, setPublisher] = useState('');
   const [publishedDate, setPublishedDate] = useState('');
   const [physicalFormat, setPhysicalFormat] = useState<PhysicalFormat>('');
   const [pageCount, setPageCount] = useState('');
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState('');
+
+  // Picker state
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [genreSuggestions, setGenreSuggestions] = useState<string[]>([]);
+  const [seriesId, setSeriesId] = useState<string | null>(null);
+  const [seriesPosition, setSeriesPosition] = useState<number | null>(null);
+
+  // Image gallery state
+  const [images, setImages] = useState<GalleryImage[]>([]);
+
+  // Reading dates state
+  const [reads, setReads] = useState<BookRead[]>([]);
+  const [readingDateError, setReadingDateError] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Original values for dirty checking
+  const [originalValues, setOriginalValues] = useState<string>('');
+
+  // Get current read entry
+  const currentRead = reads.length > 0 ? reads[reads.length - 1] : null;
+  const previousReads = reads.slice(0, -1);
+
+  // Calculate reading status
+  const readingStatus = useMemo(() => getBookStatus({ reads }), [reads]);
+
+  // Check if form has unsaved changes
+  const formValues = useMemo(
+    () =>
+      JSON.stringify({
+        title,
+        author,
+        isbn,
+        coverUrl,
+        publisher,
+        publishedDate,
+        physicalFormat,
+        pageCount,
+        rating,
+        notes,
+        selectedGenres,
+        seriesId,
+        seriesPosition,
+        reads,
+        images: images.map(i => i.id),
+      }),
+    [title, author, isbn, coverUrl, publisher, publishedDate, physicalFormat, pageCount, rating, notes, selectedGenres, seriesId, seriesPosition, reads, images]
+  );
+
+  const isDirty = originalValues !== '' && originalValues !== formValues;
+
+  // Fetch covers and genre suggestions from API
+  const fetchBookMetadata = useCallback(async (bookIsbn: string) => {
+    if (!bookIsbn) return;
+
+    try {
+      const result = await lookupISBN(bookIsbn);
+      if (result) {
+        // Set cover options if we got covers from API
+        if (result.covers && Object.keys(result.covers).length > 0) {
+          setCoverOptions(prev => ({
+            ...prev,
+            ...result.covers,
+          }));
+        }
+        // Set genre suggestions
+        if (result.genres && result.genres.length > 0) {
+          setGenreSuggestions(result.genres);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch book metadata:', err);
+    }
+  }, []);
 
   // Load book data
   useEffect(() => {
@@ -120,12 +237,44 @@ export default function EditBookPage({ params }: PageProps) {
         setAuthor(bookData.author);
         setIsbn(bookData.isbn || '');
         setCoverUrl(bookData.coverImageUrl || '');
+        setCoverOptions(bookData.covers || {});
         setPublisher(bookData.publisher || '');
         setPublishedDate(bookData.publishedDate || '');
         setPhysicalFormat((bookData.physicalFormat || '') as PhysicalFormat);
         setPageCount(bookData.pageCount?.toString() || '');
         setRating(bookData.rating || 0);
         setNotes(bookData.notes || '');
+        setSelectedGenres(bookData.genres || []);
+        setSeriesId(bookData.seriesId || null);
+        setSeriesPosition(bookData.seriesPosition || null);
+        setImages(bookData.images || []);
+        setReads(bookData.reads || []);
+
+        // Store original values for dirty checking
+        setOriginalValues(
+          JSON.stringify({
+            title: bookData.title,
+            author: bookData.author,
+            isbn: bookData.isbn || '',
+            coverUrl: bookData.coverImageUrl || '',
+            publisher: bookData.publisher || '',
+            publishedDate: bookData.publishedDate || '',
+            physicalFormat: bookData.physicalFormat || '',
+            pageCount: bookData.pageCount?.toString() || '',
+            rating: bookData.rating || 0,
+            notes: bookData.notes || '',
+            selectedGenres: bookData.genres || [],
+            seriesId: bookData.seriesId || null,
+            seriesPosition: bookData.seriesPosition || null,
+            reads: bookData.reads || [],
+            images: (bookData.images || []).map((i: GalleryImage) => i.id),
+          })
+        );
+
+        // Fetch additional metadata from APIs if book has ISBN
+        if (bookData.isbn) {
+          fetchBookMetadata(bookData.isbn);
+        }
       } catch (err) {
         console.error('Failed to load book:', err);
         setError('Failed to load book. Please try again.');
@@ -139,13 +288,206 @@ export default function EditBookPage({ params }: PageProps) {
     } else if (!authLoading && !user) {
       setLoading(false);
     }
-  }, [user, authLoading, id]);
+  }, [user, authLoading, id, fetchBookMetadata]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  // Handle started date change
+  const handleStartedDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setReadingDateError(null);
+
+    setReads((prev) => {
+      const newReads = [...prev];
+      if (newReads.length === 0) {
+        if (value) {
+          newReads.push({ startedAt: new Date(value).getTime(), finishedAt: null });
+        }
+      } else {
+        const lastRead = { ...newReads[newReads.length - 1] };
+        lastRead.startedAt = value ? new Date(value).getTime() : null;
+
+        // Validate: finished can't be before started
+        const finishedTime = typeof lastRead.finishedAt === 'number' ? lastRead.finishedAt : null;
+        const startedTime = typeof lastRead.startedAt === 'number' ? lastRead.startedAt : null;
+        if (finishedTime && startedTime && finishedTime < startedTime) {
+          setReadingDateError('Finished date cannot be before started date');
+        }
+
+        newReads[newReads.length - 1] = lastRead;
+      }
+      return newReads;
+    });
+  }, []);
+
+  // Handle finished date change
+  const handleFinishedDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setReadingDateError(null);
+
+    setReads((prev) => {
+      const newReads = [...prev];
+      if (newReads.length === 0) {
+        // Can't set finished without started
+        if (value) {
+          setReadingDateError('Please set a start date first');
+        }
+        return prev;
+      }
+
+      const lastRead = { ...newReads[newReads.length - 1] };
+
+      // Validate: need started date first
+      if (value && !lastRead.startedAt) {
+        setReadingDateError('Please set a start date first');
+        return prev;
+      }
+
+      lastRead.finishedAt = value ? new Date(value).getTime() : null;
+
+      // Validate: finished can't be before started
+      const finishedTime = typeof lastRead.finishedAt === 'number' ? lastRead.finishedAt : null;
+      const startedTime = typeof lastRead.startedAt === 'number' ? lastRead.startedAt : null;
+      if (finishedTime && startedTime && finishedTime < startedTime) {
+        setReadingDateError('Finished date cannot be before started date');
+      }
+
+      newReads[newReads.length - 1] = lastRead;
+      return newReads;
+    });
+  }, []);
+
+  // Handle re-read button
+  const handleStartReread = useCallback(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    setReads((prev) => [...prev, { startedAt: today.getTime(), finishedAt: null }]);
+  }, []);
+
+  // Handle series selection change
+  const handleSeriesChange = useCallback(
+    (selection: { seriesId: string | null; seriesName: string; position: number | null }) => {
+      setSeriesId(selection.seriesId);
+      setSeriesPosition(selection.position);
+    },
+    []
+  );
+
+  // Handle cover selection change
+  const handleCoverChange = useCallback((url: string) => {
+    setCoverUrl(url);
+  }, []);
+
+  // Handle image gallery primary change
+  const handleImagePrimaryChange = useCallback((url: string | null, userInitiated?: boolean) => {
+    if (url && userInitiated) {
+      // Update cover options with user upload
+      setCoverOptions(prev => ({
+        ...prev,
+        userUpload: url,
+      }));
+      setCoverUrl(url);
+    }
+  }, []);
+
+  // Handle refresh data button
+  const handleRefreshData = useCallback(async () => {
+    if (!isbn && !title) return;
+
+    setRefreshing(true);
+    setRefreshMessage(null);
+
+    try {
+      const changedFields: string[] = [];
+
+      if (isbn) {
+        const result = await lookupISBN(isbn);
+        if (result) {
+          // Fill empty fields with API data
+          if (!title && result.title) {
+            setTitle(result.title);
+            changedFields.push('title');
+          }
+          if (!author && result.author) {
+            setAuthor(result.author);
+            changedFields.push('author');
+          }
+          if (!publisher && result.publisher) {
+            setPublisher(result.publisher);
+            changedFields.push('publisher');
+          }
+          if (!publishedDate && result.publishedDate) {
+            setPublishedDate(result.publishedDate);
+            changedFields.push('published date');
+          }
+          if (!physicalFormat && result.physicalFormat) {
+            setPhysicalFormat(result.physicalFormat as PhysicalFormat);
+            changedFields.push('format');
+          }
+          if (!pageCount && result.pageCount) {
+            setPageCount(result.pageCount.toString());
+            changedFields.push('pages');
+          }
+
+          // Update cover options
+          if (result.covers && Object.keys(result.covers).length > 0) {
+            setCoverOptions(prev => ({
+              ...prev,
+              ...result.covers,
+            }));
+            if (!coverUrl) {
+              const firstCover = result.covers.googleBooks || result.covers.openLibrary;
+              if (firstCover) {
+                setCoverUrl(firstCover);
+                changedFields.push('cover');
+              }
+            }
+          }
+
+          // Update genre suggestions
+          if (result.genres && result.genres.length > 0) {
+            setGenreSuggestions(result.genres);
+          }
+        }
+      }
+
+      if (changedFields.length > 0) {
+        setRefreshMessage(`Updated: ${changedFields.join(', ')}`);
+      } else {
+        setRefreshMessage('No new data found');
+      }
+
+      // Clear message after 3 seconds
+      setTimeout(() => setRefreshMessage(null), 3000);
+    } catch (err) {
+      console.error('Failed to refresh data:', err);
+      setRefreshMessage('Failed to fetch data');
+      setTimeout(() => setRefreshMessage(null), 3000);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [isbn, title, author, publisher, publishedDate, physicalFormat, pageCount, coverUrl]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user || !title.trim()) return;
+
+    // Validate reading dates
+    if (readingDateError) {
+      return;
+    }
 
     setSaving(true);
     try {
@@ -154,13 +496,23 @@ export default function EditBookPage({ params }: PageProps) {
         author: author.trim(),
         isbn: isbn.trim() || undefined,
         coverImageUrl: coverUrl || undefined,
+        covers: Object.keys(coverOptions).length > 0 ? (coverOptions as BookCovers) : undefined,
         publisher: publisher.trim() || undefined,
         publishedDate: publishedDate.trim() || undefined,
         physicalFormat: physicalFormat || undefined,
         pageCount: pageCount ? parseInt(pageCount, 10) : undefined,
         rating: rating || undefined,
         notes: notes.trim() || undefined,
+        genres: selectedGenres,
+        seriesId: seriesId || undefined,
+        seriesPosition: seriesPosition || undefined,
+        images: images,
+        reads: reads.length > 0 ? reads : undefined,
       });
+
+      // Mark gallery images as saved
+      const markSaved = (window as unknown as { __imageGalleryMarkSaved?: () => void }).__imageGalleryMarkSaved;
+      if (markSaved) markSaved();
 
       router.push(`/books/${id}`);
     } catch (err) {
@@ -181,9 +533,15 @@ export default function EditBookPage({ params }: PageProps) {
         </div>
         <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 animate-pulse">
+            <div className="flex gap-4">
+              <div className="w-24 h-36 bg-gray-200 rounded" />
+              <div className="flex-1 space-y-2">
+                <div className="h-6 bg-gray-200 rounded w-3/4" />
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
+              </div>
+            </div>
             <div className="h-10 bg-gray-200 rounded" />
             <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-24 bg-gray-200 rounded" />
             <div className="grid grid-cols-2 gap-4">
               <div className="h-10 bg-gray-200 rounded" />
               <div className="h-10 bg-gray-200 rounded" />
@@ -195,7 +553,7 @@ export default function EditBookPage({ params }: PageProps) {
   }
 
   // Error state
-  if (error) {
+  if (error && !book) {
     return (
       <>
         <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
@@ -246,7 +604,10 @@ export default function EditBookPage({ params }: PageProps) {
               </li>
               <li className="mx-2 text-gray-400">/</li>
               <li>
-                <Link href={`/books/${id}`} className="text-gray-500 hover:text-gray-700 max-w-[150px] truncate inline-block align-middle">
+                <Link
+                  href={`/books/${id}`}
+                  className="text-gray-500 hover:text-gray-700 max-w-[150px] truncate inline-block align-middle"
+                >
                   {title || 'Book'}
                 </Link>
               </li>
@@ -254,43 +615,48 @@ export default function EditBookPage({ params }: PageProps) {
               <li className="text-gray-900 font-medium">Edit</li>
             </ol>
           </nav>
-          <button
-            type="button"
-            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px]"
-            aria-label="Refresh data from API"
-          >
-            <RefreshCw className="w-5 h-5" aria-hidden="true" />
-            <span className="hidden sm:inline">Refresh Data</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {refreshMessage && (
+              <span className="text-sm text-gray-600 flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" aria-hidden="true" />
+                {refreshMessage}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleRefreshData}
+              disabled={refreshing || (!isbn && !title)}
+              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50"
+              aria-label="Refresh data from API"
+            >
+              {refreshing ? (
+                <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+              ) : (
+                <RefreshCw className="w-5 h-5" aria-hidden="true" />
+              )}
+              <span className="hidden sm:inline">Refresh Data</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Edit Form */}
-        <form id="edit-form" onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
-          {/* Cover Image Preview */}
-          <div id="cover-picker" className="flex gap-4 items-start">
-            <div className="w-24 h-36 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-              {coverUrl ? (
-                <Image
-                  src={coverUrl}
-                  alt=""
-                  width={96}
-                  height={144}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <BookOpen className="w-8 h-8 text-gray-400" aria-hidden="true" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <label className="block font-semibold text-gray-700 mb-1">Cover Image</label>
-              <p className="text-sm text-gray-500">Cover picker coming soon</p>
-            </div>
+        {/* Error banner */}
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
+        )}
 
+        {/* Edit Form */}
+        <form
+          id="edit-form"
+          onSubmit={handleSubmit}
+          className="bg-white rounded-xl border border-gray-200 p-4 space-y-4"
+          noValidate
+        >
+          {/* Title */}
           <div>
             <label htmlFor="title" className="block font-semibold text-gray-700 mb-1">
               Title <span className="text-red-500">*</span>
@@ -301,69 +667,75 @@ export default function EditBookPage({ params }: PageProps) {
               name="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             />
           </div>
 
+          {/* Author Picker */}
+          {user && (
+            <AuthorPicker
+              userId={user.uid}
+              value={author}
+              onChange={setAuthor}
+              required
+            />
+          )}
+
+          {/* ISBN */}
           <div>
-            <label htmlFor="author" className="block font-semibold text-gray-700 mb-1">
-              Author <span className="text-red-500">*</span>
+            <label htmlFor="isbn" className="block font-semibold text-gray-700 mb-1">
+              ISBN
             </label>
             <input
               type="text"
-              id="author"
-              name="author"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              required
+              id="isbn"
+              name="isbn"
+              value={isbn}
+              onChange={(e) => setIsbn(e.target.value)}
+              placeholder="e.g., 9780123456789"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             />
           </div>
 
-          {/* Genre Picker placeholder */}
-          <div id="genre-picker">
-            <label className="block font-semibold text-gray-700 mb-1">Genres</label>
-            <p className="text-sm text-gray-500">Genre picker coming soon</p>
-          </div>
+          {/* Genre Picker */}
+          {user && (
+            <GenrePicker
+              userId={user.uid}
+              selected={selectedGenres}
+              onChange={setSelectedGenres}
+              suggestions={genreSuggestions}
+            />
+          )}
 
-          {/* Series Picker placeholder */}
-          <div id="series-picker">
-            <label className="block font-semibold text-gray-700 mb-1">Series</label>
-            <p className="text-sm text-gray-500">Series picker coming soon</p>
-          </div>
+          {/* Series Picker */}
+          {user && (
+            <SeriesPicker
+              userId={user.uid}
+              selectedId={seriesId}
+              position={seriesPosition}
+              onChange={handleSeriesChange}
+            />
+          )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="isbn" className="block font-semibold text-gray-700 mb-1">
-                ISBN
-              </label>
-              <input
-                type="text"
-                id="isbn"
-                name="isbn"
-                value={isbn}
-                onChange={(e) => setIsbn(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-              />
-            </div>
-            <div>
-              <label htmlFor="pageCount" className="block font-semibold text-gray-700 mb-1">
-                Pages
-              </label>
-              <input
-                type="number"
-                id="pageCount"
-                name="pageCount"
-                value={pageCount}
-                onChange={(e) => setPageCount(e.target.value)}
-                placeholder="e.g., 320"
-                inputMode="numeric"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-              />
-            </div>
-          </div>
+          {/* Cover Picker */}
+          <CoverPicker
+            covers={coverOptions}
+            selectedUrl={coverUrl}
+            onChange={handleCoverChange}
+          />
 
+          {/* Image Gallery */}
+          {user && (
+            <ImageGallery
+              userId={user.uid}
+              bookId={id}
+              images={images}
+              onChange={setImages}
+              onPrimaryChange={handleImagePrimaryChange}
+            />
+          )}
+
+          {/* Publisher and Published Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="publisher" className="block font-semibold text-gray-700 mb-1">
@@ -393,30 +765,152 @@ export default function EditBookPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div>
-            <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 mb-1">
-              Format
-            </label>
-            <select
-              id="physicalFormat"
-              name="physicalFormat"
-              value={physicalFormat}
-              onChange={(e) => setPhysicalFormat(e.target.value as PhysicalFormat)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
-            >
-              {FORMAT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+          {/* Format and Page Count */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 mb-1">
+                Format
+              </label>
+              <select
+                id="physicalFormat"
+                name="physicalFormat"
+                value={physicalFormat}
+                onChange={(e) => setPhysicalFormat(e.target.value as PhysicalFormat)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+              >
+                {FORMAT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="pageCount" className="block font-semibold text-gray-700 mb-1">
+                Pages
+              </label>
+              <input
+                type="number"
+                id="pageCount"
+                name="pageCount"
+                value={pageCount}
+                onChange={(e) => setPageCount(e.target.value)}
+                placeholder="e.g., 320"
+                inputMode="numeric"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+              />
+            </div>
           </div>
 
+          {/* Rating */}
           <div>
             <label className="block font-semibold text-gray-700 mb-2">Rating</label>
             <RatingInput value={rating} onChange={setRating} />
           </div>
 
+          {/* Reading Dates */}
+          <div>
+            <span className="block font-semibold text-gray-700 mb-2">Reading Dates</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="started-date" className="block text-sm text-gray-500 mb-1">
+                  Started
+                </label>
+                <input
+                  type="date"
+                  id="started-date"
+                  value={currentRead ? formatDateForInput(currentRead.startedAt) : ''}
+                  onChange={handleStartedDateChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${
+                    readingDateError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+              <div>
+                <label htmlFor="finished-date" className="block text-sm text-gray-500 mb-1">
+                  Finished
+                </label>
+                <input
+                  type="date"
+                  id="finished-date"
+                  value={currentRead ? formatDateForInput(currentRead.finishedAt) : ''}
+                  onChange={handleFinishedDateChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${
+                    readingDateError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Reading date error */}
+            {readingDateError && (
+              <p className="text-sm text-red-600 mt-1">{readingDateError}</p>
+            )}
+
+            {/* Re-read button and status badge */}
+            <div className="flex items-center gap-2 mt-3">
+              <button
+                type="button"
+                onClick={handleStartReread}
+                disabled={!currentRead?.finishedAt}
+                className="px-3 py-2 min-h-[44px] rounded-lg border border-gray-300 text-sm flex items-center gap-1.5 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RotateCcw className="w-4 h-4" aria-hidden="true" />
+                <span>Start Re-read</span>
+              </button>
+
+              {/* Status badge */}
+              {readingStatus === 'reading' && (
+                <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">
+                  Reading
+                </span>
+              )}
+              {readingStatus === 'finished' && (
+                <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">
+                  Finished
+                </span>
+              )}
+            </div>
+
+            {/* Read History */}
+            {previousReads.length > 0 && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 min-h-[44px]"
+                >
+                  <ChevronRight
+                    className={`w-4 h-4 transition-transform ${showHistory ? 'rotate-90' : ''}`}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    Read History ({previousReads.length} previous read
+                    {previousReads.length !== 1 ? 's' : ''})
+                  </span>
+                </button>
+
+                {showHistory && (
+                  <div className="mt-2 pl-5 border-l-2 border-gray-200 space-y-1 text-sm text-gray-500">
+                    {previousReads
+                      .slice()
+                      .reverse()
+                      .map((read, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" aria-hidden="true" />
+                          <span>
+                            {formatDate(read.startedAt) || 'Unknown'} -{' '}
+                            {formatDate(read.finishedAt) || 'In progress'}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Notes */}
           <div>
             <label htmlFor="notes" className="block font-semibold text-gray-700 mb-1">
               Notes
@@ -441,7 +935,7 @@ export default function EditBookPage({ params }: PageProps) {
             </Link>
             <button
               type="submit"
-              disabled={saving || !title.trim()}
+              disabled={saving || !title.trim() || !isDirty}
               className="flex-1 bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Saving...' : 'Save Changes'}

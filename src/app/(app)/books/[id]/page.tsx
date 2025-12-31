@@ -22,7 +22,7 @@ import {
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBook, softDeleteBook, getBooksBySeries } from '@/lib/repositories/books';
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
-import { getSeries } from '@/lib/repositories/series';
+import { getSeries, deleteSeries } from '@/lib/repositories/series';
 import { Lightbox } from '@/components/lightbox';
 import type { Book, Genre, Series, BookImage } from '@/lib/types';
 
@@ -98,17 +98,26 @@ function StarRating({ rating }: { rating: number }) {
 
 /**
  * Delete confirmation modal
+ * Shows option to also delete empty series when this is the last book
  */
 function DeleteModal({
   isOpen,
   onClose,
   onConfirm,
   loading,
+  isLastBookInSeries,
+  seriesName,
+  deleteSeriesChecked,
+  onDeleteSeriesChange,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   loading: boolean;
+  isLastBookInSeries: boolean;
+  seriesName: string | null;
+  deleteSeriesChecked: boolean;
+  onDeleteSeriesChange: (checked: boolean) => void;
 }) {
   if (!isOpen) return null;
 
@@ -133,6 +142,27 @@ function DeleteModal({
         <p className="text-gray-500 mb-4">
           This book will be moved to the bin and automatically deleted after 30 days. You can restore it from Settings.
         </p>
+
+        {/* Series deletion option - shown when last book in series */}
+        {isLastBookInSeries && seriesName && (
+          <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={deleteSeriesChecked}
+                onChange={(e) => onDeleteSeriesChange(e.target.checked)}
+                className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
+              <div>
+                <span className="font-medium text-purple-900">Also delete the empty series</span>
+                <p className="text-purple-700 text-sm mt-0.5">
+                  &ldquo;{seriesName}&rdquo; will become empty
+                </p>
+              </div>
+            </label>
+          </div>
+        )}
+
         <div className="flex gap-3">
           <button
             onClick={onClose}
@@ -168,6 +198,7 @@ export default function BookDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteSeriesChecked, setDeleteSeriesChecked] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -253,17 +284,32 @@ export default function BookDetailPage() {
   }, [user, authLoading, bookId]);
 
   const handleDelete = async () => {
-    if (!user || !bookId) return;
+    if (!user || !bookId || !book) return;
 
     setDeleting(true);
     try {
+      // Soft-delete the book
       await softDeleteBook(user.uid, bookId);
+
+      // Also delete the series if checked and this was the last book
+      if (deleteSeriesChecked && book.seriesId && seriesBooks.length === 1) {
+        try {
+          await deleteSeries(user.uid, book.seriesId);
+        } catch (seriesErr) {
+          console.error('Failed to delete series:', seriesErr);
+          // Continue anyway - book was deleted successfully
+        }
+      }
+
       router.push('/books');
     } catch (err) {
       console.error('Failed to delete book:', err);
       setDeleting(false);
     }
   };
+
+  // Check if this is the last book in the series
+  const isLastBookInSeries = !!(book?.seriesId && seriesBooks.length === 1);
 
   const status = book ? getBookStatus(book) : 'want-to-read';
   const bookGenres = book?.genres
@@ -609,9 +655,16 @@ export default function BookDetailPage() {
       {/* Delete Modal */}
       <DeleteModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setDeleteSeriesChecked(false);
+        }}
         onConfirm={handleDelete}
         loading={deleting}
+        isLastBookInSeries={isLastBookInSeries}
+        seriesName={series?.name || null}
+        deleteSeriesChecked={deleteSeriesChecked}
+        onDeleteSeriesChange={setDeleteSeriesChecked}
       />
 
       {/* Lightbox for viewing images */}

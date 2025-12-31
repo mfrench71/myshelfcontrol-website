@@ -60,18 +60,17 @@ function docToBook(doc: QueryDocumentSnapshot<DocumentData>): Book {
 
 /**
  * Get all books for a user (excluding soft-deleted)
- * Requires composite index on: deletedAt (asc), createdAt (desc)
+ * Fetches all books and filters client-side to handle books without deletedAt field
  */
 export async function getBooks(userId: string): Promise<Book[]> {
   const booksRef = getBooksCollection(userId);
-  const q = query(
-    booksRef,
-    where('deletedAt', '==', null),
-    orderBy('createdAt', 'desc')
-  );
+  const q = query(booksRef, orderBy('createdAt', 'desc'));
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(docToBook);
+  const books = snapshot.docs.map(docToBook);
+
+  // Filter out soft-deleted books (books without deletedAt or with deletedAt: null are kept)
+  return books.filter((book) => !book.deletedAt);
 }
 
 /**
@@ -119,16 +118,15 @@ export async function getBooksByStatus(
  * Get recently added books
  */
 export async function getRecentBooks(userId: string, count: number = 10): Promise<Book[]> {
+  // Fetch more than needed to account for filtered deleted books
   const booksRef = getBooksCollection(userId);
-  const q = query(
-    booksRef,
-    where('deletedAt', '==', null),
-    orderBy('createdAt', 'desc'),
-    limit(count)
-  );
+  const q = query(booksRef, orderBy('createdAt', 'desc'), limit(count * 2));
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(docToBook);
+  const books = snapshot.docs.map(docToBook);
+
+  // Filter out soft-deleted and take only the requested count
+  return books.filter((book) => !book.deletedAt).slice(0, count);
 }
 
 /**
@@ -218,12 +216,14 @@ export async function getBooksBySeries(userId: string, seriesId: string): Promis
   const q = query(
     booksRef,
     where('seriesId', '==', seriesId),
-    where('deletedAt', '==', null),
     orderBy('seriesPosition', 'asc')
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(docToBook);
+  const books = snapshot.docs.map(docToBook);
+
+  // Filter out soft-deleted books
+  return books.filter((book) => !book.deletedAt);
 }
 
 /**
@@ -231,7 +231,9 @@ export async function getBooksBySeries(userId: string, seriesId: string): Promis
  */
 export async function getBookCount(userId: string): Promise<number> {
   const booksRef = getBooksCollection(userId);
-  const q = query(booksRef, where('deletedAt', '==', null));
-  const snapshot = await getDocs(q);
-  return snapshot.size;
+  const snapshot = await getDocs(booksRef);
+  const books = snapshot.docs.map(docToBook);
+
+  // Count only non-deleted books
+  return books.filter((book) => !book.deletedAt).length;
 }

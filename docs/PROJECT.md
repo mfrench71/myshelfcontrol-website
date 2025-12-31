@@ -162,10 +162,10 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 | Book add page | ✅ Complete |
 | Book view/edit pages | ✅ Complete |
 | Settings hub page | ✅ Complete |
-| Settings sub-pages | 🔄 In progress |
+| Settings sub-pages | ✅ Complete |
 | Widgets | ⏳ Pending |
 | PWA configuration | ⏳ Pending |
-| E2E Testing | ✅ Complete (27 tests) |
+| E2E Testing | ✅ Complete (37 tests) |
 
 ### Roadmap (Post-Migration)
 

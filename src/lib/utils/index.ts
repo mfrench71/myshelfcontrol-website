@@ -139,3 +139,43 @@ export function normalizeAuthor(name: string): string {
     .replace(/\s+/g, ' ') // Normalize whitespace
     .trim();
 }
+
+/**
+ * Password strength check results
+ */
+export interface PasswordStrengthChecks {
+  length: boolean;
+  uppercase: boolean;
+  lowercase: boolean;
+  number: boolean;
+  special: boolean;
+}
+
+export interface PasswordStrengthResult {
+  checks: PasswordStrengthChecks;
+  score: number; // 0-4
+}
+
+/**
+ * Check password strength
+ * Returns checks for individual requirements and overall score (0-4)
+ * @param password - Password to evaluate
+ * @returns Object with checks and score
+ */
+export function checkPasswordStrength(password: string): PasswordStrengthResult {
+  const checks: PasswordStrengthChecks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
+
+  let score = 0;
+  if (checks.length) score++;
+  if (checks.uppercase && checks.lowercase) score++;
+  if (checks.number) score++;
+  if (checks.special || password.length >= 10) score++;
+
+  return { checks, score };
+}

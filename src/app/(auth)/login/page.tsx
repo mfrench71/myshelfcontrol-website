@@ -1,7 +1,7 @@
 // Login Page - Authentication page for sign in/register
 'use client';
 
-import { useState, useRef, Suspense } from 'react';
+import { useState, useRef, Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { getAuthErrorMessage } from '@/lib/utils/auth-errors';
+import { checkPasswordStrength } from '@/lib/utils';
 import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -25,9 +26,21 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [registerPassword, setRegisterPassword] = useState('');
 
   const loginFormRef = useRef<HTMLFormElement>(null);
   const registerFormRef = useRef<HTMLFormElement>(null);
+
+  // Calculate password strength
+  const passwordStrength = useMemo(() => {
+    if (!registerPassword) return null;
+    return checkPasswordStrength(registerPassword);
+  }, [registerPassword]);
+
+  // Strength bar colours and labels
+  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
+  const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong'];
+  const strengthTextColors = ['text-red-500', 'text-orange-500', 'text-yellow-600', 'text-green-500'];
 
   /**
    * Create session cookie via API route
@@ -100,12 +113,13 @@ function LoginForm() {
 
   /**
    * Switch between login and register modes
-   * Clears form state and errors
+   * Clears form state, errors, and password strength
    */
   const switchMode = (toLogin: boolean) => {
     setIsLogin(toLogin);
     setError(null);
     setShowPassword(false);
+    setRegisterPassword('');
     loginFormRef.current?.reset();
     registerFormRef.current?.reset();
   };
@@ -244,6 +258,8 @@ function LoginForm() {
                 required
                 minLength={8}
                 disabled={loading}
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
                 className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="••••••••"
               />
@@ -257,7 +273,40 @@ function LoginForm() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+            {/* Password Strength Indicator */}
+            {passwordStrength && (
+              <div className="mt-2">
+                <div className="flex gap-1 mb-1">
+                  {[0, 1, 2, 3].map((index) => (
+                    <div
+                      key={index}
+                      className={`h-1 flex-1 rounded-full ${
+                        index < passwordStrength.score
+                          ? strengthColors[Math.min(passwordStrength.score - 1, 3)]
+                          : 'bg-gray-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+                {passwordStrength.score > 0 && (
+                  <p className={`text-xs ${strengthTextColors[Math.min(passwordStrength.score - 1, 3)]}`}>
+                    {strengthLabels[Math.min(passwordStrength.score - 1, 3)]}
+                  </p>
+                )}
+              </div>
+            )}
+            {/* Password Requirements */}
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+              <span className={passwordStrength?.checks.length ? 'text-green-500' : 'text-gray-500'}>
+                8+ chars
+              </span>
+              <span className={passwordStrength?.checks.uppercase ? 'text-green-500' : 'text-gray-500'}>
+                1 uppercase
+              </span>
+              <span className={passwordStrength?.checks.number ? 'text-green-500' : 'text-gray-500'}>
+                1 number
+              </span>
+            </div>
           </div>
 
           <div>

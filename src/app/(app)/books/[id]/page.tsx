@@ -17,13 +17,14 @@ import {
   Library,
   CheckCircle,
   Calendar,
-  X,
+  Images,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBook, softDeleteBook, getBooksBySeries } from '@/lib/repositories/books';
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
 import { getSeries } from '@/lib/repositories/series';
-import type { Book, Genre, Series } from '@/lib/types';
+import { Lightbox } from '@/components/lightbox';
+import type { Book, Genre, Series, BookImage } from '@/lib/types';
 
 /**
  * Format a timestamp for display
@@ -167,8 +168,40 @@ export default function BookDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const genreLookup = createGenreLookup(genres);
+
+  // Prepare images for lightbox (cover + uploaded images)
+  const allImages = (() => {
+    const imgs: { url: string; caption?: string }[] = [];
+
+    // Add cover image first if available
+    if (book?.coverImageUrl) {
+      imgs.push({ url: book.coverImageUrl, caption: 'Cover' });
+    }
+
+    // Add uploaded images
+    if (book?.images && book.images.length > 0) {
+      book.images.forEach((img, i) => {
+        imgs.push({
+          url: img.url,
+          caption: img.caption || `Image ${i + 1}`,
+        });
+      });
+    }
+
+    return imgs;
+  })();
+
+  /**
+   * Open lightbox at specified index
+   */
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   useEffect(() => {
     async function loadBook() {
@@ -333,9 +366,18 @@ export default function BookDetailPage() {
       {/* Book Content */}
       <div id="book-content" className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row md:gap-8">
-          {/* Left Column: Cover */}
-          <div className="md:w-72 flex-shrink-0 mb-6 md:mb-0">
-            <div className="aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
+          {/* Left Column: Cover and Images */}
+          <div className="md:w-72 flex-shrink-0 mb-6 md:mb-0 space-y-4">
+            {/* Main Cover */}
+            <button
+              type="button"
+              onClick={() => allImages.length > 0 && openLightbox(0)}
+              className={`aspect-[2/3] w-full bg-gray-100 rounded-lg overflow-hidden shadow-lg ${
+                allImages.length > 0 ? 'cursor-zoom-in hover:shadow-xl transition-shadow' : ''
+              }`}
+              disabled={allImages.length === 0}
+              aria-label={allImages.length > 0 ? 'View full-size image' : undefined}
+            >
               {book.coverImageUrl ? (
                 <Image
                   src={book.coverImageUrl}
@@ -350,7 +392,41 @@ export default function BookDetailPage() {
                   <BookOpen className="w-16 h-16 text-white/60" aria-hidden="true" />
                 </div>
               )}
-            </div>
+            </button>
+
+            {/* Additional Images Gallery */}
+            {book.images && book.images.length > 0 && (
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                  <Images className="w-4 h-4" aria-hidden="true" />
+                  Gallery ({book.images.length} image{book.images.length !== 1 ? 's' : ''})
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {book.images.map((img, index) => {
+                    // Lightbox index is +1 because cover is at index 0
+                    const lightboxIdx = book.coverImageUrl ? index + 1 : index;
+                    return (
+                      <button
+                        key={img.id}
+                        type="button"
+                        onClick={() => openLightbox(lightboxIdx)}
+                        className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-zoom-in hover:ring-2 hover:ring-primary transition-all group"
+                        aria-label={`View image ${index + 1}`}
+                      >
+                        <Image
+                          src={img.url}
+                          alt=""
+                          width={100}
+                          height={100}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          unoptimized
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Book Details */}
@@ -484,6 +560,12 @@ export default function BookDetailPage() {
                     <dd className="font-medium text-gray-900">{formatDate(book.createdAt)}</dd>
                   </div>
                 )}
+                {book.updatedAt && (
+                  <div>
+                    <dt className="text-gray-500">Modified</dt>
+                    <dd className="font-medium text-gray-900">{formatDate(book.updatedAt)}</dd>
+                  </div>
+                )}
               </dl>
             </div>
 
@@ -530,6 +612,14 @@ export default function BookDetailPage() {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         loading={deleting}
+      />
+
+      {/* Lightbox for viewing images */}
+      <Lightbox
+        images={allImages}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
       />
     </>
   );

@@ -162,6 +162,13 @@ export default function BooksPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  // Pull-to-refresh state
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const pullStartY = useRef<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const PULL_THRESHOLD = 80;
+
   // Create lookup maps for genres and series
   const genreLookup = useMemo(() => createGenreLookup(genres), [genres]);
   const seriesLookup = useMemo(() => createSeriesLookup(series), [series]);
@@ -227,6 +234,66 @@ export default function BooksPage() {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [hasMoreBooks, isLoadingMore, loadMoreBooks]);
+
+  /**
+   * Refresh data from Firestore
+   */
+  const refreshData = useCallback(async () => {
+    if (!user || isRefreshing) return;
+
+    setIsRefreshing(true);
+    try {
+      const [userBooks, userGenres, userSeries] = await Promise.all([
+        getBooks(user.uid),
+        getGenres(user.uid),
+        getSeries(user.uid),
+      ]);
+      setBooks(userBooks);
+      setGenres(userGenres);
+      setSeries(userSeries);
+      setVisibleCount(ITEMS_PER_PAGE);
+    } catch (err) {
+      console.error('Failed to refresh data:', err);
+    } finally {
+      setIsRefreshing(false);
+      setPullDistance(0);
+    }
+  }, [user, isRefreshing]);
+
+  /**
+   * Touch handlers for pull-to-refresh
+   */
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Only enable pull-to-refresh when at top of page
+    if (window.scrollY === 0) {
+      pullStartY.current = e.touches[0].clientY;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (pullStartY.current === null || isRefreshing) return;
+
+    const currentY = e.touches[0].clientY;
+    const distance = currentY - pullStartY.current;
+
+    // Only show pull indicator when pulling down
+    if (distance > 0 && window.scrollY === 0) {
+      // Apply resistance to pull
+      const resistedDistance = Math.min(distance * 0.5, PULL_THRESHOLD * 1.5);
+      setPullDistance(resistedDistance);
+    }
+  }, [isRefreshing]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (pullStartY.current === null) return;
+
+    if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
+      refreshData();
+    } else {
+      setPullDistance(0);
+    }
+    pullStartY.current = null;
+  }, [pullDistance, isRefreshing, refreshData]);
 
   /**
    * Calculate faceted book counts for filter options
@@ -510,7 +577,43 @@ export default function BooksPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 pt-6 pb-24">
+    <div
+      ref={containerRef}
+      className="max-w-6xl mx-auto px-4 pt-6 pb-24"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Pull-to-refresh indicator */}
+      {(pullDistance > 0 || isRefreshing) && (
+        <div
+          className="flex items-center justify-center overflow-hidden transition-all duration-200 ease-out"
+          style={{ height: isRefreshing ? PULL_THRESHOLD : pullDistance }}
+        >
+          <div
+            className={`flex items-center gap-2 text-sm text-gray-500 ${
+              pullDistance >= PULL_THRESHOLD || isRefreshing ? 'text-primary' : ''
+            }`}
+          >
+            <Loader2
+              className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`}
+              style={{
+                transform: isRefreshing
+                  ? 'none'
+                  : `rotate(${Math.min(pullDistance / PULL_THRESHOLD, 1) * 360}deg)`,
+              }}
+            />
+            <span>
+              {isRefreshing
+                ? 'Refreshing...'
+                : pullDistance >= PULL_THRESHOLD
+                  ? 'Release to refresh'
+                  : 'Pull to refresh'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Sort & Filter Bar */}
       {books.length > 0 && (
         <div className="flex gap-2 mb-4 md:hidden">

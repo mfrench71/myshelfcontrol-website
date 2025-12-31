@@ -19,9 +19,8 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { addBook } from '@/lib/repositories/books';
-import { getGenres } from '@/lib/repositories/genres';
-import { getSeries } from '@/lib/repositories/series';
-import type { Genre, Series, PhysicalFormat } from '@/lib/types';
+import { GenrePicker } from '@/components/pickers/genre-picker';
+import type { PhysicalFormat } from '@/lib/types';
 
 // Book search result from API
 type SearchResult = {
@@ -34,6 +33,7 @@ type SearchResult = {
   publishedDate?: string;
   pageCount?: number;
   description?: string;
+  categories?: string[];
 };
 
 // Format options
@@ -74,6 +74,7 @@ async function searchBooks(query: string): Promise<SearchResult[]> {
         publishedDate: info.publishedDate as string,
         pageCount: info.pageCount as number,
         description: info.description as string,
+        categories: info.categories as string[],
       };
     });
   } catch (error) {
@@ -147,6 +148,8 @@ export default function AddBookPage() {
   const [pageCount, setPageCount] = useState('');
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState('');
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [genreSuggestions, setGenreSuggestions] = useState<string[]>([]);
 
   // Search for books
   const handleSearch = async () => {
@@ -178,6 +181,14 @@ export default function AddBookPage() {
     setDataSource('Google Books');
     setShowForm(true);
     setSearchResults([]);
+    // Extract genre suggestions from categories (Google Books uses "Fiction / Mystery" format)
+    if (result.categories) {
+      const suggestions = result.categories
+        .flatMap((cat) => cat.split(/\s*[\/&]\s*/)) // Split by / or &
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && s.toLowerCase() !== 'fiction' && s.toLowerCase() !== 'nonfiction');
+      setGenreSuggestions([...new Set(suggestions)]); // Remove duplicates
+    }
   };
 
   // Add book manually
@@ -199,6 +210,8 @@ export default function AddBookPage() {
     setPageCount('');
     setRating(0);
     setNotes('');
+    setSelectedGenres([]);
+    setGenreSuggestions([]);
     setDataSource(null);
   };
 
@@ -228,7 +241,7 @@ export default function AddBookPage() {
         pageCount: pageCount ? parseInt(pageCount, 10) : undefined,
         rating: rating || undefined,
         notes: notes.trim() || undefined,
-        genres: [],
+        genres: selectedGenres,
         reads: [],
       });
 
@@ -433,11 +446,15 @@ export default function AddBookPage() {
                 />
               </div>
 
-              {/* Genre Picker placeholder */}
-              <div id="genre-picker">
-                <label className="block font-semibold text-gray-700 mb-1">Genres</label>
-                <p className="text-sm text-gray-500">Genre picker coming soon</p>
-              </div>
+              {/* Genre Picker */}
+              {user && (
+                <GenrePicker
+                  userId={user.uid}
+                  selected={selectedGenres}
+                  onChange={setSelectedGenres}
+                  suggestions={genreSuggestions}
+                />
+              )}
 
               {/* Series Picker placeholder */}
               <div id="series-picker">

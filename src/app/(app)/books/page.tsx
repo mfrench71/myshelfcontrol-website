@@ -185,13 +185,13 @@ export default function BooksPage() {
    */
   const bookCounts = useMemo((): BookCounts => {
     // Helper to filter books excluding a specific filter type
-    const filterExcluding = (excludeType: 'statuses' | 'genreIds' | 'seriesIds') => {
+    const filterExcluding = (excludeType: 'statuses' | 'genreIds' | 'seriesIds' | 'minRating' | 'author') => {
       const partialFilters = { ...filters };
       delete partialFilters[excludeType];
       return filterBooks(books, partialFilters);
     };
 
-    // Count statuses from books filtered by genre/series/author (not status)
+    // Count statuses from books filtered by genre/series/author/rating (not status)
     const booksForStatus = filterExcluding('statuses');
     const statusCounts = { reading: 0, finished: 0 };
     booksForStatus.forEach((book) => {
@@ -200,7 +200,7 @@ export default function BooksPage() {
       else if (status === 'finished') statusCounts.finished++;
     });
 
-    // Count genres from books filtered by status/series/author (not genre)
+    // Count genres from books filtered by status/series/author/rating (not genre)
     const booksForGenre = filterExcluding('genreIds');
     const genreCounts: Record<string, number> = {};
     booksForGenre.forEach((book) => {
@@ -209,7 +209,7 @@ export default function BooksPage() {
       });
     });
 
-    // Count series from books filtered by status/genre/author (not series)
+    // Count series from books filtered by status/genre/author/rating (not series)
     const booksForSeries = filterExcluding('seriesIds');
     const seriesCounts: Record<string, number> = {};
     booksForSeries.forEach((book) => {
@@ -218,10 +218,33 @@ export default function BooksPage() {
       }
     });
 
+    // Count ratings from books filtered by status/genre/series/author (not rating)
+    const booksForRating = filterExcluding('minRating');
+    const ratingCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    booksForRating.forEach((book) => {
+      if (book.rating && book.rating >= 1) {
+        // Count for each minimum rating threshold this book would match
+        for (let minRating = 1; minRating <= book.rating; minRating++) {
+          ratingCounts[minRating]++;
+        }
+      }
+    });
+
+    // Count authors from books filtered by status/genre/series/rating (not author)
+    const booksForAuthor = filterExcluding('author');
+    const authorCounts: Record<string, number> = {};
+    booksForAuthor.forEach((book) => {
+      if (book.author) {
+        authorCounts[book.author] = (authorCounts[book.author] || 0) + 1;
+      }
+    });
+
     return {
       genres: genreCounts,
       statuses: statusCounts,
       series: seriesCounts,
+      ratings: ratingCounts,
+      authors: authorCounts,
       total: books.length,
     };
   }, [books, filters]);

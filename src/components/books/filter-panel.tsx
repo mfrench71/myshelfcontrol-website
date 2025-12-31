@@ -16,6 +16,8 @@ export type BookCounts = {
   genres: Record<string, number>;
   statuses: { reading: number; finished: number };
   series: Record<string, number>;
+  ratings: Record<number, number>; // minRating -> count of books with that rating or higher
+  authors: Record<string, number>; // author name -> book count
   total: number;
 };
 
@@ -80,11 +82,13 @@ function AuthorTypeahead({
   id,
   authors,
   value,
+  authorCounts,
   onChange,
 }: {
   id: string;
   authors: string[];
   value: string;
+  authorCounts?: Record<string, number>;
   onChange: (author: string) => void;
 }) {
   const [query, setQuery] = useState(value || '');
@@ -207,20 +211,24 @@ function AuthorTypeahead({
           className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           role="listbox"
         >
-          {filteredAuthors.map((author, index) => (
-            <button
-              key={author}
-              type="button"
-              onClick={() => handleSelect(author)}
-              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 min-h-[44px] ${
-                index === focusedIndex ? 'bg-gray-100' : ''
-              } ${value === author ? 'text-primary font-medium' : 'text-gray-900'}`}
-              role="option"
-              aria-selected={value === author}
-            >
-              {author}
-            </button>
-          ))}
+          {filteredAuthors.map((author, index) => {
+            const count = authorCounts?.[author] ?? 0;
+            return (
+              <button
+                key={author}
+                type="button"
+                onClick={() => handleSelect(author)}
+                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 min-h-[44px] flex items-center justify-between ${
+                  index === focusedIndex ? 'bg-gray-100' : ''
+                } ${value === author ? 'text-primary font-medium' : 'text-gray-900'}`}
+                role="option"
+                aria-selected={value === author}
+              >
+                <span>{author}</span>
+                <span className="text-gray-400 text-xs">({count})</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -380,11 +388,19 @@ export function FilterSidebar({
           onChange={(e) => handleRatingChange(parseInt(e.target.value, 10))}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm cursor-pointer"
         >
-          {RATING_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
+          {RATING_OPTIONS.map((option) => {
+            const count = option.value === 0 ? bookCounts?.total ?? 0 : bookCounts?.ratings?.[option.value] ?? 0;
+            const isSelected = (filters.minRating || 0) === option.value;
+            return (
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={count === 0 && !isSelected && option.value !== 0}
+              >
+                {option.label} ({count})
+              </option>
+            );
+          })}
         </select>
       </div>
 
@@ -398,6 +414,7 @@ export function FilterSidebar({
             id={`${id}-author`}
             authors={authors}
             value={filters.author || ''}
+            authorCounts={bookCounts?.authors}
             onChange={handleAuthorChange}
           />
         </div>
@@ -687,11 +704,19 @@ export function FilterBottomSheet({
               onChange={(e) => handleRatingChange(parseInt(e.target.value, 10))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"
             >
-              {RATING_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              {RATING_OPTIONS.map((option) => {
+                const count = option.value === 0 ? bookCounts?.total ?? 0 : bookCounts?.ratings?.[option.value] ?? 0;
+                const isSelected = (filters.minRating || 0) === option.value;
+                return (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                    disabled={count === 0 && !isSelected && option.value !== 0}
+                  >
+                    {option.label} ({count})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -705,6 +730,7 @@ export function FilterBottomSheet({
                 id={`${id}-mobile-author`}
                 authors={authors}
                 value={filters.author || ''}
+                authorCounts={bookCounts?.authors}
                 onChange={handleAuthorChange}
               />
             </div>

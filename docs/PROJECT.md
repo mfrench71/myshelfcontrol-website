@@ -163,14 +163,14 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 | Book view/edit pages | ✅ Complete |
 | Settings hub page | ✅ Complete |
 | Settings sub-pages | ✅ Complete |
-| Widgets | ⏳ Pending |
-| PWA configuration | ⏳ Pending |
-| E2E Testing | ✅ Complete (37 tests) |
+| Widgets (dashboard) | ✅ Complete |
+| PWA configuration | ✅ Complete |
+| E2E Testing | ✅ Complete (74 tests) |
 
 ### Roadmap (Post-Migration)
 
 **High Priority**
-- [ ] Complete page migration from legacy app
+- [x] Complete page migration from legacy app
 - [ ] Public user profiles
 - [ ] Book/list sharing
 - [ ] Role-based permissions

@@ -178,34 +178,53 @@ export default function BooksPage() {
     return sortBooks(filtered, sortBy, direction);
   }, [books, filters, sortValue]);
 
-  // Calculate book counts for filter options (from all books, not filtered)
+  /**
+   * Calculate faceted book counts for filter options
+   * For each filter type, count from books filtered by OTHER filters (not that type)
+   * This enables proper disabling of filter options that would yield 0 results
+   */
   const bookCounts = useMemo((): BookCounts => {
-    const counts: BookCounts = {
-      genres: {},
-      statuses: { reading: 0, finished: 0 },
-      series: {},
-      total: books.length,
+    // Helper to filter books excluding a specific filter type
+    const filterExcluding = (excludeType: 'statuses' | 'genreIds' | 'seriesIds') => {
+      const partialFilters = { ...filters };
+      delete partialFilters[excludeType];
+      return filterBooks(books, partialFilters);
     };
 
-    books.forEach((book) => {
-      // Count statuses
+    // Count statuses from books filtered by genre/series/author (not status)
+    const booksForStatus = filterExcluding('statuses');
+    const statusCounts = { reading: 0, finished: 0 };
+    booksForStatus.forEach((book) => {
       const status = getBookStatus(book);
-      if (status === 'reading') counts.statuses.reading++;
-      else if (status === 'finished') counts.statuses.finished++;
+      if (status === 'reading') statusCounts.reading++;
+      else if (status === 'finished') statusCounts.finished++;
+    });
 
-      // Count genres
+    // Count genres from books filtered by status/series/author (not genre)
+    const booksForGenre = filterExcluding('genreIds');
+    const genreCounts: Record<string, number> = {};
+    booksForGenre.forEach((book) => {
       (book.genres || []).forEach((genreId) => {
-        counts.genres[genreId] = (counts.genres[genreId] || 0) + 1;
+        genreCounts[genreId] = (genreCounts[genreId] || 0) + 1;
       });
+    });
 
-      // Count series
+    // Count series from books filtered by status/genre/author (not series)
+    const booksForSeries = filterExcluding('seriesIds');
+    const seriesCounts: Record<string, number> = {};
+    booksForSeries.forEach((book) => {
       if (book.seriesId) {
-        counts.series[book.seriesId] = (counts.series[book.seriesId] || 0) + 1;
+        seriesCounts[book.seriesId] = (seriesCounts[book.seriesId] || 0) + 1;
       }
     });
 
-    return counts;
-  }, [books]);
+    return {
+      genres: genreCounts,
+      statuses: statusCounts,
+      series: seriesCounts,
+      total: books.length,
+    };
+  }, [books, filters]);
 
   useEffect(() => {
     async function loadData() {

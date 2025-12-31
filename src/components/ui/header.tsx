@@ -1,19 +1,30 @@
 // Header Component - Main navigation header
+// Matches the old site's header design with menu bottom sheet
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
-import { BookOpen, Search, Settings, User, LogOut, ChevronDown } from 'lucide-react';
+import {
+  BookOpen,
+  Search,
+  Menu,
+  X,
+  Library,
+  Heart,
+  Settings,
+  LogOut,
+} from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuthContext();
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -23,13 +34,9 @@ export function Header() {
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      // Sign out from Firebase
       await signOut(auth);
-
-      // Clear session cookie
       await fetch('/api/auth/session', { method: 'DELETE' });
-
-      // Redirect to login
+      setShowMenu(false);
       router.push('/login');
       router.refresh();
     } catch (error) {
@@ -39,23 +46,23 @@ export function Header() {
   };
 
   /**
-   * Close menu when clicking outside
+   * Close menu when clicking outside (desktop)
    */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
+        setShowMenu(false);
       }
     };
 
-    if (showUserMenu) {
+    if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showUserMenu]);
+  }, [showMenu]);
 
   /**
    * Close menu on escape key
@@ -63,124 +70,257 @@ export function Header() {
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setShowUserMenu(false);
+        setShowMenu(false);
       }
     };
 
-    if (showUserMenu) {
+    if (showMenu) {
       document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [showUserMenu]);
+  }, [showMenu]);
+
+  /**
+   * Get user initials for avatar
+   */
+  const getUserInitial = () => {
+    if (!user?.email) return 'U';
+    return user.email.charAt(0).toUpperCase();
+  };
+
+  /**
+   * Get user avatar (photo or initial)
+   */
+  const renderAvatar = (size: 'sm' | 'md') => {
+    const sizeClasses = size === 'sm' ? 'w-10 h-10' : 'w-12 h-12';
+    const textSize = size === 'sm' ? 'text-sm' : 'text-lg';
+
+    if (user?.photoURL) {
+      return (
+        <Image
+          src={user.photoURL}
+          alt=""
+          width={size === 'sm' ? 40 : 48}
+          height={size === 'sm' ? 40 : 48}
+          className={`${sizeClasses} rounded-full object-cover`}
+        />
+      );
+    }
+
+    return (
+      <div
+        className={`${sizeClasses} bg-primary rounded-full flex items-center justify-center text-white font-bold`}
+      >
+        {getUserInitial()}
+      </div>
+    );
+  };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-14">
+    <>
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 h-14">
+        <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
           {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-primary font-semibold"
-          >
-            <BookOpen className="w-6 h-6" />
-            <span className="hidden sm:inline">MyShelfControl</span>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <BookOpen className="w-4 h-4 text-white" aria-hidden="true" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">MyShelfControl</span>
           </Link>
 
-          {/* Navigation */}
-          <nav className="flex items-center gap-1">
+          {/* Right side buttons */}
+          <div className="flex items-center gap-1">
+            {/* My Library button */}
             <Link
               href="/books"
-              className={`p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+              className={`p-2 sm:px-4 sm:py-2 rounded-lg transition-colors inline-flex items-center gap-2 ${
                 pathname.startsWith('/books')
-                  ? 'bg-primary text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-primary-dark text-white'
+                  : 'bg-primary hover:bg-primary-dark text-white'
               }`}
-              aria-label="Books"
+              aria-label="View My Library"
             >
-              <BookOpen className="w-5 h-5" />
+              <Library className="w-5 h-5 sm:w-4 sm:h-4" aria-hidden="true" />
+              <span className="hidden sm:inline text-sm">My Library</span>
             </Link>
 
+            {/* Search button */}
             <button
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="Search"
+              className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+              aria-label="Search books"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-5 h-5 text-gray-600" aria-hidden="true" />
             </button>
 
-            <Link
-              href="/settings"
-              className={`p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                pathname.startsWith('/settings')
-                  ? 'bg-primary text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-              aria-label="Settings"
+            {/* Menu button */}
+            <button
+              onClick={() => setShowMenu(true)}
+              className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+              aria-label="Open menu"
             >
-              <Settings className="w-5 h-5" />
-            </Link>
+              <Menu className="w-5 h-5 text-gray-600" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </header>
 
-            {/* User avatar or login */}
-            {loading ? (
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-            ) : user ? (
-              <div className="relative" ref={menuRef}>
+      {/* Menu Overlay */}
+      {showMenu && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50"
+          onClick={() => setShowMenu(false)}
+        >
+          {/* Mobile: Bottom sheet */}
+          <div
+            ref={menuRef}
+            className="md:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div className="flex justify-center mb-4 md:hidden">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
+
+            {/* User info */}
+            {user && (
+              <div className="flex items-center gap-3 mb-4">
+                {renderAvatar('md')}
+                <div>
+                  <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                    {user.email}
+                  </p>
+                  <p className="text-xs text-gray-500">MyShelfControl</p>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation */}
+            <nav className="space-y-1">
+              <Link
+                href="/wishlist"
+                onClick={() => setShowMenu(false)}
+                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+                  pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
+                }`}
+              >
+                <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
+                <span>Wishlist</span>
+              </Link>
+
+              <Link
+                href="/settings"
+                onClick={() => setShowMenu(false)}
+                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+                  pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
+                }`}
+              >
+                <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
+                <span>Settings</span>
+              </Link>
+
+              {user && (
                 <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-1 p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                  aria-expanded={showUserMenu}
-                  aria-haspopup="true"
-                  aria-label="User menu"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-left text-red-600 min-h-[44px] transition-colors disabled:opacity-50"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium">
-                    {user.email?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                  {loggingOut ? (
+                    <>
+                      <span className="w-5 h-5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                      <span>Signing out...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-5 h-5" aria-hidden="true" />
+                      <span>Sign Out</span>
+                    </>
+                  )}
                 </button>
+              )}
+            </nav>
+          </div>
 
-                {/* User dropdown menu */}
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+          {/* Desktop: Slide-out panel */}
+          <div
+            ref={menuRef}
+            className="hidden md:block absolute right-0 top-0 bottom-0 w-80 bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                {user && (
+                  <div className="flex items-center gap-3">
+                    {renderAvatar('sm')}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
                         {user.email}
                       </p>
+                      <p className="text-xs text-gray-500">MyShelfControl</p>
                     </div>
-
-                    <button
-                      onClick={handleLogout}
-                      disabled={loggingOut}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
-                    >
-                      {loggingOut ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-                          <span>Signing out...</span>
-                        </>
-                      ) : (
-                        <>
-                          <LogOut className="w-4 h-4" />
-                          <span>Sign out</span>
-                        </>
-                      )}
-                    </button>
                   </div>
                 )}
+                <button
+                  onClick={() => setShowMenu(false)}
+                  className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" aria-hidden="true" />
+                </button>
               </div>
-            ) : (
+            </div>
+
+            <nav className="p-2">
               <Link
-                href="/login"
-                className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                aria-label="Login"
+                href="/wishlist"
+                onClick={() => setShowMenu(false)}
+                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+                  pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
+                }`}
               >
-                <User className="w-5 h-5" />
+                <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
+                <span>Wishlist</span>
               </Link>
-            )}
-          </nav>
+
+              <Link
+                href="/settings"
+                onClick={() => setShowMenu(false)}
+                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+                  pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
+                }`}
+              >
+                <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
+                <span>Settings</span>
+              </Link>
+
+              <hr className="my-2" />
+
+              {user && (
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-left text-red-600 min-h-[44px] transition-colors disabled:opacity-50"
+                >
+                  {loggingOut ? (
+                    <>
+                      <span className="w-5 h-5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                      <span>Signing out...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-5 h-5" aria-hidden="true" />
+                      <span>Sign Out</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </nav>
+          </div>
         </div>
-      </div>
-    </header>
+      )}
+    </>
   );
 }

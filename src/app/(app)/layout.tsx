@@ -1,5 +1,6 @@
-// App Layout - Layout for authenticated pages with header
+// App Layout - Layout for authenticated pages with header and footer
 import { Header } from '@/components/ui/header';
+import { Footer } from '@/components/ui/footer';
 
 export default function AppLayout({
   children,
@@ -7,11 +8,12 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <main id="main-content" className="flex-1">
         {children}
       </main>
+      <Footer />
     </div>
   );
 }

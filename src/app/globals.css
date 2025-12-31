@@ -162,6 +162,20 @@ select {
   animation: modalContentIn 0.2s ease-out;
 }
 
+/* Bottom Sheet Slide Up */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
 /* Skeleton Loading */
 @keyframes shimmer {
   0% { background-position: -200% 0; }

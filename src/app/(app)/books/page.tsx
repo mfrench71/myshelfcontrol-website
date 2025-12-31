@@ -1,31 +1,185 @@
 // Books Page - List and manage user's book collection
 'use client';
 
-import { useState, useEffect } from 'react';
-import { BookOpen, Plus, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { BookOpen, Plus, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
+import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
+import { getSeries, createSeriesLookup } from '@/lib/repositories/series';
 import { BookCard, BookCardSkeleton } from '@/components/books/book-card';
-import type { Book } from '@/lib/types';
+import {
+  FilterSidebar,
+  FilterSidebarSkeleton,
+  MobileSortDropdown,
+  FilterBottomSheet,
+  ActiveFilterChip,
+} from '@/components/books/filter-panel';
+import type { Book, Genre, Series, BookFilters } from '@/lib/types';
+
+type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc';
+
+/**
+ * Parse sort option string into sortBy and direction
+ */
+function parseSortOption(option: SortOption): { sortBy: string; direction: 'asc' | 'desc' } {
+  const [sortBy, direction] = option.split('-') as [string, 'asc' | 'desc'];
+  return { sortBy, direction };
+}
+
+/**
+ * Get the reading status of a book based on its reads array
+ */
+function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
+  const reads = book.reads || [];
+  if (reads.length === 0) return 'want-to-read';
+
+  const latestRead = reads[reads.length - 1];
+  if (latestRead.finishedAt) return 'finished';
+  if (latestRead.startedAt) return 'reading';
+
+  return 'want-to-read';
+}
+
+/**
+ * Filter books based on active filters
+ */
+function filterBooks(books: Book[], filters: BookFilters): Book[] {
+  return books.filter((book) => {
+    // Search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      const matchesTitle = book.title.toLowerCase().includes(searchLower);
+      const matchesAuthor = book.author.toLowerCase().includes(searchLower);
+      if (!matchesTitle && !matchesAuthor) return false;
+    }
+
+    // Status filter
+    if (filters.status) {
+      const bookStatus = getBookStatus(book);
+      if (bookStatus !== filters.status) return false;
+    }
+
+    // Genre filter
+    if (filters.genreId) {
+      const bookGenres = book.genres || [];
+      if (!bookGenres.includes(filters.genreId)) return false;
+    }
+
+    // Series filter
+    if (filters.seriesId) {
+      if (book.seriesId !== filters.seriesId) return false;
+    }
+
+    // Rating filter
+    if (filters.minRating) {
+      if (!book.rating || book.rating < filters.minRating) return false;
+    }
+
+    // Author filter
+    if (filters.author) {
+      if (book.author.toLowerCase() !== filters.author.toLowerCase()) return false;
+    }
+
+    return true;
+  });
+}
+
+/**
+ * Sort books based on sort options
+ */
+function sortBooks(
+  books: Book[],
+  sortBy: string,
+  direction: 'asc' | 'desc'
+): Book[] {
+  const sorted = [...books].sort((a, b) => {
+    let comparison = 0;
+
+    switch (sortBy) {
+      case 'title':
+        comparison = a.title.localeCompare(b.title);
+        break;
+      case 'author':
+        comparison = a.author.localeCompare(b.author);
+        break;
+      case 'rating':
+        // Books without rating go to the end
+        if (!a.rating && !b.rating) comparison = 0;
+        else if (!a.rating) comparison = 1;
+        else if (!b.rating) comparison = -1;
+        else comparison = a.rating - b.rating;
+        break;
+      case 'createdAt':
+        const aTime = a.createdAt
+          ? typeof a.createdAt === 'number'
+            ? a.createdAt
+            : 'toMillis' in a.createdAt
+              ? a.createdAt.toMillis()
+              : new Date(a.createdAt).getTime()
+          : 0;
+        const bTime = b.createdAt
+          ? typeof b.createdAt === 'number'
+            ? b.createdAt
+            : 'toMillis' in b.createdAt
+              ? b.createdAt.toMillis()
+              : new Date(b.createdAt).getTime()
+          : 0;
+        comparison = aTime - bTime;
+        break;
+    }
+
+    return direction === 'asc' ? comparison : -comparison;
+  });
+
+  return sorted;
+}
 
 export default function BooksPage() {
   const { user, loading: authLoading } = useAuthContext();
   const [books, setBooks] = useState<Book[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filter and sort state
+  const [filters, setFilters] = useState<BookFilters>({});
+  const [sortValue, setSortValue] = useState<SortOption>('createdAt-desc');
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
+
+  // Create lookup maps for genres and series
+  const genreLookup = useMemo(() => createGenreLookup(genres), [genres]);
+  const seriesLookup = useMemo(() => createSeriesLookup(series), [series]);
+
+  // Filter and sort books
+  const filteredAndSortedBooks = useMemo(() => {
+    const { sortBy, direction } = parseSortOption(sortValue);
+    const filtered = filterBooks(books, filters);
+    return sortBooks(filtered, sortBy, direction);
+  }, [books, filters, sortValue]);
+
   useEffect(() => {
-    async function loadBooks() {
+    async function loadData() {
       if (!user) return;
 
       try {
         setLoading(true);
         setError(null);
-        const userBooks = await getBooks(user.uid);
+
+        // Load books, genres, and series in parallel
+        const [userBooks, userGenres, userSeries] = await Promise.all([
+          getBooks(user.uid),
+          getGenres(user.uid),
+          getSeries(user.uid),
+        ]);
+
         setBooks(userBooks);
+        setGenres(userGenres);
+        setSeries(userSeries);
       } catch (err) {
-        console.error('Failed to load books:', err);
+        console.error('Failed to load data:', err);
         setError('Failed to load your books. Please try again.');
       } finally {
         setLoading(false);
@@ -33,27 +187,91 @@ export default function BooksPage() {
     }
 
     if (!authLoading && user) {
-      loadBooks();
+      loadData();
     } else if (!authLoading && !user) {
       setLoading(false);
     }
   }, [user, authLoading]);
 
+  const handleFiltersChange = (newFilters: BookFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleSortChange = (newSort: SortOption) => {
+    setSortValue(newSort);
+  };
+
+  const handleReset = () => {
+    setFilters({});
+    setSortValue('createdAt-desc');
+  };
+
+  // Get active filter labels for chips
+  const getActiveFilterLabels = (): { label: string; key: keyof BookFilters }[] => {
+    const labels: { label: string; key: keyof BookFilters }[] = [];
+
+    if (filters.status) {
+      labels.push({
+        label: filters.status === 'reading' ? 'Reading' : 'Finished',
+        key: 'status'
+      });
+    }
+    if (filters.genreId) {
+      const genre = genres.find(g => g.id === filters.genreId);
+      if (genre) labels.push({ label: genre.name, key: 'genreId' });
+    }
+    if (filters.seriesId) {
+      const s = series.find(s => s.id === filters.seriesId);
+      if (s) labels.push({ label: s.name, key: 'seriesId' });
+    }
+    if (filters.minRating) {
+      labels.push({ label: `${filters.minRating}+ Stars`, key: 'minRating' });
+    }
+
+    return labels;
+  };
+
+  const removeFilter = (key: keyof BookFilters) => {
+    setFilters(prev => {
+      const newFilters = { ...prev };
+      delete newFilters[key];
+      return newFilters;
+    });
+  };
+
+  const hasActiveFilters =
+    filters.status || filters.genreId || filters.seriesId || filters.minRating;
+  const activeFilterLabels = getActiveFilterLabels();
+
   // Show loading state
   if (authLoading || loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-6 page-content">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header skeleton */}
         <div className="flex items-center justify-between mb-6">
           <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
-          <div className="h-10 bg-gray-200 rounded w-28 animate-pulse" />
+          <div className="h-10 bg-gray-200 rounded w-10 animate-pulse md:hidden" />
         </div>
 
-        {/* Books skeleton */}
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <BookCardSkeleton key={i} />
-          ))}
+        {/* Mobile sort skeleton */}
+        <div className="flex gap-2 mb-4 md:hidden">
+          <div className="flex-1 h-10 bg-gray-200 rounded animate-pulse" />
+          <div className="h-10 w-10 bg-gray-200 rounded animate-pulse" />
+        </div>
+
+        {/* Two-column layout */}
+        <div className="flex gap-6">
+          {/* Desktop sidebar skeleton */}
+          <aside className="hidden md:block w-72 flex-shrink-0">
+            <FilterSidebarSkeleton />
+          </aside>
+
+          {/* Books skeleton */}
+          <div className="flex-1 space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <BookCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -62,13 +280,13 @@ export default function BooksPage() {
   // Show error state
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-6 page-content">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">My Books</h1>
         </div>
 
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <p className="text-red-700 font-medium">Error loading books</p>
             <p className="text-red-600 text-sm mt-1">{error}</p>
@@ -85,52 +303,154 @@ export default function BooksPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 page-content">
+    <div className="max-w-6xl mx-auto px-4 py-6">
       {/* Page Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">My Books</h1>
+        {/* Desktop Add button - hidden on mobile, FAB is used there */}
         <Link
           href="/books/add"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors btn-press min-h-[44px]"
+          className="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"
         >
-          <Plus className="w-5 h-5" />
-          <span className="hidden sm:inline">Add Book</span>
+          <Plus className="w-5 h-5" aria-hidden="true" />
+          <span>Add Book</span>
         </Link>
       </div>
+
+      {/* Mobile Sort & Filter Bar */}
+      {books.length > 0 && (
+        <div className="flex gap-2 mb-4 md:hidden">
+          <MobileSortDropdown value={sortValue} onChange={handleSortChange} />
+          <button
+            onClick={() => setShowFilterSheet(true)}
+            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border transition-colors min-w-[44px] min-h-[44px] ${
+              hasActiveFilters
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+            }`}
+            aria-label="Open filters"
+          >
+            <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+            {hasActiveFilters && (
+              <span className="text-sm font-medium">{activeFilterLabels.length}</span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Active Filter Chips (Mobile) */}
+      {hasActiveFilters && activeFilterLabels.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4 md:hidden">
+          {activeFilterLabels.map(({ label, key }) => (
+            <ActiveFilterChip
+              key={key}
+              label={label}
+              onRemove={() => removeFilter(key)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Book count */}
       {books.length > 0 && (
         <p className="text-sm text-gray-500 mb-4">
-          {books.length} {books.length === 1 ? 'book' : 'books'} in your library
+          {hasActiveFilters ? (
+            <>
+              Showing {filteredAndSortedBooks.length} of {books.length}{' '}
+              {books.length === 1 ? 'book' : 'books'}
+            </>
+          ) : (
+            <>
+              {books.length} {books.length === 1 ? 'book' : 'books'} in your library
+            </>
+          )}
         </p>
       )}
 
-      {/* Empty State */}
-      {books.length === 0 ? (
-        <div className="empty-state">
-          <BookOpen className="empty-state-icon" />
-          <h2 className="empty-state-title">No books yet</h2>
-          <p className="empty-state-description">
-            Start building your library by adding your first book.
-          </p>
-          <div className="empty-state-action">
-            <Link
-              href="/books/add"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors btn-press"
-            >
-              <Plus className="w-5 h-5" />
-              Add Your First Book
-            </Link>
-          </div>
+      {/* Two-Column Layout */}
+      <div className="flex gap-6">
+        {/* Desktop Sidebar */}
+        {books.length > 0 && (
+          <aside className="hidden md:block w-72 flex-shrink-0">
+            <div className="sticky top-20">
+              <FilterSidebar
+                genres={genres}
+                series={series}
+                filters={filters}
+                sortValue={sortValue}
+                onFiltersChange={handleFiltersChange}
+                onSortChange={handleSortChange}
+                onReset={handleReset}
+              />
+            </div>
+          </aside>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          {/* Empty State */}
+          {books.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
+              <h2 className="text-lg font-medium text-gray-900 mt-4">No books yet</h2>
+              <p className="text-gray-500 mt-1">
+                Start building your library by adding your first book.
+              </p>
+              <Link
+                href="/books/add"
+                className="inline-flex items-center gap-2 px-6 py-3 mt-4 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"
+              >
+                <Plus className="w-5 h-5" aria-hidden="true" />
+                Add Your First Book
+              </Link>
+            </div>
+          ) : filteredAndSortedBooks.length === 0 ? (
+            /* No results after filtering */
+            <div className="text-center py-12">
+              <BookOpen className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
+              <p className="text-gray-500 mt-3">No books match your filters</p>
+              <button
+                onClick={handleReset}
+                className="mt-4 text-primary hover:text-primary-dark underline"
+              >
+                Clear all filters
+              </button>
+            </div>
+          ) : (
+            /* Books List */
+            <div className="space-y-4">
+              {filteredAndSortedBooks.map((book) => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  genres={genreLookup}
+                  series={seriesLookup}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        /* Books List */
-        <div className="space-y-4">
-          {books.map((book) => (
-            <BookCard key={book.id} book={book} />
-          ))}
-        </div>
-      )}
+      </div>
+
+      {/* Mobile Filter Bottom Sheet */}
+      <FilterBottomSheet
+        isOpen={showFilterSheet}
+        onClose={() => setShowFilterSheet(false)}
+        genres={genres}
+        series={series}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onReset={handleReset}
+      />
+
+      {/* Floating Action Button (Mobile) */}
+      <Link
+        href="/books/add"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary hover:bg-primary-dark text-white rounded-full shadow-lg flex items-center justify-center transition-colors md:hidden z-30"
+        aria-label="Add book"
+      >
+        <Plus className="w-6 h-6" aria-hidden="true" />
+      </Link>
     </div>
   );
 }

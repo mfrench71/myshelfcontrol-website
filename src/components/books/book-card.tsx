@@ -1,11 +1,11 @@
 // Book Card Component
-// Displays a book in list/grid view with cover, title, author, and metadata
+// Displays a book in list view with cover, title, author, and metadata
 
 'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, CheckCircle } from 'lucide-react';
+import { BookOpen, CheckCircle, Library } from 'lucide-react';
 import type { Book, Genre, Series } from '@/lib/types';
 
 // Maximum number of genre badges to show
@@ -18,13 +18,12 @@ type BookCardProps = {
   book: Book;
   genres?: Record<string, Genre>;
   series?: Record<string, Series>;
-  searchQuery?: string;
 };
 
 /**
  * Get the reading status of a book based on its reads array
  */
-function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' | null {
+function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
   const reads = book.reads || [];
   if (reads.length === 0) return 'want-to-read';
 
@@ -57,7 +56,7 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
 }
 
 /**
- * Status badge component
+ * Status badge component (span, not link)
  */
 function StatusBadge({ status }: { status: 'reading' | 'finished' }) {
   const config = {
@@ -78,15 +77,17 @@ function StatusBadge({ status }: { status: 'reading' | 'finished' }) {
   const { icon: Icon, label, bgClass, textClass } = config[status];
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${bgClass} ${textClass}`}>
-      <Icon className="w-3 h-3" />
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${bgClass} ${textClass}`}
+    >
+      <Icon className="w-3 h-3" aria-hidden="true" />
       <span>{label}</span>
     </span>
   );
 }
 
 /**
- * Series badge component
+ * Series badge component (span, not link - avoids nested anchor)
  */
 function SeriesBadge({
   series,
@@ -103,31 +104,32 @@ function SeriesBadge({
   const positionText = position ? ` #${position}` : '';
 
   return (
-    <Link
-      href={`/books?series=${series.id}`}
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors"
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-700"
       title={series.name}
     >
-      <span>{displayName}{positionText}</span>
-    </Link>
+      <Library className="w-3 h-3" aria-hidden="true" />
+      <span>
+        {displayName}
+        {positionText}
+      </span>
+    </span>
   );
 }
 
 /**
- * Genre badge component
+ * Genre badge component (span, not link - avoids nested anchor)
  */
 function GenreBadge({ genre }: { genre: Genre }) {
-  // Calculate contrasting text colour
   const textColor = getContrastColor(genre.color);
 
   return (
-    <Link
-      href={`/books?genre=${genre.id}`}
-      className="inline-block px-2 py-0.5 rounded text-xs transition-opacity hover:opacity-80"
+    <span
+      className="inline-block px-2 py-0.5 rounded text-xs"
       style={{ backgroundColor: genre.color, color: textColor }}
     >
       {genre.name}
-    </Link>
+    </span>
   );
 }
 
@@ -135,25 +137,18 @@ function GenreBadge({ genre }: { genre: Genre }) {
  * Calculate contrast colour for text on a background
  */
 function getContrastColor(hexColor: string): string {
-  // Remove # if present
   const hex = hexColor.replace('#', '');
-
-  // Parse RGB values
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-
-  // Calculate relative luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return white for dark backgrounds, black for light backgrounds
   return luminance > 0.5 ? '#000000' : '#ffffff';
 }
 
 /**
- * Book card component
+ * Book card component - matches old site layout
  */
-export function BookCard({ book, genres = {}, series = {}, searchQuery }: BookCardProps) {
+export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
   const status = getBookStatus(book);
   const bookSeries = book.seriesId ? series[book.seriesId] : undefined;
   const bookGenres = (book.genres || [])
@@ -162,36 +157,50 @@ export function BookCard({ book, genres = {}, series = {}, searchQuery }: BookCa
     .slice(0, MAX_GENRE_BADGES);
   const hasMoreGenres = (book.genres || []).length > MAX_GENRE_BADGES;
 
+  // Status and series badges on same line
+  const hasTopBadges = status === 'reading' || status === 'finished' || bookSeries;
+
   return (
     <Link
       href={`/books/${book.id}`}
-      className="book-card group flex gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all"
+      className="book-card flex gap-4 p-3 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all"
     >
       {/* Cover Image */}
-      <div className="flex-shrink-0 w-20 h-28 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+      <div className="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
         {book.coverImageUrl ? (
           <Image
             src={book.coverImageUrl}
-            alt={`Cover of ${book.title}`}
-            width={80}
-            height={112}
+            alt=""
+            width={64}
+            height={96}
             className="w-full h-full object-cover"
             loading="lazy"
           />
         ) : (
-          <BookOpen className="w-8 h-8 text-white/60" />
+          <BookOpen className="w-6 h-6 text-white/60" aria-hidden="true" />
         )}
       </div>
 
       {/* Book Details */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0">
         {/* Title */}
-        <h3 className="font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-          {book.title}
-        </h3>
+        <h3 className="font-medium text-gray-900 truncate">{book.title}</h3>
 
         {/* Author */}
-        <p className="text-sm text-gray-600 mt-0.5 truncate">{book.author}</p>
+        <p className="text-sm text-gray-500 truncate">
+          {book.author || 'Unknown author'}
+        </p>
+
+        {/* Status + Series Badges */}
+        {hasTopBadges && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {status === 'reading' && <StatusBadge status="reading" />}
+            {status === 'finished' && <StatusBadge status="finished" />}
+            {bookSeries && (
+              <SeriesBadge series={bookSeries} position={book.seriesPosition} />
+            )}
+          </div>
+        )}
 
         {/* Rating */}
         {book.rating && (
@@ -200,27 +209,19 @@ export function BookCard({ book, genres = {}, series = {}, searchQuery }: BookCa
           </div>
         )}
 
-        {/* Badges */}
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {/* Status Badge */}
-          {status === 'reading' && <StatusBadge status="reading" />}
-          {status === 'finished' && <StatusBadge status="finished" />}
-
-          {/* Series Badge */}
-          {bookSeries && (
-            <SeriesBadge series={bookSeries} position={book.seriesPosition} />
-          )}
-
-          {/* Genre Badges */}
-          {bookGenres.map((genre) => (
-            <GenreBadge key={genre.id} genre={genre} />
-          ))}
-          {hasMoreGenres && (
-            <span className="inline-block px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
-              +{(book.genres || []).length - MAX_GENRE_BADGES}
-            </span>
-          )}
-        </div>
+        {/* Genre Badges */}
+        {bookGenres.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {bookGenres.map((genre) => (
+              <GenreBadge key={genre.id} genre={genre} />
+            ))}
+            {hasMoreGenres && (
+              <span className="inline-block px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                +{(book.genres || []).length - MAX_GENRE_BADGES}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -231,19 +232,15 @@ export function BookCard({ book, genres = {}, series = {}, searchQuery }: BookCa
  */
 export function BookCardSkeleton() {
   return (
-    <div className="flex gap-4 p-4 bg-white border border-gray-200 rounded-xl animate-pulse">
+    <div className="flex gap-4 p-3 bg-white border border-gray-200 rounded-xl animate-pulse">
       {/* Cover skeleton */}
-      <div className="flex-shrink-0 w-20 h-28 rounded-lg bg-gray-200" />
+      <div className="flex-shrink-0 w-16 h-24 rounded-lg bg-gray-200" />
 
       {/* Content skeleton */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <div className="h-5 bg-gray-200 rounded w-3/4" />
-        <div className="h-4 bg-gray-200 rounded w-1/2 mt-2" />
-        <div className="h-4 bg-gray-200 rounded w-1/4 mt-2" />
-        <div className="flex gap-1.5 mt-3">
-          <div className="h-5 bg-gray-200 rounded w-16" />
-          <div className="h-5 bg-gray-200 rounded w-20" />
-        </div>
+      <div className="flex-1 min-w-0 py-1">
+        <div className="h-4 bg-gray-200 rounded w-3/4" />
+        <div className="h-3 bg-gray-200 rounded w-1/2 mt-2" />
+        <div className="h-3 bg-gray-200 rounded w-1/4 mt-2" />
       </div>
     </div>
   );

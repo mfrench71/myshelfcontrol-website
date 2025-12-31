@@ -8,6 +8,7 @@
 import { useState, useId, useRef, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import type { Genre, Series, BookFilters } from '@/lib/types';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 
 export type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc' | 'seriesPosition-asc';
 
@@ -574,6 +575,9 @@ export function FilterBottomSheet({
   const [showMoreFilters, setShowMoreFilters] = useState(
     !!(filters.seriesIds && filters.seriesIds.length > 0)
   );
+
+  // Lock body scroll when filter sheet is open
+  useBodyScrollLock(isOpen);
 
   const handleStatusChange = (status: string, checked: boolean) => {
     const currentStatuses = filters.statuses || [];

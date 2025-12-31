@@ -50,6 +50,14 @@ body {
   color: #111827;
 }
 
+/* Body scroll lock for modals/bottom sheets */
+body.scroll-locked {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 /* Form Elements */
 input[type='text'],
 input[type='email'],

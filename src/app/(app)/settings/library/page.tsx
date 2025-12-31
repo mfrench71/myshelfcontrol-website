@@ -4,7 +4,8 @@
  */
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import Link from 'next/link';
 import {
   Tag,
@@ -100,6 +101,11 @@ export default function LibrarySettingsPage() {
   useEffect(() => {
     setPickerSettings(getPickerSettings());
   }, []);
+
+  // Lock body scroll when any modal is open
+  const isAnyModalOpen = showGenreModal || !!genreDeleteConfirm || showMergeGenreModal ||
+    showSeriesModal || !!seriesDeleteConfirm || showMergeSeriesModal;
+  useBodyScrollLock(isAnyModalOpen);
 
   // Load all data
   const loadData = useCallback(async () => {
@@ -743,26 +749,21 @@ export default function LibrarySettingsPage() {
 
       {/* Genre Add/Edit Modal */}
       {showGenreModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div
-              className="fixed inset-0 bg-black/50 transition-opacity"
-              onClick={closeGenreModal}
-              aria-hidden="true"
-            />
-            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {editingGenre ? 'Edit Genre' : 'Add Genre'}
-                </h3>
-                <button
-                  onClick={closeGenreModal}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" aria-hidden="true" />
-                </button>
-              </div>
+        <div
+          className="fixed inset-0 z-50 bottom-sheet-backdrop"
+          onClick={closeGenreModal}
+          role="dialog"
+          aria-modal="true"
+          aria-label={editingGenre ? 'Edit Genre' : 'Add Genre'}
+        >
+          <div
+            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bottom-sheet-handle" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {editingGenre ? 'Edit Genre' : 'Add Genre'}
+            </h3>
 
               <div className="space-y-4">
                 <div>
@@ -811,21 +812,20 @@ export default function LibrarySettingsPage() {
                 )}
               </div>
 
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={closeGenreModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveGenre}
-                  disabled={!isGenreFormDirty() || genreSaving}
-                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                >
-                  {genreSaving ? 'Saving...' : 'Save'}
-                </button>
-              </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={closeGenreModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveGenre}
+                disabled={!isGenreFormDirty() || genreSaving}
+                className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {genreSaving ? 'Saving...' : 'Save'}
+              </button>
             </div>
           </div>
         </div>
@@ -833,44 +833,47 @@ export default function LibrarySettingsPage() {
 
       {/* Genre Delete Confirmation Modal */}
       {genreDeleteConfirm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div
-              className="fixed inset-0 bg-black/50 transition-opacity"
-              onClick={() => setGenreDeleteConfirm(null)}
-              aria-hidden="true"
-            />
-            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Genre</h3>
-              <p className="text-gray-600 mb-6">
-                {genreDeleteConfirm.bookCount > 0 ? (
-                  <>
-                    This will remove &quot;{genreDeleteConfirm.name}&quot; from{' '}
-                    <span className="text-amber-600 font-medium">
-                      {genreDeleteConfirm.bookCount} book
-                      {genreDeleteConfirm.bookCount !== 1 ? 's' : ''}
-                    </span>
-                    .
-                  </>
-                ) : (
-                  <>Are you sure you want to delete &quot;{genreDeleteConfirm.name}&quot;?</>
-                )}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setGenreDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteGenre}
-                  disabled={genreSaving}
-                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                >
-                  {genreSaving ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
+        <div
+          className="fixed inset-0 z-50 bottom-sheet-backdrop"
+          onClick={() => setGenreDeleteConfirm(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delete Genre"
+        >
+          <div
+            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bottom-sheet-handle" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Genre</h3>
+            <p className="text-gray-600 mb-6">
+              {genreDeleteConfirm.bookCount > 0 ? (
+                <>
+                  This will remove &quot;{genreDeleteConfirm.name}&quot; from{' '}
+                  <span className="text-amber-600 font-medium">
+                    {genreDeleteConfirm.bookCount} book
+                    {genreDeleteConfirm.bookCount !== 1 ? 's' : ''}
+                  </span>
+                  .
+                </>
+              ) : (
+                <>Are you sure you want to delete &quot;{genreDeleteConfirm.name}&quot;?</>
+              )}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setGenreDeleteConfirm(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteGenre}
+                disabled={genreSaving}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {genreSaving ? 'Deleting...' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>
@@ -878,65 +881,59 @@ export default function LibrarySettingsPage() {
 
       {/* Genre Merge Modal */}
       {showMergeGenreModal && mergingGenre && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div
-              className="fixed inset-0 bg-black/50 transition-opacity"
-              onClick={closeMergeGenreModal}
-              aria-hidden="true"
-            />
-            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Merge Genre</h3>
-                <button
-                  onClick={closeMergeGenreModal}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" aria-hidden="true" />
-                </button>
-              </div>
+        <div
+          className="fixed inset-0 z-50 bottom-sheet-backdrop"
+          onClick={closeMergeGenreModal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Merge Genre"
+        >
+          <div
+            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bottom-sheet-handle" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Genre</h3>
 
-              <p className="text-gray-600 text-sm mb-4">
-                Merge &quot;<span className="font-medium">{mergingGenre.name}</span>&quot; into another genre. Books will be moved and the source genre will be deleted.
-              </p>
+            <p className="text-gray-600 text-sm mb-4">
+              Merge &quot;<span className="font-medium">{mergingGenre.name}</span>&quot; into another genre. Books will be moved and the source genre will be deleted.
+            </p>
 
-              <div>
-                <label htmlFor="merge-target" className="block font-semibold text-gray-700 mb-1">
-                  Target Genre
-                </label>
-                <select
-                  id="merge-target"
-                  value={mergeTargetId}
-                  onChange={(e) => setMergeTargetId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="">Select a genre...</option>
-                  {genres
-                    .filter((g) => g.id !== mergingGenre.id)
-                    .map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
+            <div>
+              <label htmlFor="merge-target" className="block font-semibold text-gray-700 mb-1">
+                Target Genre
+              </label>
+              <select
+                id="merge-target"
+                value={mergeTargetId}
+                onChange={(e) => setMergeTargetId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="">Select a genre...</option>
+                {genres
+                  .filter((g) => g.id !== mergingGenre.id)
+                  .map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
 
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={closeMergeGenreModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleMergeGenre}
-                  disabled={!mergeTargetId || genreSaving}
-                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                >
-                  {genreSaving ? 'Merging...' : 'Merge'}
-                </button>
-              </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={closeMergeGenreModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleMergeGenre}
+                disabled={!mergeTargetId || genreSaving}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {genreSaving ? 'Merging...' : 'Merge'}
+              </button>
             </div>
           </div>
         </div>
@@ -944,77 +941,71 @@ export default function LibrarySettingsPage() {
 
       {/* Series Add/Edit Modal */}
       {showSeriesModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div
-              className="fixed inset-0 bg-black/50 transition-opacity"
-              onClick={closeSeriesModal}
-              aria-hidden="true"
-            />
-            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {editingSeries ? 'Edit Series' : 'Add Series'}
-                </h3>
-                <button
-                  onClick={closeSeriesModal}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" aria-hidden="true" />
-                </button>
+        <div
+          className="fixed inset-0 z-50 bottom-sheet-backdrop"
+          onClick={closeSeriesModal}
+          role="dialog"
+          aria-modal="true"
+          aria-label={editingSeries ? 'Edit Series' : 'Add Series'}
+        >
+          <div
+            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bottom-sheet-handle" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {editingSeries ? 'Edit Series' : 'Add Series'}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="series-name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Series Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="series-name"
+                  type="text"
+                  value={seriesName}
+                  onChange={(e) => setSeriesName(e.target.value)}
+                  placeholder="e.g., Harry Potter"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  autoFocus
+                />
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="series-name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Series Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="series-name"
-                    type="text"
-                    value={seriesName}
-                    onChange={(e) => setSeriesName(e.target.value)}
-                    placeholder="e.g., Harry Potter"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    autoFocus
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="series-total" className="block text-sm font-medium text-gray-700 mb-1">
-                    Total Books in Series
-                  </label>
-                  <input
-                    id="series-total"
-                    type="number"
-                    value={seriesTotalBooks}
-                    onChange={(e) => setSeriesTotalBooks(e.target.value)}
-                    placeholder="e.g., 7"
-                    min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Optional. Shows completion progress (e.g., 3/7). You can have more books than this total.
-                  </p>
-                </div>
+              <div>
+                <label htmlFor="series-total" className="block text-sm font-medium text-gray-700 mb-1">
+                  Total Books in Series
+                </label>
+                <input
+                  id="series-total"
+                  type="number"
+                  value={seriesTotalBooks}
+                  onChange={(e) => setSeriesTotalBooks(e.target.value)}
+                  placeholder="e.g., 7"
+                  min="1"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional. Shows completion progress (e.g., 3/7). You can have more books than this total.
+                </p>
               </div>
+            </div>
 
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={closeSeriesModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveSeries}
-                  disabled={!isSeriesFormDirty() || seriesSaving}
-                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                >
-                  {seriesSaving ? 'Saving...' : 'Save'}
-                </button>
-              </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={closeSeriesModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSeries}
+                disabled={!isSeriesFormDirty() || seriesSaving}
+                className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {seriesSaving ? 'Saving...' : 'Save'}
+              </button>
             </div>
           </div>
         </div>
@@ -1022,44 +1013,47 @@ export default function LibrarySettingsPage() {
 
       {/* Series Delete Confirmation Modal */}
       {seriesDeleteConfirm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div
-              className="fixed inset-0 bg-black/50 transition-opacity"
-              onClick={() => setSeriesDeleteConfirm(null)}
-              aria-hidden="true"
-            />
-            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Series</h3>
-              <p className="text-gray-600 mb-6">
-                {seriesDeleteConfirm.bookCount > 0 ? (
-                  <>
-                    This will remove &quot;{seriesDeleteConfirm.name}&quot; from{' '}
-                    <span className="text-amber-600 font-medium">
-                      {seriesDeleteConfirm.bookCount} book
-                      {seriesDeleteConfirm.bookCount !== 1 ? 's' : ''}
-                    </span>
-                    .
-                  </>
-                ) : (
-                  <>Are you sure you want to delete &quot;{seriesDeleteConfirm.name}&quot;?</>
-                )}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setSeriesDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteSeries}
-                  disabled={seriesSaving}
-                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                >
-                  {seriesSaving ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
+        <div
+          className="fixed inset-0 z-50 bottom-sheet-backdrop"
+          onClick={() => setSeriesDeleteConfirm(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delete Series"
+        >
+          <div
+            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bottom-sheet-handle" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Series</h3>
+            <p className="text-gray-600 mb-6">
+              {seriesDeleteConfirm.bookCount > 0 ? (
+                <>
+                  This will remove &quot;{seriesDeleteConfirm.name}&quot; from{' '}
+                  <span className="text-amber-600 font-medium">
+                    {seriesDeleteConfirm.bookCount} book
+                    {seriesDeleteConfirm.bookCount !== 1 ? 's' : ''}
+                  </span>
+                  .
+                </>
+              ) : (
+                <>Are you sure you want to delete &quot;{seriesDeleteConfirm.name}&quot;?</>
+              )}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSeriesDeleteConfirm(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteSeries}
+                disabled={seriesSaving}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {seriesSaving ? 'Deleting...' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>
@@ -1067,65 +1061,59 @@ export default function LibrarySettingsPage() {
 
       {/* Series Merge Modal */}
       {showMergeSeriesModal && mergingSeries && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div
-              className="fixed inset-0 bg-black/50 transition-opacity"
-              onClick={closeMergeSeriesModal}
-              aria-hidden="true"
-            />
-            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 z-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Merge Series</h3>
-                <button
-                  onClick={closeMergeSeriesModal}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" aria-hidden="true" />
-                </button>
-              </div>
+        <div
+          className="fixed inset-0 z-50 bottom-sheet-backdrop"
+          onClick={closeMergeSeriesModal}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Merge Series"
+        >
+          <div
+            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bottom-sheet-handle" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Series</h3>
 
-              <p className="text-gray-600 text-sm mb-4">
-                Merge &quot;<span className="font-medium">{mergingSeries.name}</span>&quot; into another series. Books will be moved and the source series will be deleted.
-              </p>
+            <p className="text-gray-600 text-sm mb-4">
+              Merge &quot;<span className="font-medium">{mergingSeries.name}</span>&quot; into another series. Books will be moved and the source series will be deleted.
+            </p>
 
-              <div>
-                <label htmlFor="merge-series-target" className="block font-semibold text-gray-700 mb-1">
-                  Target Series
-                </label>
-                <select
-                  id="merge-series-target"
-                  value={mergeSeriesTargetId}
-                  onChange={(e) => setMergeSeriesTargetId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="">Select a series...</option>
-                  {seriesList
-                    .filter((s) => s.id !== mergingSeries.id)
-                    .map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
+            <div>
+              <label htmlFor="merge-series-target" className="block font-semibold text-gray-700 mb-1">
+                Target Series
+              </label>
+              <select
+                id="merge-series-target"
+                value={mergeSeriesTargetId}
+                onChange={(e) => setMergeSeriesTargetId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="">Select a series...</option>
+                {seriesList
+                  .filter((s) => s.id !== mergingSeries.id)
+                  .map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
 
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={closeMergeSeriesModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleMergeSeries}
-                  disabled={!mergeSeriesTargetId || seriesSaving}
-                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-                >
-                  {seriesSaving ? 'Merging...' : 'Merge'}
-                </button>
-              </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={closeMergeSeriesModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleMergeSeries}
+                disabled={!mergeSeriesTargetId || seriesSaving}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                {seriesSaving ? 'Merging...' : 'Merge'}
+              </button>
             </div>
           </div>
         </div>

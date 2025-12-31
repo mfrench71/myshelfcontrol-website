@@ -5,6 +5,7 @@
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -424,6 +425,9 @@ export default function ProfileSettingsPage() {
   const [deleting, setDeleting] = useState(false);
   const [sendingVerification, setSendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+
+  // Lock body scroll when any modal is open
+  useBodyScrollLock(showPasswordModal || showDeleteModal);
 
   /**
    * Resend email verification

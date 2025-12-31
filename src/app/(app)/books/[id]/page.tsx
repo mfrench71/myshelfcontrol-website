@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -200,6 +201,9 @@ export default function BookDetailPage() {
   const [deleteSeriesChecked, setDeleteSeriesChecked] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // Lock body scroll when modal/lightbox is open
+  useBodyScrollLock(showDeleteModal || lightboxOpen);
 
   const genreLookup = createGenreLookup(genres);
 

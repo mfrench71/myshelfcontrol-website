@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import {
   BookOpen,
   Search,
@@ -32,6 +33,9 @@ export function Header() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll when menu is open
+  useBodyScrollLock(showMenu);
 
   /**
    * Check if Gravatar exists for user email

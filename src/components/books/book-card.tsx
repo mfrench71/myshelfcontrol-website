@@ -5,8 +5,35 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, CheckCircle, Library } from 'lucide-react';
-import type { Book, Genre, Series } from '@/lib/types';
+import { BookOpen, CheckCircle, Library, Calendar } from 'lucide-react';
+import type { Book, Genre, Series, FirestoreTimestamp } from '@/lib/types';
+import { Timestamp } from 'firebase/firestore';
+
+/**
+ * Format a Firestore timestamp to a short date string
+ * @param timestamp - Firestore timestamp, Date, or number
+ * @returns Formatted date string (e.g., "15 Dec 2024")
+ */
+function formatShortDate(timestamp: FirestoreTimestamp | undefined): string | null {
+  if (!timestamp) return null;
+
+  let date: Date;
+  if (timestamp instanceof Timestamp) {
+    date = timestamp.toDate();
+  } else if (timestamp instanceof Date) {
+    date = timestamp;
+  } else if (typeof timestamp === 'number') {
+    date = new Date(timestamp);
+  } else {
+    return null;
+  }
+
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 // Maximum number of genre badges to show
 const MAX_GENRE_BADGES = 3;
@@ -156,6 +183,7 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
     .filter(Boolean)
     .slice(0, MAX_GENRE_BADGES);
   const hasMoreGenres = (book.genres || []).length > MAX_GENRE_BADGES;
+  const dateAdded = formatShortDate(book.createdAt);
 
   // Status and series badges on same line
   const hasTopBadges = status === 'reading' || status === 'finished' || bookSeries;
@@ -190,6 +218,14 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
         <p className="text-sm text-gray-500 truncate">
           {book.author || 'Unknown author'}
         </p>
+
+        {/* Date Added */}
+        {dateAdded && (
+          <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+            <Calendar className="w-3 h-3" aria-hidden="true" />
+            <span>Added {dateAdded}</span>
+          </p>
+        )}
 
         {/* Status + Series Badges */}
         {hasTopBadges && (

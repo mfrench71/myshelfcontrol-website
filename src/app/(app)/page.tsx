@@ -631,15 +631,8 @@ export default function HomePage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <Link
-          href="/books/add"
-          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"
-        >
-          <Plus className="w-5 h-5" aria-hidden="true" />
-          <span className="hidden sm:inline">Add Book</span>
-        </Link>
       </div>
 
       {/* Widgets Grid */}

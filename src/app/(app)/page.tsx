@@ -690,6 +690,15 @@ export default function HomePage() {
           </Link>
         </div>
       )}
+
+      {/* Floating Action Button */}
+      <Link
+        href="/books/add"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary hover:bg-primary-dark text-white rounded-full shadow-lg flex items-center justify-center transition-all z-30 active:scale-[0.92] active:shadow-md"
+        aria-label="Add book"
+      >
+        <Plus className="w-6 h-6" aria-hidden="true" />
+      </Link>
     </div>
   );
 }

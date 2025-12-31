@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -73,6 +73,17 @@ function ChangePasswordModal({
     if (!newPassword) return null;
     return checkPasswordStrength(newPassword);
   }, [newPassword]);
+
+  // Clear form state when modal opens
+  const prevIsOpen = useRef(isOpen);
+  if (isOpen && !prevIsOpen.current) {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setError(null);
+    setSuccess(false);
+  }
+  prevIsOpen.current = isOpen;
 
   // Strength bar colours and labels
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
@@ -283,11 +294,28 @@ function DeleteAccountModal({
   loading: boolean;
 }) {
   const [password, setPassword] = useState('');
+  const [confirmText, setConfirmText] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  // Clear form state when modal opens
+  const prevIsOpen = useRef(isOpen);
+  if (isOpen && !prevIsOpen.current) {
+    setPassword('');
+    setConfirmText('');
+    setError(null);
+  }
+  prevIsOpen.current = isOpen;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validate confirm text
+    if (confirmText !== 'DELETE') {
+      setError('Please type DELETE to confirm');
+      return;
+    }
+
     try {
       await onConfirm(password);
     } catch (err) {
@@ -295,12 +323,20 @@ function DeleteAccountModal({
     }
   };
 
+  // Reset form when modal closes
+  const handleClose = () => {
+    setPassword('');
+    setConfirmText('');
+    setError(null);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
       className="fixed inset-0 bg-black/50 z-50"
-      onClick={onClose}
+      onClick={handleClose}
       role="dialog"
       aria-modal="true"
       aria-label="Delete account confirmation"
@@ -318,7 +354,7 @@ function DeleteAccountModal({
           This action is permanent and cannot be undone. All your books, genres, series, and settings will be deleted.
         </p>
 
-        <form id="delete-form" onSubmit={handleSubmit} className="space-y-4">
+        <form id="delete-form" onSubmit={handleSubmit} noValidate className="space-y-4">
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -328,7 +364,7 @@ function DeleteAccountModal({
 
           <div>
             <label htmlFor="delete-password" className="block font-semibold text-gray-700 mb-1">
-              Enter your password to confirm
+              Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
@@ -336,7 +372,21 @@ function DeleteAccountModal({
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="delete-confirm-text" className="block font-semibold text-gray-700 mb-1">
+              Type &quot;DELETE&quot; to confirm <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="delete-confirm-text"
+              name="confirmText"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="DELETE"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             />
           </div>
@@ -344,7 +394,7 @@ function DeleteAccountModal({
           <div className="flex gap-3 pt-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
               className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
             >
@@ -352,7 +402,7 @@ function DeleteAccountModal({
             </button>
             <button
               type="submit"
-              disabled={loading || !password}
+              disabled={loading || !password || confirmText !== 'DELETE'}
               className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] disabled:opacity-50"
             >
               {loading ? 'Deleting...' : 'Delete Account'}

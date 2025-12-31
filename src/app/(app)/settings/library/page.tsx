@@ -177,6 +177,35 @@ export default function LibrarySettingsPage() {
     return used;
   }
 
+  // ========== DIRTY STATE HELPERS ==========
+
+  /** Check if genre form has changes worth saving */
+  const isGenreFormDirty = (): boolean => {
+    if (!genreName.trim()) return false; // Need a name at minimum
+
+    if (editingGenre) {
+      // Edit mode: check if something changed
+      return genreName.trim() !== editingGenre.name || genreColor !== editingGenre.color;
+    }
+
+    // Add mode: just need a name
+    return true;
+  };
+
+  /** Check if series form has changes worth saving */
+  const isSeriesFormDirty = (): boolean => {
+    if (!seriesName.trim()) return false; // Need a name at minimum
+
+    if (editingSeries) {
+      // Edit mode: check if something changed
+      const originalTotal = editingSeries.totalBooks?.toString() || '';
+      return seriesName.trim() !== editingSeries.name || seriesTotalBooks !== originalTotal;
+    }
+
+    // Add mode: just need a name
+    return true;
+  };
+
   // ========== GENRE HANDLERS ==========
 
   const openAddGenreModal = () => {
@@ -791,8 +820,8 @@ export default function LibrarySettingsPage() {
                 </button>
                 <button
                   onClick={handleSaveGenre}
-                  disabled={!genreName.trim() || genreSaving}
-                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                  disabled={!isGenreFormDirty() || genreSaving}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {genreSaving ? 'Saving...' : 'Save'}
                 </button>
@@ -837,7 +866,7 @@ export default function LibrarySettingsPage() {
                 <button
                   onClick={handleDeleteGenre}
                   disabled={genreSaving}
-                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {genreSaving ? 'Deleting...' : 'Delete'}
                 </button>
@@ -903,7 +932,7 @@ export default function LibrarySettingsPage() {
                 <button
                   onClick={handleMergeGenre}
                   disabled={!mergeTargetId || genreSaving}
-                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {genreSaving ? 'Merging...' : 'Merge'}
                 </button>
@@ -980,8 +1009,8 @@ export default function LibrarySettingsPage() {
                 </button>
                 <button
                   onClick={handleSaveSeries}
-                  disabled={!seriesName.trim() || seriesSaving}
-                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                  disabled={!isSeriesFormDirty() || seriesSaving}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {seriesSaving ? 'Saving...' : 'Save'}
                 </button>
@@ -1026,7 +1055,7 @@ export default function LibrarySettingsPage() {
                 <button
                   onClick={handleDeleteSeries}
                   disabled={seriesSaving}
-                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                  className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {seriesSaving ? 'Deleting...' : 'Delete'}
                 </button>
@@ -1092,7 +1121,7 @@ export default function LibrarySettingsPage() {
                 <button
                   onClick={handleMergeSeries}
                   disabled={!mergeSeriesTargetId || seriesSaving}
-                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px]"
+                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                 >
                   {seriesSaving ? 'Merging...' : 'Merge'}
                 </button>

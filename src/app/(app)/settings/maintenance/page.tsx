@@ -26,6 +26,8 @@ import {
   Calendar,
   Barcode,
 } from 'lucide-react';
+import { ref, listAll, deleteObject, getMetadata, StorageReference, FullMetadata } from 'firebase/storage';
+import { storage } from '@/lib/firebase/client';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
 import { getBooks } from '@/lib/repositories/books';
@@ -63,6 +65,14 @@ export default function MaintenanceSettingsPage() {
   // Genre Recount state
   const [recountLoading, setRecountLoading] = useState(false);
   const [recountResults, setRecountResults] = useState<string | null>(null);
+
+  // Orphaned Images state
+  const [orphanScanning, setOrphanScanning] = useState(false);
+  const [orphanDeleting, setOrphanDeleting] = useState(false);
+  const [orphanedFiles, setOrphanedFiles] = useState<Array<{ ref: StorageReference; metadata: FullMetadata }>>([]);
+  const [orphanResults, setOrphanResults] = useState<'none' | 'found' | 'deleted' | null>(null);
+  const [orphanTotalSize, setOrphanTotalSize] = useState(0);
+  const [orphanDeletedCount, setOrphanDeletedCount] = useState(0);
 
   // Load library health on mount
   const loadLibraryHealth = useCallback(async () => {
@@ -136,6 +146,135 @@ export default function MaintenanceSettingsPage() {
       setRecountLoading(false);
     }
   }, [user, recountLoading, showToast]);
+
+  /**
+   * Format bytes to human-readable size
+   */
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  /**
+   * Recursively list all files in a storage folder
+   */
+  const listAllFilesRecursively = async (
+    folderRef: StorageReference
+  ): Promise<Array<{ ref: StorageReference; metadata: FullMetadata }>> => {
+    const files: Array<{ ref: StorageReference; metadata: FullMetadata }> = [];
+
+    try {
+      const result = await listAll(folderRef);
+
+      // Get metadata for all files in this folder
+      for (const itemRef of result.items) {
+        try {
+          const metadata = await getMetadata(itemRef);
+          files.push({ ref: itemRef, metadata });
+        } catch (err) {
+          console.warn('Could not get metadata for:', itemRef.fullPath, err);
+        }
+      }
+
+      // Recursively list files in subfolders
+      for (const prefixRef of result.prefixes) {
+        const subFiles = await listAllFilesRecursively(prefixRef);
+        files.push(...subFiles);
+      }
+    } catch (error) {
+      // Folder might not exist, which is fine
+      console.log('Could not list folder:', folderRef.fullPath);
+    }
+
+    return files;
+  };
+
+  /**
+   * Scan for orphaned images in Firebase Storage
+   */
+  const handleScanOrphans = useCallback(async () => {
+    if (!user || orphanScanning) return;
+
+    setOrphanScanning(true);
+    setOrphanResults(null);
+    setOrphanedFiles([]);
+
+    try {
+      // Get all books to collect referenced image paths
+      const books = await getBooks(user.uid);
+
+      // Collect all image storage paths from books
+      const referencedPaths = new Set<string>();
+      for (const book of books) {
+        if (book.images && Array.isArray(book.images)) {
+          for (const img of book.images) {
+            if (img.storagePath) {
+              referencedPaths.add(img.storagePath);
+            }
+          }
+        }
+      }
+
+      // List all files in user's storage folder
+      const userStorageRef = ref(storage, `users/${user.uid}`);
+      const allFiles = await listAllFilesRecursively(userStorageRef);
+
+      // Find orphaned files (in storage but not referenced by any book)
+      const orphaned = allFiles.filter(file => !referencedPaths.has(file.ref.fullPath));
+
+      // Calculate total size
+      const totalSize = orphaned.reduce((sum, file) => sum + (file.metadata.size || 0), 0);
+
+      setOrphanedFiles(orphaned);
+      setOrphanTotalSize(totalSize);
+
+      if (orphaned.length > 0) {
+        setOrphanResults('found');
+      } else {
+        setOrphanResults('none');
+        showToast('No orphaned images found', { type: 'success' });
+      }
+    } catch (err) {
+      console.error('Error scanning for orphaned images:', err);
+      showToast('Failed to scan for orphaned images', { type: 'error' });
+    } finally {
+      setOrphanScanning(false);
+    }
+  }, [user, orphanScanning, showToast]);
+
+  /**
+   * Delete all orphaned images
+   */
+  const handleDeleteOrphans = useCallback(async () => {
+    if (!orphanedFiles.length || orphanDeleting) return;
+
+    setOrphanDeleting(true);
+    let deletedCount = 0;
+
+    try {
+      for (const file of orphanedFiles) {
+        try {
+          await deleteObject(file.ref);
+          deletedCount++;
+        } catch (err) {
+          console.error('Failed to delete:', file.ref.fullPath, err);
+        }
+      }
+
+      setOrphanDeletedCount(deletedCount);
+      setOrphanResults('deleted');
+      setOrphanedFiles([]);
+      showToast(`Deleted ${deletedCount} orphaned image${deletedCount !== 1 ? 's' : ''}`, { type: 'success' });
+    } catch (err) {
+      console.error('Error deleting orphaned images:', err);
+      showToast('Failed to delete some images', { type: 'error' });
+    } finally {
+      setOrphanDeleting(false);
+    }
+  }, [orphanedFiles, orphanDeleting, showToast]);
 
   // Get unique books with issues count
   const uniqueBooksWithIssues = booksWithIssues.length;
@@ -370,7 +509,7 @@ export default function MaintenanceSettingsPage() {
           </button>
         </div>
 
-        {/* Orphaned Images - Placeholder for now */}
+        {/* Orphaned Images */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-medium text-gray-900 mb-2">Orphaned Images</h3>
           <p className="text-gray-600 text-sm mb-4">
@@ -378,14 +517,70 @@ export default function MaintenanceSettingsPage() {
             you upload images but don&apos;t save the book.
           </p>
 
+          {/* Scan Results */}
+          {(orphanScanning || orphanResults) && (
+            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              {orphanScanning && (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-amber-500" aria-hidden="true" />
+                  <span className="text-sm text-gray-600">Scanning for orphaned images...</span>
+                </div>
+              )}
+
+              {orphanResults === 'found' && (
+                <div>
+                  <div className="flex items-center gap-2 text-amber-600 mb-2">
+                    <AlertTriangle className="w-5 h-5" aria-hidden="true" />
+                    <span className="font-medium">{orphanedFiles.length} orphaned images found</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Total size: {formatBytes(orphanTotalSize)}</p>
+                  <button
+                    onClick={handleDeleteOrphans}
+                    disabled={orphanDeleting}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+                  >
+                    {orphanDeleting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                        <span>Delete Orphaned Images</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {orphanResults === 'none' && (
+                <p className="text-sm text-gray-700">No orphaned images found.</p>
+              )}
+
+              {orphanResults === 'deleted' && (
+                <p className="text-sm text-gray-700">{orphanDeletedCount} orphaned images deleted.</p>
+              )}
+            </div>
+          )}
+
           <button
-            disabled
-            className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleScanOrphans}
+            disabled={orphanScanning}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
           >
-            <Search className="w-4 h-4" aria-hidden="true" />
-            <span>Scan for Orphaned Images</span>
+            {orphanScanning ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                <span>Scanning...</span>
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4" aria-hidden="true" />
+                <span>Scan for Orphaned Images</span>
+              </>
+            )}
           </button>
-          <p className="text-xs text-gray-400 mt-2">Coming soon - requires Firebase Storage setup</p>
         </div>
       </div>
     </>

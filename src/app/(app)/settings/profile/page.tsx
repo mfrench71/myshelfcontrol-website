@@ -270,21 +270,21 @@ function ChangePasswordModal({
               />
             </div>
 
-            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="w-full sm:flex-1 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:flex-1 py-3 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Changing...' : 'Change Password'}
+                {loading ? 'Updating...' : 'Update Password'}
               </button>
             </div>
           </form>

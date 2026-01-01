@@ -169,6 +169,13 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   // Lock body scroll when open
   useBodyScrollLock(isOpen);
 
+  // Load recent searches when overlay opens
+  useEffect(() => {
+    if (isOpen) {
+      setRecentSearches(getRecentSearches());
+    }
+  }, [isOpen]);
+
   // Load books, series, and genres when overlay opens (only once)
   useEffect(() => {
     if (!isOpen || !user || dataLoaded) return;
@@ -190,7 +197,6 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     }
 
     loadData();
-    setRecentSearches(getRecentSearches());
   }, [isOpen, user, dataLoaded]);
 
   // Focus input when opening

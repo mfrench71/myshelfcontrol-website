@@ -290,7 +290,7 @@ export async function lookupISBN(isbn: string | null | undefined): Promise<ISBNL
           }
         }
       }
-    } catch (err) {
+    } catch {
       // Edition data is supplementary, ignore errors
     }
   }

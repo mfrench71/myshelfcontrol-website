@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  ChevronRight,
   RefreshCw,
   Calculator,
   Search,
@@ -184,7 +183,7 @@ export default function MaintenanceSettingsPage() {
         const subFiles = await listAllFilesRecursively(prefixRef);
         files.push(...subFiles);
       }
-    } catch (error) {
+    } catch {
       // Folder might not exist, which is fine
       console.log('Could not list folder:', folderRef.fullPath);
     }
@@ -243,6 +242,7 @@ export default function MaintenanceSettingsPage() {
     } finally {
       setOrphanScanning(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, orphanScanning, showToast]);
 
   /**

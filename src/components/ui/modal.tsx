@@ -418,32 +418,35 @@ export function useConfirmModal(): [
   const [state, setState] = useState<{
     isOpen: boolean;
     options: ConfirmOptions | null;
-    resolve: ((value: boolean) => void) | null;
   }>({
     isOpen: false,
     options: null,
-    resolve: null,
   });
+
+  // Use ref to store the resolve function to avoid dependency issues
+  const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
+      resolveRef.current = resolve;
       setState({
         isOpen: true,
         options,
-        resolve,
       });
     });
   }, []);
 
   const handleClose = useCallback(() => {
-    state.resolve?.(false);
-    setState({ isOpen: false, options: null, resolve: null });
-  }, [state.resolve]);
+    resolveRef.current?.(false);
+    resolveRef.current = null;
+    setState({ isOpen: false, options: null });
+  }, []);
 
   const handleConfirm = useCallback(() => {
-    state.resolve?.(true);
-    setState({ isOpen: false, options: null, resolve: null });
-  }, [state.resolve]);
+    resolveRef.current?.(true);
+    resolveRef.current = null;
+    setState({ isOpen: false, options: null });
+  }, []);
 
   const ConfirmModalComponent = useCallback(() => {
     if (!state.options) return null;

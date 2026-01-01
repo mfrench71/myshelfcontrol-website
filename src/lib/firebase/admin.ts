@@ -2,12 +2,10 @@
 // Server-side Firebase initialization for API routes and server components
 
 import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
-import { getAuth, type Auth } from 'firebase-admin/auth';
-import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 
 let app: App;
-let adminAuth: Auth;
-let adminDb: Firestore;
 
 if (getApps().length === 0) {
   // Use service account credentials from environment variable
@@ -23,7 +21,7 @@ if (getApps().length === 0) {
   app = getApps()[0];
 }
 
-adminAuth = getAuth(app);
-adminDb = getFirestore(app);
+const adminAuth = getAuth(app);
+const adminDb = getFirestore(app);
 
 export { app, adminAuth, adminDb };

@@ -102,7 +102,7 @@ export async function compressProfilePhoto(file: File): Promise<{ blob: Blob; ex
       URL.revokeObjectURL(url);
 
       // Calculate new dimensions (square crop)
-      let { naturalWidth: width, naturalHeight: height } = img;
+      const { naturalWidth: width, naturalHeight: height } = img;
 
       // Determine crop dimensions (center square)
       const size = Math.min(width, height);

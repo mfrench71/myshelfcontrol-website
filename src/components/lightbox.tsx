@@ -40,17 +40,67 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
+  /**
+   * Reset zoom, rotation, and position
+   */
+  const resetTransforms = useCallback(() => {
+    setZoom(1);
+    setRotation(0);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  /**
+   * Navigate to previous image
+   */
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+    resetTransforms();
+  }, [images.length, resetTransforms]);
+
+  /**
+   * Navigate to next image
+   */
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+    resetTransforms();
+  }, [images.length, resetTransforms]);
+
+  /**
+   * Zoom in
+   */
+  const handleZoomIn = useCallback(() => {
+    setZoom((prev) => Math.min(prev + 0.5, 4));
+  }, []);
+
+  /**
+   * Zoom out
+   */
+  const handleZoomOut = useCallback(() => {
+    setZoom((prev) => {
+      const newZoom = Math.max(prev - 0.5, 1);
+      if (newZoom === 1) {
+        setPosition({ x: 0, y: 0 });
+      }
+      return newZoom;
+    });
+  }, []);
+
+  /**
+   * Rotate image 90 degrees
+   */
+  const handleRotate = useCallback(() => {
+    setRotation((prev) => (prev + 90) % 360);
+  }, []);
+
   // Reset state when opening or changing images
   useEffect(() => {
     if (isOpen) {
       setCurrentIndex(initialIndex);
-      setZoom(1);
-      setRotation(0);
-      setPosition({ x: 0, y: 0 });
+      resetTransforms();
       setSwipeOffset(0);
       setIsClosing(false);
     }
-  }, [isOpen, initialIndex]);
+  }, [isOpen, initialIndex, resetTransforms]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -82,7 +132,7 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, currentIndex, images.length]);
+  }, [isOpen, onClose, goToPrevious, goToNext, handleZoomIn, handleZoomOut, handleRotate]);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -95,58 +145,6 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
       document.body.style.overflow = '';
     };
   }, [isOpen]);
-
-  /**
-   * Navigate to previous image
-   */
-  const goToPrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-    resetTransforms();
-  }, [images.length]);
-
-  /**
-   * Navigate to next image
-   */
-  const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-    resetTransforms();
-  }, [images.length]);
-
-  /**
-   * Reset zoom, rotation, and position
-   */
-  const resetTransforms = useCallback(() => {
-    setZoom(1);
-    setRotation(0);
-    setPosition({ x: 0, y: 0 });
-  }, []);
-
-  /**
-   * Zoom in
-   */
-  const handleZoomIn = useCallback(() => {
-    setZoom((prev) => Math.min(prev + 0.5, 4));
-  }, []);
-
-  /**
-   * Zoom out
-   */
-  const handleZoomOut = useCallback(() => {
-    setZoom((prev) => {
-      const newZoom = Math.max(prev - 0.5, 1);
-      if (newZoom === 1) {
-        setPosition({ x: 0, y: 0 });
-      }
-      return newZoom;
-    });
-  }, []);
-
-  /**
-   * Rotate image 90 degrees
-   */
-  const handleRotate = useCallback(() => {
-    setRotation((prev) => (prev + 90) % 360);
-  }, []);
 
   /**
    * Handle mouse/touch start for dragging

@@ -24,7 +24,6 @@ import {
   Loader2,
   Camera,
   Upload,
-  X,
 } from 'lucide-react';
 import {
   EmailAuthProvider,
@@ -93,15 +92,15 @@ function ChangePasswordModal({
   }, [newPassword]);
 
   // Clear form state when modal opens
-  const prevIsOpen = useRef(isOpen);
-  if (isOpen && !prevIsOpen.current) {
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setError(null);
-    setSuccess(false);
-  }
-  prevIsOpen.current = isOpen;
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setError(null);
+      setSuccess(false);
+    }
+  }, [isOpen]);
 
   // Strength bar colours and labels
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
@@ -499,13 +498,13 @@ function DeleteAccountModal({
   const [error, setError] = useState<string | null>(null);
 
   // Clear form state when modal opens
-  const prevIsOpen = useRef(isOpen);
-  if (isOpen && !prevIsOpen.current) {
-    setPassword('');
-    setConfirmText('');
-    setError(null);
-  }
-  prevIsOpen.current = isOpen;
+  useEffect(() => {
+    if (isOpen) {
+      setPassword('');
+      setConfirmText('');
+      setError(null);
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -519,7 +518,7 @@ function DeleteAccountModal({
 
     try {
       await onConfirm(password);
-    } catch (err) {
+    } catch {
       setError('Failed to delete account. Please check your password.');
     }
   };

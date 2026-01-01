@@ -14,7 +14,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  X,
   GitMerge,
   Library,
   Check,
@@ -23,7 +22,6 @@ import {
   Heart,
   MinusCircle,
   CheckCircle,
-  Sparkles,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
@@ -33,7 +31,7 @@ import { getSeries, createSeries, updateSeries, deleteSeries } from '@/lib/repos
 import { getBooks, getBinBooks, addBook } from '@/lib/repositories/books';
 import { getWishlist, addWishlistItem } from '@/lib/repositories/wishlist';
 import { getContrastColor, getNextAvailableColor, GENRE_COLORS } from '@/lib/utils';
-import type { Genre, Series, Book, WishlistItem } from '@/lib/types';
+import type { Genre, Series, Book } from '@/lib/types';
 
 /** Genre with book count */
 type GenreWithCount = Genre & { bookCount: number };
@@ -477,9 +475,9 @@ export default function LibrarySettingsPage() {
         exportedAt: new Date().toISOString(),
         genres: allGenres.map(({ id, ...g }) => ({ ...g, _exportId: id })),
         series: allSeries.map(({ id, ...s }) => ({ ...s, _exportId: id })),
-        books: allBooks.map(({ id, ...b }) => b),
-        wishlist: allWishlist.map(({ id, ...w }) => w),
-        bin: binnedBooks.map(({ id, ...b }) => b),
+        books: allBooks.map(({ id: _id, ...b }) => b),
+        wishlist: allWishlist.map(({ id: _id, ...w }) => w),
+        bin: binnedBooks.map(({ id: _id, ...b }) => b),
       };
 
       // Create and download file

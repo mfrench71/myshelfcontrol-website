@@ -34,7 +34,7 @@ import { getBook, softDeleteBook, getBooksBySeries, updateBook } from '@/lib/rep
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
 import { getSeries, deleteSeries } from '@/lib/repositories/series';
 import { Lightbox } from '@/components/lightbox';
-import type { Book, Genre, Series, BookImage } from '@/lib/types';
+import type { Book, Genre, Series } from '@/lib/types';
 
 /**
  * Format a timestamp for display

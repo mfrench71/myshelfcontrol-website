@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -49,26 +49,34 @@ export default function SettingsLayout({ children }: Props) {
   const activeTab = getActiveTab();
 
   // Load counts for badges
-  const loadCounts = useCallback(async () => {
-    if (!user) return;
-    try {
-      const [books, binBooks] = await Promise.all([
-        getBooks(user.uid),
-        getBinBooks(user.uid),
-      ]);
-      setBinCount(binBooks.length);
-
-      const report = analyzeLibraryHealth(books);
-      const booksWithIssues = getBooksWithIssues(report);
-      setIssueCount(booksWithIssues.length);
-    } catch (err) {
-      console.error('Failed to load counts:', err);
-    }
-  }, [user]);
-
   useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+
+    async function loadCounts() {
+      try {
+        const [books, binBooks] = await Promise.all([
+          getBooks(user!.uid),
+          getBinBooks(user!.uid),
+        ]);
+        if (cancelled) return;
+        setBinCount(binBooks.length);
+
+        const report = analyzeLibraryHealth(books);
+        const booksWithIssues = getBooksWithIssues(report);
+        setIssueCount(booksWithIssues.length);
+      } catch (err) {
+        console.error('Failed to load counts:', err);
+      }
+    }
+
     loadCounts();
-  }, [loadCounts]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   // Get current page label for breadcrumb
   const activeTabInfo = SETTINGS_TABS.find((t) => t.id === activeTab);

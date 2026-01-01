@@ -6,9 +6,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { Trash2, BookOpen, RotateCcw, AlertCircle, Clock, ChevronRight } from 'lucide-react';
+import { Trash2, BookOpen, RotateCcw, AlertCircle, Clock } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBinBooks, restoreBook, deleteBook } from '@/lib/repositories/books';
 import { useToast } from '@/components/ui/toast';

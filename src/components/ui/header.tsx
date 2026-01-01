@@ -8,7 +8,6 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
-import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import {
   BookOpen,
   Search,
@@ -20,10 +19,12 @@ import {
   LogOut,
   WifiOff,
 } from 'lucide-react';
+import { BottomSheet } from '@/components/ui/modal';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getGravatarUrl } from '@/lib/utils';
 import { SearchOverlay } from '@/components/ui/search-overlay';
 import { getWishlist } from '@/lib/repositories/wishlist';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 
 /** localStorage key for caching Gravatar availability per email hash */
 const GRAVATAR_CACHE_KEY = 'gravatar_cache';
@@ -31,7 +32,7 @@ const GRAVATAR_CACHE_KEY = 'gravatar_cache';
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading } = useAuthContext();
+  const { user } = useAuthContext();
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -56,9 +57,6 @@ export function Header() {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-
-  // Lock body scroll when menu is open
-  useBodyScrollLock(showMenu);
 
   /**
    * Fetch wishlist count
@@ -299,91 +297,90 @@ export function Header() {
         </div>
       </header>
 
-      {/* Menu Overlay */}
+      {/* Mobile Menu Bottom Sheet */}
+      <BottomSheet
+        isOpen={showMenu}
+        onClose={() => setShowMenu(false)}
+        title="Menu"
+        swipeToDismiss={true}
+        className="md:hidden"
+      >
+        <div className="p-6 pt-2">
+          {/* User info */}
+          {user && (
+            <div className="flex items-center gap-3 mb-4">
+              {renderAvatar('md')}
+              <div>
+                <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                  {user.email}
+                </p>
+                <p className="text-xs text-gray-500">MyShelfControl</p>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="space-y-1">
+            <Link
+              href="/wishlist"
+              onClick={() => setShowMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+                pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
+              }`}
+            >
+              <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
+              <span>Wishlist</span>
+              {wishlistCount > 0 && (
+                <span className="ml-auto bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              href="/settings"
+              onClick={() => setShowMenu(false)}
+              className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+                pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
+              }`}
+            >
+              <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
+              <span>Settings</span>
+            </Link>
+
+            {user && (
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-left text-red-600 min-h-[44px] transition-colors disabled:opacity-50"
+              >
+                {loggingOut ? (
+                  <>
+                    <span className="w-5 h-5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                    <span>Signing out...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="w-5 h-5" aria-hidden="true" />
+                    <span>Sign Out</span>
+                  </>
+                )}
+              </button>
+            )}
+          </nav>
+        </div>
+      </BottomSheet>
+
+      {/* Desktop Menu Overlay */}
       {showMenu && (
         <div
-          className="fixed inset-0 bg-black/50 z-50"
+          className="hidden md:block fixed inset-0 bg-black/50 z-50"
           onClick={() => setShowMenu(false)}
         >
-          {/* Mobile: Bottom sheet */}
-          <div
-            ref={menuRef}
-            className="md:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Handle */}
-            <div className="flex justify-center mb-4 md:hidden">
-              <div className="w-10 h-1 bg-gray-300 rounded-full" />
-            </div>
-
-            {/* User info */}
-            {user && (
-              <div className="flex items-center gap-3 mb-4">
-                {renderAvatar('md')}
-                <div>
-                  <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
-                    {user.email}
-                  </p>
-                  <p className="text-xs text-gray-500">MyShelfControl</p>
-                </div>
-              </div>
-            )}
-
-            {/* Navigation */}
-            <nav className="space-y-1">
-              <Link
-                href="/wishlist"
-                onClick={() => setShowMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
-                  pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
-                }`}
-              >
-                <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
-                <span>Wishlist</span>
-                {wishlistCount > 0 && (
-                  <span className="ml-auto bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
-
-              <Link
-                href="/settings"
-                onClick={() => setShowMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
-                  pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
-                }`}
-              >
-                <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
-                <span>Settings</span>
-              </Link>
-
-              {user && (
-                <button
-                  onClick={handleLogout}
-                  disabled={loggingOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-left text-red-600 min-h-[44px] transition-colors disabled:opacity-50"
-                >
-                  {loggingOut ? (
-                    <>
-                      <span className="w-5 h-5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-                      <span>Signing out...</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogOut className="w-5 h-5" aria-hidden="true" />
-                      <span>Sign Out</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </nav>
-          </div>
-
           {/* Desktop: Slide-out panel */}
           <div
             ref={menuRef}
-            className="hidden md:block absolute right-0 top-0 bottom-0 w-80 bg-white shadow-xl"
+            className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b border-gray-200">

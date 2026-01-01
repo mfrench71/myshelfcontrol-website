@@ -20,7 +20,6 @@ import {
   Library,
   Loader2,
   Trash2,
-  Globe,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';

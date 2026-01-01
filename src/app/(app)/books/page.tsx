@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
 import { BookOpen, Plus, AlertCircle, SlidersHorizontal, Loader2, SearchX } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
@@ -227,7 +227,6 @@ function buildURLParams(filters: BookFilters, sort: SortOption): string {
 function BooksPageContent() {
   const { user, loading: authLoading } = useAuthContext();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [series, setSeries] = useState<Series[]>([]);

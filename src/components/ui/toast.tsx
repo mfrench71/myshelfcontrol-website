@@ -62,13 +62,14 @@ function ToastItem({
   const [isExiting, setIsExiting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const remainingTimeRef = useRef(toast.duration);
-  const startTimeRef = useRef(Date.now());
+  const startTimeRef = useRef<number | null>(null);
 
   // Auto-dismiss timer
   useEffect(() => {
     if (isPaused) return;
 
-    startTimeRef.current = Date.now();
+    const startTime = Date.now();
+    startTimeRef.current = startTime;
 
     const timer = setTimeout(() => {
       setIsExiting(true);
@@ -78,7 +79,7 @@ function ToastItem({
     return () => {
       clearTimeout(timer);
       // Update remaining time based on how long the timer ran
-      const elapsed = Date.now() - startTimeRef.current;
+      const elapsed = Date.now() - startTime;
       remainingTimeRef.current = Math.max(0, remainingTimeRef.current - elapsed);
     };
   }, [isPaused, toast.id, onDismiss]);

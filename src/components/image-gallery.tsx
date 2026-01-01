@@ -4,10 +4,10 @@
  */
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useId } from 'react';
 import Image from 'next/image';
 import { X, ImagePlus, ImageOff, Loader2 } from 'lucide-react';
-import { uploadImage, deleteImage, validateImage, type UploadResult } from '@/lib/utils/image-upload';
+import { uploadImage, deleteImage, validateImage } from '@/lib/utils/image-upload';
 
 /** Image data structure */
 export interface GalleryImage {
@@ -63,9 +63,11 @@ export function ImageGallery({
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [imageLoadStates, setImageLoadStates] = useState<Record<string, 'loading' | 'loaded' | 'error'>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Generate a stable temp ID for new books
+  const tempId = useId();
 
   // Effective book ID (use temp ID for new books)
-  const effectiveBookId = bookId || `temp-${Date.now()}`;
+  const effectiveBookId = bookId || `temp-${tempId}`;
 
   // Calculate remaining slots
   const total = images.length + uploading.size;

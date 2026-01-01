@@ -3,7 +3,7 @@
  * Manages widget configuration storage and retrieval
  */
 
-import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 import {
   DEFAULT_WIDGETS,

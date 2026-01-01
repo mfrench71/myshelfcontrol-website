@@ -729,6 +729,7 @@ export default function AddBookPage() {
       setDuplicateBypassed(false);
       setDuplicateWarning(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, author]);
 
   return (

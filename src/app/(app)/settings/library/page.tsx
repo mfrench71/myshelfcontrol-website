@@ -14,7 +14,7 @@ import {
   Plus,
   Pencil,
   Trash2,
-  GitMerge,
+  Combine,
   Library,
   Check,
   Loader2,
@@ -870,7 +870,7 @@ export default function LibrarySettingsPage() {
                             className="p-2 hover:bg-blue-50 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Merge ${genre.name}`}
                           >
-                            <GitMerge className="w-4 h-4" aria-hidden="true" />
+                            <Combine className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => setGenreDeleteConfirm(genre)}
@@ -979,7 +979,7 @@ export default function LibrarySettingsPage() {
                             className="p-2 hover:bg-blue-50 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Merge ${series.name}`}
                           >
-                            <GitMerge className="w-4 h-4" aria-hidden="true" />
+                            <Combine className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => setSeriesDeleteConfirm(series)}
@@ -1150,7 +1150,6 @@ export default function LibrarySettingsPage() {
                 onChange={(e) => setGenreName(e.target.value)}
                 placeholder="e.g., Science Fiction"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                autoFocus
               />
             </div>
 
@@ -1158,28 +1157,30 @@ export default function LibrarySettingsPage() {
             {editingGenre && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Colour</label>
-                <div className="flex flex-wrap gap-2">
-                  {availableColors.map((color) => {
-                    const isSelected = color.toLowerCase() === genreColor.toLowerCase();
-                    const textColor = getContrastColor(color);
-                    return (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setGenreColor(color)}
-                        className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${
-                          isSelected ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' : 'border-transparent'
-                        }`}
-                        style={{ backgroundColor: color }}
-                        aria-label={`Select ${color} colour${isSelected ? ' (selected)' : ''}`}
-                        aria-pressed={isSelected}
-                      >
-                        {isSelected && (
-                          <Check className="w-4 h-4 mx-auto" style={{ color: textColor }} aria-hidden="true" />
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="max-h-32 overflow-y-auto rounded-lg border border-gray-100 p-2">
+                  <div className="flex flex-wrap gap-2">
+                    {availableColors.map((color) => {
+                      const isSelected = color.toLowerCase() === genreColor.toLowerCase();
+                      const textColor = getContrastColor(color);
+                      return (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setGenreColor(color)}
+                          className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${
+                            isSelected ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' : 'border-transparent'
+                          }`}
+                          style={{ backgroundColor: color }}
+                          aria-label={`Select ${color} colour${isSelected ? ' (selected)' : ''}`}
+                          aria-pressed={isSelected}
+                        >
+                          {isSelected && (
+                            <Check className="w-4 h-4 mx-auto" style={{ color: textColor }} aria-hidden="true" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
@@ -1324,7 +1325,6 @@ export default function LibrarySettingsPage() {
                 onChange={(e) => setSeriesName(e.target.value)}
                 placeholder="e.g., Harry Potter"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                autoFocus
               />
             </div>
 
@@ -1335,6 +1335,7 @@ export default function LibrarySettingsPage() {
               <input
                 id="series-total"
                 type="number"
+                inputMode="numeric"
                 value={seriesTotalBooks}
                 onChange={(e) => setSeriesTotalBooks(e.target.value)}
                 placeholder="e.g., 7"

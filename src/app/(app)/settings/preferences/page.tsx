@@ -20,9 +20,12 @@ import {
   Library,
   Loader2,
   Trash2,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
+import { BottomSheet } from '@/components/ui/modal';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import {
   loadWidgetSettings,
@@ -92,29 +95,19 @@ function ClearCacheModal({
   onConfirm: () => void;
   isClearing: boolean;
 }) {
-  useBodyScrollLock(isOpen);
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose}>
-      {/* Mobile: Bottom sheet */}
-      <div
-        className="md:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-center mb-4">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Trash2 className="w-6 h-6 text-amber-600" aria-hidden="true" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900">Clear Local Cache?</h3>
-          <p className="text-gray-600 text-sm mt-2">
-            This will clear all cached data from your browser. Your data in the cloud will not be affected.
-          </p>
-        </div>
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Clear Local Cache"
+      closeOnBackdrop={!isClearing}
+      closeOnEscape={!isClearing}
+    >
+      <div className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Clear Local Cache?</h3>
+        <p className="text-gray-600 text-sm mb-6">
+          This will clear all cached data from your browser. Your data in the cloud will not be affected.
+        </p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
@@ -130,8 +123,8 @@ function ClearCacheModal({
           >
             {isClearing ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Clearing...
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                <span>Clearing...</span>
               </>
             ) : (
               'Clear Cache'
@@ -139,48 +132,7 @@ function ClearCacheModal({
           </button>
         </div>
       </div>
-
-      {/* Desktop: Centered modal */}
-      <div
-        className="hidden md:flex items-center justify-center h-full p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-6 h-6 text-amber-600" aria-hidden="true" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">Clear Local Cache?</h3>
-            <p className="text-gray-600 text-sm mt-2">
-              This will clear all cached data from your browser. Your data in the cloud will not be affected.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={isClearing}
-              className="flex-1 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              disabled={isClearing}
-              className="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isClearing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Clearing...
-                </>
-              ) : (
-                'Clear Cache'
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </BottomSheet>
   );
 }
 
@@ -294,6 +246,28 @@ export default function PreferencesSettingsPage() {
     setDraggedIndex(null);
     // Save after drag ends
     saveSettings(widgets);
+  };
+
+  // Move widget up (for mobile arrow buttons)
+  const moveWidgetUp = (index: number) => {
+    if (index === 0) return;
+    const newWidgets = [...widgets];
+    [newWidgets[index - 1], newWidgets[index]] = [newWidgets[index], newWidgets[index - 1]];
+    newWidgets.forEach((w, i) => {
+      w.order = i;
+    });
+    saveSettings(newWidgets);
+  };
+
+  // Move widget down (for mobile arrow buttons)
+  const moveWidgetDown = (index: number) => {
+    if (index === widgets.length - 1) return;
+    const newWidgets = [...widgets];
+    [newWidgets[index], newWidgets[index + 1]] = [newWidgets[index + 1], newWidgets[index]];
+    newWidgets.forEach((w, i) => {
+      w.order = i;
+    });
+    saveSettings(newWidgets);
   };
 
   // Update widget settings (count, etc.)
@@ -553,7 +527,9 @@ export default function PreferencesSettingsPage() {
                   </button>
                 </div>
                 <p className="text-gray-500 text-sm mb-4">
-                  Drag to reorder. Configure items to show and width for each widget.
+                  <span className="hidden md:inline">Drag to reorder.</span>
+                  <span className="md:hidden">Use arrows to reorder.</span>
+                  {' '}Configure items to show and width for each widget.
                 </p>
 
                 {/* Widget list */}
@@ -570,7 +546,7 @@ export default function PreferencesSettingsPage() {
                         onDragStart={() => handleDragStart(index)}
                         onDragOver={(e) => handleDragOver(e, index)}
                         onDragEnd={handleDragEnd}
-                        className={`p-4 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
+                        className={`p-4 rounded-lg border transition-all md:cursor-grab md:active:cursor-grabbing ${
                           draggedIndex === index
                             ? 'border-primary bg-primary/5'
                             : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
@@ -578,10 +554,30 @@ export default function PreferencesSettingsPage() {
                       >
                         {/* Header row */}
                         <div className="flex items-center gap-3">
+                          {/* Drag handle - desktop only */}
                           <GripVertical
-                            className="w-4 h-4 text-gray-400 flex-shrink-0"
+                            className="hidden md:block w-4 h-4 text-gray-400 flex-shrink-0"
                             aria-hidden="true"
                           />
+                          {/* Arrow buttons - mobile only */}
+                          <div className="md:hidden flex flex-col gap-0.5 flex-shrink-0">
+                            <button
+                              onClick={() => moveWidgetUp(index)}
+                              disabled={saving || index === 0}
+                              className="p-1 rounded hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              aria-label="Move up"
+                            >
+                              <ChevronUp className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                            </button>
+                            <button
+                              onClick={() => moveWidgetDown(index)}
+                              disabled={saving || index === widgets.length - 1}
+                              className="p-1 rounded hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              aria-label="Move down"
+                            >
+                              <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                            </button>
+                          </div>
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <IconComponent className="w-4 h-4 text-gray-500" aria-hidden="true" />
                             <div className="min-w-0">

@@ -682,22 +682,6 @@ export default function EditBookPage({ params }: PageProps) {
             />
           )}
 
-          {/* ISBN */}
-          <div>
-            <label htmlFor="isbn" className="block font-semibold text-gray-700 mb-1">
-              ISBN
-            </label>
-            <input
-              type="text"
-              id="isbn"
-              name="isbn"
-              value={isbn}
-              onChange={(e) => setIsbn(e.target.value)}
-              placeholder="e.g., 9780123456789"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-            />
-          </div>
-
           {/* Genre Picker */}
           {user && (
             <GenrePicker
@@ -736,7 +720,7 @@ export default function EditBookPage({ params }: PageProps) {
             />
           )}
 
-          {/* Publisher and Published Date */}
+          {/* Publisher and Year Published */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="publisher" className="block font-semibold text-gray-700 mb-1">
@@ -753,14 +737,18 @@ export default function EditBookPage({ params }: PageProps) {
             </div>
             <div>
               <label htmlFor="publishedDate" className="block font-semibold text-gray-700 mb-1">
-                Published Date
+                Year Published
               </label>
               <input
-                type="text"
+                type="number"
                 id="publishedDate"
                 name="publishedDate"
                 value={publishedDate}
                 onChange={(e) => setPublishedDate(e.target.value)}
+                placeholder="e.g., 2024"
+                inputMode="numeric"
+                min="1000"
+                max="2100"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               />
             </div>
@@ -798,6 +786,7 @@ export default function EditBookPage({ params }: PageProps) {
                 onChange={(e) => setPageCount(e.target.value)}
                 placeholder="e.g., 320"
                 inputMode="numeric"
+                min="1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               />
             </div>

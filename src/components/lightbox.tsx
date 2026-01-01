@@ -35,6 +35,8 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [swipeOffset, setSwipeOffset] = useState(0); // Vertical swipe offset for close gesture
+  const [isClosing, setIsClosing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -45,6 +47,8 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
       setZoom(1);
       setRotation(0);
       setPosition({ x: 0, y: 0 });
+      setSwipeOffset(0);
+      setIsClosing(false);
     }
   }, [isOpen, initialIndex]);
 
@@ -190,7 +194,25 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
       x: e.touches[0].clientX,
       y: e.touches[0].clientY,
     };
+    setSwipeOffset(0);
   }, [zoom, handleDragStart]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (zoom > 1) {
+      handleDragMove(e);
+      return;
+    }
+
+    if (!touchStartRef.current) return;
+
+    const currentY = e.touches[0].clientY;
+    const diffY = currentY - touchStartRef.current.y;
+
+    // Only track downward swipes for close gesture
+    if (diffY > 0) {
+      setSwipeOffset(diffY);
+    }
+  }, [zoom, handleDragMove]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (zoom > 1) {
@@ -215,10 +237,17 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
       } else {
         goToNext();
       }
+      setSwipeOffset(0);
     }
     // Vertical swipe down to close
     else if (diffY > 100 && Math.abs(diffY) > Math.abs(diffX)) {
-      onClose();
+      setIsClosing(true);
+      setTimeout(() => {
+        onClose();
+      }, 150);
+    } else {
+      // Reset swipe offset with animation
+      setSwipeOffset(0);
     }
 
     touchStartRef.current = null;
@@ -237,13 +266,19 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
 
   const currentImage = images[currentIndex];
 
+  // Calculate opacity based on swipe offset
+  const swipeOpacity = Math.max(0.3, 1 - swipeOffset / 300);
+
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+      className={`fixed inset-0 z-50 bg-black/95 flex items-center justify-center lightbox-enter ${
+        isClosing ? 'lightbox-exit' : ''
+      }`}
+      style={{ opacity: swipeOffset > 0 ? swipeOpacity : undefined }}
       onClick={handleBackdropClick}
       onTouchStart={handleTouchStart}
-      onTouchMove={zoom > 1 ? handleDragMove : undefined}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleDragStart}
       onMouseMove={handleDragMove}
@@ -321,10 +356,10 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
 
       {/* Image container */}
       <div
-        className={`relative max-w-full max-h-full ${isDragging ? 'cursor-grabbing' : zoom > 1 ? 'cursor-grab' : ''}`}
+        className={`relative max-w-full max-h-full lightbox-image-enter ${isDragging ? 'cursor-grabbing' : zoom > 1 ? 'cursor-grab' : ''} ${swipeOffset > 0 ? 'lightbox-dragging' : ''}`}
         style={{
-          transform: `translate(${position.x}px, ${position.y}px) scale(${zoom}) rotate(${rotation}deg)`,
-          transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+          transform: `translate(${position.x}px, ${position.y + swipeOffset}px) scale(${zoom * (1 - swipeOffset / 1000)}) rotate(${rotation}deg)`,
+          transition: isDragging || swipeOffset > 0 ? 'none' : 'transform 0.2s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >

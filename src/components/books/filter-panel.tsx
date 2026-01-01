@@ -209,7 +209,7 @@ function AuthorTypeahead({
         <div
           ref={dropdownRef}
           id={`${id}-listbox`}
-          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dropdown-enter"
           role="listbox"
         >
           {filteredAuthors.map((author, index) => {
@@ -236,7 +236,7 @@ function AuthorTypeahead({
       {isOpen && query && filteredAuthors.length === 0 && (
         <div
           ref={dropdownRef}
-          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dropdown-enter"
         >
           <div className="px-3 py-2 text-sm text-gray-500 italic">No authors found</div>
         </div>
@@ -462,7 +462,7 @@ export function FilterSidebar({
             className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors py-1 min-h-[44px]"
           >
             <ChevronDown
-              className={`w-4 h-4 transition-transform ${showMoreFilters ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 accordion-icon ${showMoreFilters ? 'open' : ''}`}
               aria-hidden="true"
             />
             <span>{showMoreFilters ? 'Less' : 'More'}</span>
@@ -781,7 +781,8 @@ export function FilterBottomSheet({
                 className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors py-1"
               >
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform ${showMoreFilters ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 accordion-icon ${showMoreFilters ? 'open' : ''}`}
+                  aria-hidden="true"
                 />
                 <span>{showMoreFilters ? 'Less' : 'More'}</span>
               </button>
@@ -872,7 +873,7 @@ export function ActiveFilterChip({
   return (
     <button
       onClick={onRemove}
-      className={`inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] ${colours} rounded-full text-sm font-medium transition-colors`}
+      className={`inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] ${colours} rounded-full text-sm font-medium filter-chip chip-enter`}
       aria-label={`Remove ${label} filter`}
     >
       <span>{label}</span>

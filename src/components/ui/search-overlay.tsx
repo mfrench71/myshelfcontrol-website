@@ -69,6 +69,18 @@ function saveRecentSearch(query: string): void {
 }
 
 /**
+ * Clear all recent searches
+ */
+function clearRecentSearches(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(RECENT_SEARCHES_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/**
  * Highlight matching text in a string
  */
 function highlightMatch(text: string, query: string): React.ReactNode {
@@ -266,7 +278,18 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           /* Recent Searches */
           recentSearches.length > 0 && (
             <div className="p-4">
-              <h3 className="text-sm font-medium text-gray-500 mb-3">Recent Searches</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-gray-500">Recent Searches</h3>
+                <button
+                  onClick={() => {
+                    clearRecentSearches();
+                    setRecentSearches([]);
+                  }}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
               <div className="space-y-1">
                 {recentSearches.map((search, index) => (
                   <button

@@ -432,6 +432,445 @@ button, a {
 }
 
 /* ============================================
+   CARD STAGGER ANIMATIONS
+   ============================================ */
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-animate {
+  animation: cardIn 0.3s ease-out backwards;
+}
+
+/* Stagger delays for list items */
+.card-animate:nth-child(1) { animation-delay: 0ms; }
+.card-animate:nth-child(2) { animation-delay: 50ms; }
+.card-animate:nth-child(3) { animation-delay: 100ms; }
+.card-animate:nth-child(4) { animation-delay: 150ms; }
+.card-animate:nth-child(5) { animation-delay: 200ms; }
+.card-animate:nth-child(n + 6) { animation-delay: 250ms; }
+
+/* ============================================
+   EMPTY STATE ANIMATIONS
+   ============================================ */
+
+@keyframes emptyStateIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.empty-state-animate {
+  animation: emptyStateIn 0.3s ease-out;
+}
+
+/* ============================================
+   FILTER CHIP ANIMATIONS
+   ============================================ */
+
+@keyframes chipIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes chipOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.chip-enter {
+  animation: chipIn 0.15s ease-out forwards;
+}
+
+.chip-exit {
+  animation: chipOut 0.1s ease-in forwards;
+}
+
+/* Filter chip press feedback */
+.filter-chip {
+  transition: transform 0.1s ease-out, background-color 0.15s ease;
+}
+
+.filter-chip:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   FAB ANIMATIONS
+   ============================================ */
+
+.fab-press {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.fab-press:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   GENRE BADGE ANIMATIONS
+   ============================================ */
+
+.genre-badge-link {
+  text-decoration: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.genre-badge-link:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+}
+
+.genre-badge-link:active {
+  transform: scale(0.98);
+}
+
+/* ============================================
+   BADGE PULSE ANIMATION
+   ============================================ */
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.badge-pulse {
+  animation: badgePulse 0.3s ease-out;
+}
+
+/* Notification dot pulse */
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+.dot-pulse {
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   DROPDOWN ANIMATIONS
+   ============================================ */
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdownOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+.dropdown-enter {
+  animation: dropdownIn 0.15s ease-out forwards;
+}
+
+.dropdown-exit {
+  animation: dropdownOut 0.1s ease-in forwards;
+}
+
+/* ============================================
+   SECTION FADE TRANSITIONS
+   ============================================ */
+
+@keyframes sectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sectionFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.section-enter {
+  animation: sectionFadeIn 0.2s ease-out forwards;
+}
+
+.section-exit {
+  animation: sectionFadeOut 0.15s ease-in forwards;
+}
+
+/* Fade transitions for dynamic content */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.2s ease-out;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.15s ease-in;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ============================================
+   ACCORDION ANIMATIONS
+   ============================================ */
+
+.accordion-icon {
+  transition: transform 0.2s ease-out;
+}
+
+.accordion-icon.open {
+  transform: rotate(180deg);
+}
+
+/* ============================================
+   SECONDARY FILTERS COLLAPSE
+   ============================================ */
+
+.secondary-filters {
+  overflow: hidden;
+  transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.secondary-filters.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.secondary-filters.expanded {
+  max-height: 500px;
+  opacity: 1;
+}
+
+/* ============================================
+   LIST ITEM INTERACTIONS
+   ============================================ */
+
+.list-item-press {
+  transition: background-color 0.1s ease-out;
+}
+
+.list-item-press:active {
+  background-color: #f3f4f6;
+}
+
+/* ============================================
+   TOAST QUEUE ANIMATIONS
+   ============================================ */
+
+@keyframes toastQueueIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastQueueOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+.toast-queue-enter {
+  animation: toastQueueIn 0.2s ease-out forwards;
+}
+
+.toast-queue-exit {
+  animation: toastQueueOut 0.15s ease-in forwards;
+}
+
+/* Toast swipe-to-dismiss transitions */
+.toast-item {
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+  touch-action: pan-x;
+}
+
+/* Desktop toast slide from right */
+@keyframes toastSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 640px) {
+  .toast-enter {
+    animation: toastSlideInRight 0.25s ease-out forwards;
+  }
+}
+
+/* ============================================
+   LIGHTBOX ANIMATIONS
+   ============================================ */
+
+@keyframes lightboxIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lightboxOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes lightboxBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lightbox-enter {
+  animation: lightboxBackdropIn 0.2s ease-out;
+}
+
+.lightbox-image-enter {
+  animation: lightboxIn 0.25s ease-out;
+}
+
+.lightbox-exit {
+  animation: lightboxOut 0.15s ease-in forwards;
+}
+
+/* Lightbox swipe-to-close visual feedback */
+.lightbox-dragging {
+  transition: none !important;
+}
+
+/* ============================================
+   ERROR STATE STYLING
+   ============================================ */
+
+.error-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+}
+
+.error-state-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #ef4444;
+  margin: 0 auto;
+}
+
+.error-state-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #991b1b;
+  margin-top: 0.75rem;
+}
+
+.error-state-description {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+.error-state-action {
+  margin-top: 1rem;
+}
+
+/* ============================================
    REDUCED MOTION
    ============================================ */
 

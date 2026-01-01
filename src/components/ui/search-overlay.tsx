@@ -301,20 +301,24 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             </div>
           ) : (
             /* Empty initial state */
-            <div className="py-8 text-center max-w-6xl mx-auto w-full">
-              <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-              <p className="text-gray-500 mt-3">Search your library</p>
-              <p className="text-gray-400 text-sm mt-1">
-                Find books by title, author, ISBN, series, notes or publisher
-              </p>
+            <div className="p-4 max-w-6xl mx-auto w-full">
+              <div className="py-8 text-center">
+                <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
+                <p className="text-gray-500 mt-3">Search your library</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Find books by title, author, ISBN, series, notes or publisher
+                </p>
+              </div>
             </div>
           )
         ) : results.length === 0 ? (
           /* No Results */
-          <div className="py-8 text-center max-w-6xl mx-auto w-full">
-            <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-            <p className="text-gray-500 mt-3">No books found for &quot;{query}&quot;</p>
-            <p className="text-gray-400 text-sm mt-1">Try a different search term</p>
+          <div className="p-4 max-w-6xl mx-auto w-full">
+            <div className="py-8 text-center">
+              <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
+              <p className="text-gray-500 mt-3">No books found for &quot;{query}&quot;</p>
+              <p className="text-gray-400 text-sm mt-1">Try a different search term</p>
+            </div>
           </div>
         ) : (
           /* Search Results */

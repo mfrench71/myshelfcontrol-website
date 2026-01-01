@@ -132,12 +132,23 @@ function getContrastColor(hex: string): string {
 }
 
 /**
- * Format date for display
+ * Format date for display (handles Firestore timestamps)
  */
 function formatDate(date: unknown): string {
   if (!date) return '';
   try {
-    const d = date instanceof Date ? date : new Date(date as string | number);
+    let d: Date;
+    // Handle Firestore Timestamp (has toDate method)
+    if (typeof date === 'object' && date !== null && 'toDate' in date) {
+      d = (date as { toDate: () => Date }).toDate();
+    // Handle Firestore Timestamp with seconds
+    } else if (typeof date === 'object' && date !== null && 'seconds' in date) {
+      d = new Date((date as { seconds: number }).seconds * 1000);
+    } else if (date instanceof Date) {
+      d = date;
+    } else {
+      d = new Date(date as string | number);
+    }
     if (isNaN(d.getTime())) return '';
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   } catch {
@@ -272,9 +283,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col">
+    <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col animate-fade-in">
       {/* Search Header */}
-      <div className="border-b border-gray-200 p-4 animate-fade-in flex-shrink-0">
+      <div className="border-b border-gray-200 p-4 animate-search-header flex-shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={handleClose}

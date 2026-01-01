@@ -1,6 +1,6 @@
 /**
  * Preferences Settings Page
- * Sync settings and widget customisation
+ * Sync settings, widget customisation, and browser cache management
  */
 'use client';
 
@@ -19,15 +19,54 @@ import {
   Heart,
   Library,
   Loader2,
+  Trash2,
+  Globe,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import {
   loadWidgetSettings,
   saveWidgetSettings,
   resetWidgetSettings,
 } from '@/lib/repositories/widget-settings';
+import { getBooks } from '@/lib/repositories/books';
 import { WIDGET_REGISTRY, type WidgetConfig, type WidgetId } from '@/lib/types/widgets';
+
+/** Sync settings stored in localStorage */
+type SyncSettings = {
+  autoRefreshEnabled: boolean;
+  hiddenThreshold: number; // seconds before auto-refresh triggers
+  cooldownPeriod: number; // minimum seconds between refreshes
+};
+
+const DEFAULT_SYNC_SETTINGS: SyncSettings = {
+  autoRefreshEnabled: true,
+  hiddenThreshold: 60, // 1 minute
+  cooldownPeriod: 300, // 5 minutes
+};
+
+const SYNC_SETTINGS_KEY = 'myshelfcontrol_sync_settings';
+
+/** Load sync settings from localStorage */
+function loadSyncSettings(): SyncSettings {
+  if (typeof window === 'undefined') return DEFAULT_SYNC_SETTINGS;
+  try {
+    const stored = localStorage.getItem(SYNC_SETTINGS_KEY);
+    if (stored) {
+      return { ...DEFAULT_SYNC_SETTINGS, ...JSON.parse(stored) };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return DEFAULT_SYNC_SETTINGS;
+}
+
+/** Save sync settings to localStorage */
+function saveSyncSettings(settings: SyncSettings): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(SYNC_SETTINGS_KEY, JSON.stringify(settings));
+}
 
 /** Icon mapping for widgets */
 const WIDGET_ICONS: Record<WidgetId, typeof BookOpen> = {
@@ -40,6 +79,112 @@ const WIDGET_ICONS: Record<WidgetId, typeof BookOpen> = {
   seriesProgress: Library,
 };
 
+/**
+ * Clear Cache Confirmation Modal
+ */
+function ClearCacheModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  isClearing,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isClearing: boolean;
+}) {
+  useBodyScrollLock(isOpen);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose}>
+      {/* Mobile: Bottom sheet */}
+      <div
+        className="md:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-center mb-4">
+          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+        </div>
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Trash2 className="w-6 h-6 text-amber-600" aria-hidden="true" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Clear Local Cache?</h3>
+          <p className="text-gray-600 text-sm mt-2">
+            This will clear all cached data from your browser. Your data in the cloud will not be affected.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            disabled={isClearing}
+            className="flex-1 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isClearing}
+            className="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isClearing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Clearing...
+              </>
+            ) : (
+              'Clear Cache'
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop: Centered modal */}
+      <div
+        className="hidden md:flex items-center justify-center h-full p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6 text-amber-600" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Clear Local Cache?</h3>
+            <p className="text-gray-600 text-sm mt-2">
+              This will clear all cached data from your browser. Your data in the cloud will not be affected.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              disabled={isClearing}
+              className="flex-1 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={isClearing}
+              className="flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isClearing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Clearing...
+                </>
+              ) : (
+                'Clear Cache'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PreferencesSettingsPage() {
   const { user, loading: authLoading } = useAuthContext();
   const { showToast } = useToast();
@@ -47,6 +192,19 @@ export default function PreferencesSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  // Sync settings state
+  const [syncSettings, setSyncSettings] = useState<SyncSettings>(DEFAULT_SYNC_SETTINGS);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Cache modal state
+  const [showCacheModal, setShowCacheModal] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+
+  // Load sync settings from localStorage
+  useEffect(() => {
+    setSyncSettings(loadSyncSettings());
+  }, []);
 
   // Load widget settings
   const loadSettings = useCallback(async () => {
@@ -139,6 +297,58 @@ export default function PreferencesSettingsPage() {
     saveSettings(widgets);
   };
 
+  // Update sync settings
+  const updateSyncSetting = <K extends keyof SyncSettings>(key: K, value: SyncSettings[K]) => {
+    const newSettings = { ...syncSettings, [key]: value };
+    setSyncSettings(newSettings);
+    saveSyncSettings(newSettings);
+    showToast('Setting saved', { type: 'info' });
+  };
+
+  // Manual refresh
+  const handleManualRefresh = async () => {
+    if (!user) return;
+    setRefreshing(true);
+    try {
+      // Force reload books from server
+      await getBooks(user.uid);
+      showToast('Library refreshed', { type: 'success' });
+    } catch (err) {
+      console.error('Failed to refresh library:', err);
+      showToast('Failed to refresh library', { type: 'error' });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Clear local cache
+  const handleClearCache = async () => {
+    setIsClearing(true);
+    try {
+      // Clear all localStorage items for this app
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('myshelfcontrol_') || key.startsWith('widget_'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+      // Reset sync settings to defaults
+      setSyncSettings(DEFAULT_SYNC_SETTINGS);
+      saveSyncSettings(DEFAULT_SYNC_SETTINGS);
+
+      setShowCacheModal(false);
+      showToast('Cache cleared', { type: 'success' });
+    } catch (err) {
+      console.error('Failed to clear cache:', err);
+      showToast('Failed to clear cache', { type: 'error' });
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-6">
@@ -153,13 +363,22 @@ export default function PreferencesSettingsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
+    <>
+      <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="lg:flex lg:gap-8">
           {/* Sidebar Navigation (Desktop Only) */}
           <aside className="hidden lg:block w-48 flex-shrink-0">
             <nav className="sticky top-36" aria-label="In this section">
               <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">In this section</h2>
               <ul className="space-y-1">
+                <li>
+                  <a
+                    href="#sync"
+                    className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
+                  >
+                    Sync
+                  </a>
+                </li>
                 <li>
                   <a
                     href="#widgets"
@@ -170,10 +389,10 @@ export default function PreferencesSettingsPage() {
                 </li>
                 <li>
                   <a
-                    href="#sync"
+                    href="#browser"
                     className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
                   >
-                    Sync
+                    Browser
                   </a>
                 </li>
               </ul>
@@ -188,87 +407,186 @@ export default function PreferencesSettingsPage() {
             <nav className="lg:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
               <div className="flex gap-2">
                 <a
+                  href="#sync"
+                  className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+                >
+                  Sync
+                </a>
+                <a
                   href="#widgets"
                   className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
                 >
                   Widgets
                 </a>
                 <a
-                  href="#sync"
+                  href="#browser"
                   className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
                 >
-                  Sync
+                  Browser
                 </a>
               </div>
             </nav>
 
             <div className="space-y-6">
+              {/* Sync Section */}
+              <section id="sync" className="scroll-mt-36 space-y-4">
+                <h2 className="text-lg font-semibold text-gray-900">Sync</h2>
+
+                {/* Auto-Refresh Settings */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-2">Auto-Refresh Settings</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    When you switch back to the app after being away, your library can automatically refresh to sync
+                    changes from other devices.
+                  </p>
+
+                  <div className="space-y-4">
+                    {/* Toggle */}
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="auto-refresh-toggle" className="text-sm text-gray-700">
+                        Enable auto-refresh on tab focus
+                      </label>
+                      <input
+                        type="checkbox"
+                        id="auto-refresh-toggle"
+                        checked={syncSettings.autoRefreshEnabled}
+                        onChange={(e) => updateSyncSetting('autoRefreshEnabled', e.target.checked)}
+                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                    </div>
+
+                    {/* Options (shown when enabled) */}
+                    {syncSettings.autoRefreshEnabled && (
+                      <div className="space-y-4 pt-2 border-t border-gray-100">
+                        <div>
+                          <label htmlFor="hidden-threshold" className="block text-sm text-gray-700 mb-1">
+                            Refresh after hidden for
+                          </label>
+                          <select
+                            id="hidden-threshold"
+                            value={syncSettings.hiddenThreshold}
+                            onChange={(e) => updateSyncSetting('hiddenThreshold', Number(e.target.value))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                          >
+                            <option value={30}>30 seconds</option>
+                            <option value={60}>1 minute</option>
+                            <option value={120}>2 minutes</option>
+                            <option value={300}>5 minutes</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="cooldown-period" className="block text-sm text-gray-700 mb-1">
+                            Minimum time between refreshes
+                          </label>
+                          <select
+                            id="cooldown-period"
+                            value={syncSettings.cooldownPeriod}
+                            onChange={(e) => updateSyncSetting('cooldownPeriod', Number(e.target.value))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                          >
+                            <option value={60}>1 minute</option>
+                            <option value={300}>5 minutes</option>
+                            <option value={600}>10 minutes</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Manual Refresh */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-2">Manual Refresh</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Force a full refresh of your library from the server to sync the latest changes.
+                  </p>
+                  <button
+                    onClick={handleManualRefresh}
+                    disabled={refreshing}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+                  >
+                    {refreshing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                        <span>Refreshing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4" aria-hidden="true" />
+                        <span>Refresh Library Now</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </section>
+
               {/* Dashboard Widgets */}
               <section id="widgets" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <LayoutGrid className="w-5 h-5 text-gray-600" aria-hidden="true" />
-                <h2 className="text-lg font-semibold text-gray-900">Dashboard Widgets</h2>
-              </div>
-              <button
-                onClick={handleReset}
-                disabled={saving}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Reset
-              </button>
-            </div>
-            <p className="text-gray-500 text-sm mb-4">
-              Drag to reorder, click eye icon to show/hide widgets on your dashboard.
-            </p>
-
-            {/* Widget list */}
-            <div className="space-y-2">
-              {widgets.map((widget, index) => {
-                const meta = WIDGET_REGISTRY[widget.id];
-                const IconComponent = WIDGET_ICONS[widget.id];
-
-                return (
-                  <div
-                    key={widget.id}
-                    draggable
-                    onDragStart={() => handleDragStart(index)}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDragEnd={handleDragEnd}
-                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
-                      draggedIndex === index
-                        ? 'border-primary bg-primary/5'
-                        : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-                    } ${!widget.enabled ? 'opacity-60' : ''}`}
-                  >
-                    <GripVertical
-                      className="w-4 h-4 text-gray-400 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <IconComponent className="w-4 h-4 text-gray-500" aria-hidden="true" />
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900 text-sm">{meta.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{meta.description}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => toggleWidget(widget.id)}
-                      disabled={saving}
-                      className="p-2 rounded-lg hover:bg-gray-200 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50"
-                      aria-label={widget.enabled ? 'Hide widget' : 'Show widget'}
-                    >
-                      {widget.enabled ? (
-                        <Eye className="w-5 h-5 text-green-600" aria-hidden="true" />
-                      ) : (
-                        <EyeOff className="w-5 h-5 text-gray-400" aria-hidden="true" />
-                      )}
-                    </button>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <LayoutGrid className="w-5 h-5 text-gray-600" aria-hidden="true" />
+                    <h2 className="text-lg font-semibold text-gray-900">Dashboard Widgets</h2>
                   </div>
-                );
-              })}
-            </div>
+                  <button
+                    onClick={handleReset}
+                    disabled={saving}
+                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Reset
+                  </button>
+                </div>
+                <p className="text-gray-500 text-sm mb-4">
+                  Drag to reorder, click eye icon to show/hide widgets on your dashboard.
+                </p>
+
+                {/* Widget list */}
+                <div className="space-y-2">
+                  {widgets.map((widget, index) => {
+                    const meta = WIDGET_REGISTRY[widget.id];
+                    const IconComponent = WIDGET_ICONS[widget.id];
+
+                    return (
+                      <div
+                        key={widget.id}
+                        draggable
+                        onDragStart={() => handleDragStart(index)}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
+                          draggedIndex === index
+                            ? 'border-primary bg-primary/5'
+                            : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                        } ${!widget.enabled ? 'opacity-60' : ''}`}
+                      >
+                        <GripVertical
+                          className="w-4 h-4 text-gray-400 flex-shrink-0"
+                          aria-hidden="true"
+                        />
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <IconComponent className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 text-sm">{meta.name}</p>
+                            <p className="text-xs text-gray-500 truncate">{meta.description}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => toggleWidget(widget.id)}
+                          disabled={saving}
+                          className="p-2 rounded-lg hover:bg-gray-200 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50"
+                          aria-label={widget.enabled ? 'Hide widget' : 'Show widget'}
+                        >
+                          {widget.enabled ? (
+                            <Eye className="w-5 h-5 text-green-600" aria-hidden="true" />
+                          ) : (
+                            <EyeOff className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
 
                 {saving && (
                   <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500">
@@ -278,23 +596,38 @@ export default function PreferencesSettingsPage() {
                 )}
               </section>
 
-              {/* Sync Settings */}
-              <section id="sync" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <RefreshCw className="w-5 h-5 text-gray-600" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-gray-900">Auto-Refresh</h2>
-            </div>
-            <p className="text-gray-500 text-sm mb-4">
-              Your dashboard automatically refreshes when you return to the tab.
-            </p>
-                <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-                  <CheckCircle className="w-4 h-4" />
-                  Visibility-based sync is enabled
+              {/* Browser Section */}
+              <section id="browser" className="scroll-mt-36 space-y-4">
+                <h2 className="text-lg font-semibold text-gray-900">Browser</h2>
+
+                {/* Clear Local Cache */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="font-medium text-gray-900 mb-2">Clear Local Cache</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Clear cached data stored in your browser. This includes genre and series caches, sync settings, and
+                    widget preferences. Your data in the cloud will not be affected.
+                  </p>
+                  <button
+                    onClick={() => setShowCacheModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors min-h-[44px]"
+                  >
+                    <Trash2 className="w-4 h-4" aria-hidden="true" />
+                    <span>Clear Cache</span>
+                  </button>
                 </div>
               </section>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Clear Cache Modal */}
+      <ClearCacheModal
+        isOpen={showCacheModal}
+        onClose={() => setShowCacheModal(false)}
+        onConfirm={handleClearCache}
+        isClearing={isClearing}
+      />
+    </>
   );
 }

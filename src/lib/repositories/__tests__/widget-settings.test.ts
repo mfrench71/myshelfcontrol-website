@@ -27,11 +27,38 @@ vi.mock('@/lib/firebase/client', () => ({
   db: {},
 }));
 
+// Mock localStorage at module level
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    clear: () => {
+      store = {};
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    get store() {
+      return store;
+    },
+    reset: () => {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+});
+
 describe('widget-settings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Clear localStorage
-    localStorage.clear();
+    localStorageMock.reset();
 
     // Default mock implementations
     mockGetDoc.mockResolvedValue({
@@ -39,10 +66,6 @@ describe('widget-settings', () => {
       data: () => null,
     });
     mockSetDoc.mockResolvedValue(undefined);
-  });
-
-  afterEach(() => {
-    localStorage.clear();
   });
 
   describe('loadWidgetSettings', () => {
@@ -76,9 +99,13 @@ describe('widget-settings', () => {
       const localWidgets: WidgetConfig[] = [
         { id: 'welcome', enabled: true, order: 0, size: 12, settings: {} },
       ];
-      localStorage.setItem(
+      localStorageMock.setItem(
         'widgetSettings',
-        JSON.stringify({ version: 1, widgets: localWidgets, updatedAt: Date.now() })
+        JSON.stringify({
+          version: 1,
+          widgets: localWidgets,
+          updatedAt: Date.now(),
+        })
       );
 
       const result = await loadWidgetSettings('user-123');
@@ -91,9 +118,13 @@ describe('widget-settings', () => {
       const localWidgets: WidgetConfig[] = [
         { id: 'welcome', enabled: true, order: 0, size: 12, settings: {} },
       ];
-      localStorage.setItem(
+      localStorageMock.setItem(
         'widgetSettings',
-        JSON.stringify({ version: 1, widgets: localWidgets, updatedAt: Date.now() })
+        JSON.stringify({
+          version: 1,
+          widgets: localWidgets,
+          updatedAt: Date.now(),
+        })
       );
 
       await loadWidgetSettings('user-123');
@@ -145,7 +176,7 @@ describe('widget-settings', () => {
 
       await saveWidgetSettings('user-123', widgets);
 
-      const stored = localStorage.getItem('widgetSettings');
+      const stored = localStorageMock.getItem('widgetSettings');
       expect(stored).not.toBe(null);
       expect(JSON.parse(stored!).widgets).toEqual(widgets);
     });

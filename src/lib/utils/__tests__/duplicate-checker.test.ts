@@ -187,3 +187,333 @@ describe('DUPLICATE_CHECK_LIMIT', () => {
     expect(DUPLICATE_CHECK_LIMIT).toBeLessThanOrEqual(500);
   });
 });
+
+describe('checkForDuplicate', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetDocs.mockReset();
+  });
+
+  describe('ISBN matching', () => {
+    it('finds duplicate by ISBN', async () => {
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'existing-book',
+            data: () => ({
+              isbn: '9780123456789',
+              title: 'Existing Book',
+              author: 'Existing Author',
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        '9780123456789',
+        'New Book',
+        'New Author'
+      );
+
+      expect(result.isDuplicate).toBe(true);
+      expect(result.matchType).toBe('isbn');
+      expect(result.existingBook?.id).toBe('existing-book');
+    });
+
+    it('returns no duplicate when ISBN not found', async () => {
+      mockGetDocs.mockResolvedValue({
+        empty: true,
+        docs: [],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        '9780123456789',
+        'New Book',
+        'New Author'
+      );
+
+      expect(result.isDuplicate).toBe(false);
+      expect(result.matchType).toBe(null);
+      expect(result.existingBook).toBe(null);
+    });
+  });
+
+  describe('title/author matching', () => {
+    it('finds duplicate by exact title and author', async () => {
+      // No ISBN provided, so only title/author query runs
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'existing-book',
+            data: () => ({
+              title: 'The Great Gatsby',
+              author: 'F. Scott Fitzgerald',
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        null,
+        'The Great Gatsby',
+        'F. Scott Fitzgerald'
+      );
+
+      expect(result.isDuplicate).toBe(true);
+      expect(result.matchType).toBe('title-author');
+    });
+
+    it('matches case-insensitively', async () => {
+      // No ISBN provided, so only title/author query runs
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'existing-book',
+            data: () => ({
+              title: 'THE GREAT GATSBY',
+              author: 'F. SCOTT FITZGERALD',
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        null,
+        'the great gatsby',
+        'f. scott fitzgerald'
+      );
+
+      expect(result.isDuplicate).toBe(true);
+      expect(result.matchType).toBe('title-author');
+    });
+
+    it('handles extra whitespace in comparison', async () => {
+      // No ISBN provided, so only title/author query runs
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'existing-book',
+            data: () => ({
+              title: 'The   Great   Gatsby',
+              author: 'F.  Scott  Fitzgerald',
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        null,
+        'The Great Gatsby',
+        'F. Scott Fitzgerald'
+      );
+
+      expect(result.isDuplicate).toBe(true);
+    });
+
+    it('does not match when only title matches', async () => {
+      // No ISBN provided, so only title/author query runs
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'existing-book',
+            data: () => ({
+              title: 'The Great Gatsby',
+              author: 'Different Author',
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        null,
+        'The Great Gatsby',
+        'F. Scott Fitzgerald'
+      );
+
+      expect(result.isDuplicate).toBe(false);
+    });
+
+    it('does not match when only author matches', async () => {
+      // No ISBN provided, so only title/author query runs
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'existing-book',
+            data: () => ({
+              title: 'Different Title',
+              author: 'F. Scott Fitzgerald',
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        null,
+        'The Great Gatsby',
+        'F. Scott Fitzgerald'
+      );
+
+      expect(result.isDuplicate).toBe(false);
+    });
+  });
+
+  describe('ISBN priority', () => {
+    it('checks ISBN before title/author', async () => {
+      // ISBN match found first
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'isbn-match',
+            data: () => ({
+              isbn: '9780123456789',
+              title: 'Different Title',
+              author: 'Different Author',
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        '9780123456789',
+        'The Great Gatsby',
+        'F. Scott Fitzgerald'
+      );
+
+      expect(result.matchType).toBe('isbn');
+      // Should only call getDocs once (for ISBN query)
+      expect(mockGetDocs).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('no ISBN provided', () => {
+    it('skips ISBN query when ISBN is null', async () => {
+      mockGetDocs.mockResolvedValueOnce({
+        empty: true,
+        docs: [],
+      });
+
+      await checkForDuplicate(
+        'user-123',
+        null,
+        'Test Book',
+        'Test Author'
+      );
+
+      // Should only make one query (title/author check)
+      expect(mockGetDocs).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips ISBN query when ISBN is undefined', async () => {
+      mockGetDocs.mockResolvedValueOnce({
+        empty: true,
+        docs: [],
+      });
+
+      await checkForDuplicate(
+        'user-123',
+        undefined,
+        'Test Book',
+        'Test Author'
+      );
+
+      expect(mockGetDocs).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips ISBN query when ISBN is empty string', async () => {
+      mockGetDocs.mockResolvedValueOnce({
+        empty: true,
+        docs: [],
+      });
+
+      await checkForDuplicate(
+        'user-123',
+        '',
+        'Test Book',
+        'Test Author'
+      );
+
+      // Empty string is falsy, so ISBN query skipped
+      expect(mockGetDocs).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('result structure', () => {
+    it('returns existingBook with id and data for ISBN match', async () => {
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'book-123',
+            data: () => ({
+              isbn: '9780123456789',
+              title: 'Test Book',
+              author: 'Test Author',
+              rating: 5,
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        '9780123456789',
+        'Different Title',
+        'Different Author'
+      );
+
+      expect(result.existingBook).toEqual({
+        id: 'book-123',
+        isbn: '9780123456789',
+        title: 'Test Book',
+        author: 'Test Author',
+        rating: 5,
+      });
+    });
+
+    it('returns existingBook with id and data for title/author match', async () => {
+      // No ISBN provided, so only title/author query runs
+      mockGetDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'book-456',
+            data: () => ({
+              title: 'Test Book',
+              author: 'Test Author',
+              genres: ['Fiction'],
+            }),
+          },
+        ],
+      });
+
+      const result = await checkForDuplicate(
+        'user-123',
+        null,
+        'Test Book',
+        'Test Author'
+      );
+
+      expect(result.existingBook).toEqual({
+        id: 'book-456',
+        title: 'Test Book',
+        author: 'Test Author',
+        genres: ['Fiction'],
+      });
+    });
+  });
+});

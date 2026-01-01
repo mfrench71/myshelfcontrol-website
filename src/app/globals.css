@@ -871,6 +871,81 @@ button, a {
 }
 
 /* ============================================
+   WIDGET GRID SYSTEM
+   ============================================ */
+
+/* 12-column responsive widget grid */
+.widget-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(12, 1fr);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Widget size classes (desktop: 12-column grid) */
+[class*='widget-col-'] {
+  min-width: 0; /* Prevent grid blowout from content */
+}
+.widget-col-3 {
+  grid-column: span 3;
+} /* Quarter width */
+.widget-col-6 {
+  grid-column: span 6;
+} /* Half width */
+.widget-col-9 {
+  grid-column: span 9;
+} /* Three-quarter width */
+.widget-col-12 {
+  grid-column: span 12;
+} /* Full width */
+
+/* Tablet: 6-column grid (widgets respect sizes proportionally) */
+@media (max-width: 1023px) {
+  .widget-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .widget-col-3 {
+    grid-column: span 3;
+  } /* Half width on tablet */
+  .widget-col-6 {
+    grid-column: span 3;
+  } /* Half width on tablet */
+  .widget-col-9 {
+    grid-column: span 6;
+  } /* Full width on tablet */
+  .widget-col-12 {
+    grid-column: span 6;
+  } /* Full width on tablet */
+}
+
+/* Mobile: single column */
+@media (max-width: 767px) {
+  .widget-grid {
+    grid-template-columns: 1fr;
+  }
+  [class*='widget-col-'] {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Widget fade-in animation */
+@keyframes widgetFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.widget-grid.fade-in {
+  animation: widgetFadeIn 0.2s ease-out forwards;
+}
+
+/* ============================================
    REDUCED MOTION
    ============================================ */
 

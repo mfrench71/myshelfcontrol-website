@@ -297,6 +297,22 @@ export default function PreferencesSettingsPage() {
     saveSettings(widgets);
   };
 
+  // Update widget settings (count, etc.)
+  const updateWidgetSettings = (widgetId: WidgetId, settings: { count?: number }) => {
+    const newWidgets = widgets.map((w) =>
+      w.id === widgetId ? { ...w, settings: { ...w.settings, ...settings } } : w
+    );
+    saveSettings(newWidgets);
+  };
+
+  // Update widget size
+  const updateWidgetSize = (widgetId: WidgetId, size: 6 | 12) => {
+    const newWidgets = widgets.map((w) =>
+      w.id === widgetId ? { ...w, size } : w
+    );
+    saveSettings(newWidgets);
+  };
+
   // Update sync settings
   const updateSyncSetting = <K extends keyof SyncSettings>(key: K, value: SyncSettings[K]) => {
     const newSettings = { ...syncSettings, [key]: value };
@@ -538,14 +554,15 @@ export default function PreferencesSettingsPage() {
                   </button>
                 </div>
                 <p className="text-gray-500 text-sm mb-4">
-                  Drag to reorder, click eye icon to show/hide widgets on your dashboard.
+                  Drag to reorder. Configure items to show and width for each widget.
                 </p>
 
                 {/* Widget list */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {widgets.map((widget, index) => {
                     const meta = WIDGET_REGISTRY[widget.id];
                     const IconComponent = WIDGET_ICONS[widget.id];
+                    const showCountSetting = widget.id !== 'welcome';
 
                     return (
                       <div
@@ -554,35 +571,80 @@ export default function PreferencesSettingsPage() {
                         onDragStart={() => handleDragStart(index)}
                         onDragOver={(e) => handleDragOver(e, index)}
                         onDragEnd={handleDragEnd}
-                        className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
+                        className={`p-4 rounded-lg border transition-all cursor-grab active:cursor-grabbing ${
                           draggedIndex === index
                             ? 'border-primary bg-primary/5'
                             : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
                         } ${!widget.enabled ? 'opacity-60' : ''}`}
                       >
-                        <GripVertical
-                          className="w-4 h-4 text-gray-400 flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <IconComponent className="w-4 h-4 text-gray-500" aria-hidden="true" />
-                          <div className="min-w-0">
-                            <p className="font-medium text-gray-900 text-sm">{meta.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{meta.description}</p>
+                        {/* Header row */}
+                        <div className="flex items-center gap-3">
+                          <GripVertical
+                            className="w-4 h-4 text-gray-400 flex-shrink-0"
+                            aria-hidden="true"
+                          />
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <IconComponent className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                            <div className="min-w-0">
+                              <p className="font-medium text-gray-900 text-sm">{meta.name}</p>
+                            </div>
                           </div>
+                          <button
+                            onClick={() => toggleWidget(widget.id)}
+                            disabled={saving}
+                            className="p-2 rounded-lg hover:bg-gray-200 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50"
+                            aria-label={widget.enabled ? 'Hide widget' : 'Show widget'}
+                          >
+                            {widget.enabled ? (
+                              <Eye className="w-5 h-5 text-green-600" aria-hidden="true" />
+                            ) : (
+                              <EyeOff className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                            )}
+                          </button>
                         </div>
-                        <button
-                          onClick={() => toggleWidget(widget.id)}
-                          disabled={saving}
-                          className="p-2 rounded-lg hover:bg-gray-200 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50"
-                          aria-label={widget.enabled ? 'Hide widget' : 'Show widget'}
-                        >
-                          {widget.enabled ? (
-                            <Eye className="w-5 h-5 text-green-600" aria-hidden="true" />
-                          ) : (
-                            <EyeOff className="w-5 h-5 text-gray-400" aria-hidden="true" />
-                          )}
-                        </button>
+
+                        {/* Settings row (when enabled) */}
+                        {widget.enabled && (
+                          <div className="mt-3 pt-3 border-t border-gray-200 flex flex-wrap gap-4">
+                            {/* Items to show */}
+                            {showCountSetting && (
+                              <div className="flex items-center gap-2">
+                                <label htmlFor={`count-${widget.id}`} className="text-xs text-gray-600">
+                                  Items:
+                                </label>
+                                <select
+                                  id={`count-${widget.id}`}
+                                  value={widget.settings?.count || 6}
+                                  onChange={(e) => updateWidgetSettings(widget.id, { count: Number(e.target.value) })}
+                                  disabled={saving}
+                                  className="text-sm border border-gray-300 rounded-md px-2 py-1 min-h-[32px] disabled:opacity-50"
+                                >
+                                  <option value={3}>3</option>
+                                  <option value={6}>6</option>
+                                  <option value={9}>9</option>
+                                  <option value={12}>12</option>
+                                </select>
+                              </div>
+                            )}
+
+                            {/* Width */}
+                            <div className="flex items-center gap-2">
+                              <label htmlFor={`size-${widget.id}`} className="text-xs text-gray-600">
+                                Width:
+                              </label>
+                              <select
+                                id={`size-${widget.id}`}
+                                value={widget.size || 6}
+                                onChange={(e) => updateWidgetSize(widget.id, Number(e.target.value) as 6 | 12)}
+                                disabled={saving}
+                                className="text-sm border border-gray-300 rounded-md px-2 py-1 min-h-[32px] disabled:opacity-50"
+                              >
+                                <option value={6}>Half</option>
+                                <option value={12}>Full</option>
+                              </select>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

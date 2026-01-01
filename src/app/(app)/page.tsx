@@ -1,6 +1,7 @@
 /**
  * Home Page - Dashboard with widgets
  * Displays reading stats, currently reading, recently added, and more
+ * Matches old site's horizontal scrolling widget layout
  */
 'use client';
 
@@ -15,24 +16,23 @@ import {
   CheckCircle,
   Library,
   TrendingUp,
-  AlertCircle,
   X,
   Loader2,
   Mail,
   Heart,
+  PlusCircle,
 } from 'lucide-react';
 import { sendEmailVerification } from 'firebase/auth';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
-import { getGenres } from '@/lib/repositories/genres';
-import { getSeries, createSeriesLookup } from '@/lib/repositories/series';
+import { getSeries } from '@/lib/repositories/series';
 import { getWishlist } from '@/lib/repositories/wishlist';
 import {
   loadWidgetSettings,
   getEnabledWidgets,
 } from '@/lib/repositories/widget-settings';
-import type { Book, Genre, Series, WishlistItem } from '@/lib/types';
-import type { WidgetConfig, WidgetId } from '@/lib/types/widgets';
+import type { Book, Series, WishlistItem } from '@/lib/types';
+import type { WidgetConfig } from '@/lib/types/widgets';
 
 /**
  * Get reading status from book's reads array
@@ -47,94 +47,143 @@ function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
 }
 
 /**
- * Format timestamp to readable date
+ * Horizontal scrolling book cover card (matches old site)
  */
-function formatDate(timestamp: unknown): string {
-  if (!timestamp) return '';
-  let date: Date;
-  if (typeof timestamp === 'number') {
-    date = new Date(timestamp);
-  } else if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
-    date = (timestamp as { toDate: () => Date }).toDate();
-  } else if (timestamp instanceof Date) {
-    date = timestamp;
-  } else {
-    return '';
-  }
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
-/**
- * Book card for widget display
- */
-function WidgetBookCard({ book, showRating = false }: { book: Book; showRating?: boolean }) {
+function HorizontalBookCard({ book, href }: { book: Book; href: string }) {
   return (
-    <Link
-      href={`/books/${book.id}`}
-      className="flex gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-primary hover:shadow-sm transition-all"
-    >
-      <div className="w-10 h-14 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-        {book.coverImageUrl ? (
+    <Link href={href} className="flex-shrink-0 w-24 snap-start">
+      <div className="relative w-24 h-36 bg-primary rounded-lg shadow-md flex items-center justify-center overflow-hidden">
+        <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
+        {book.coverImageUrl && (
           <Image
             src={book.coverImageUrl}
             alt=""
-            width={40}
-            height={56}
-            className="w-full h-full object-cover"
+            width={96}
+            height={144}
+            className="absolute inset-0 w-full h-full object-cover"
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-            <BookOpen className="w-4 h-4 text-white/60" aria-hidden="true" />
-          </div>
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-gray-900 text-sm truncate">{book.title}</p>
-        <p className="text-xs text-gray-500 truncate">{book.author}</p>
-        {showRating && book.rating != null && book.rating > 0 && (
-          <div className="flex items-center gap-0.5 mt-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`w-3 h-3 ${star <= book.rating! ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
+      <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
     </Link>
+  );
+}
+
+/**
+ * Widget container with header (matches old site)
+ */
+function WidgetContainer({
+  icon: Icon,
+  iconColor,
+  title,
+  seeAllLink,
+  seeAllParams,
+  emptyMessage,
+  isEmpty,
+  children,
+  size = 12,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  iconColor: string;
+  title: string;
+  seeAllLink?: string;
+  seeAllParams?: Record<string, string>;
+  emptyMessage?: string;
+  isEmpty?: boolean;
+  children: React.ReactNode;
+  size?: number;
+}) {
+  const seeAllHref = seeAllLink
+    ? seeAllParams
+      ? `${seeAllLink}?${new URLSearchParams(seeAllParams).toString()}`
+      : seeAllLink
+    : null;
+
+  return (
+    <div className={`widget-col-${size} bg-white rounded-xl border border-gray-200 overflow-hidden`}>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <Icon className={`w-5 h-5 ${iconColor}`} aria-hidden="true" />
+          <h3 className="font-semibold text-gray-900">{title}</h3>
+        </div>
+        {seeAllHref && !isEmpty && (
+          <Link
+            href={seeAllHref}
+            className="flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            See all <ChevronRight className="w-4 h-4" />
+          </Link>
+        )}
+      </div>
+      {/* Content */}
+      {isEmpty ? (
+        <div className="p-6 text-center">
+          <Icon className={`w-8 h-8 text-gray-300 mx-auto`} aria-hidden="true" />
+          <p className="text-sm text-gray-500 mt-2">{emptyMessage}</p>
+        </div>
+      ) : (
+        children
+      )}
+    </div>
+  );
+}
+
+/**
+ * Horizontal scroll container (matches old site widget-scroll-container)
+ */
+function HorizontalScroll({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex gap-4 overflow-x-auto overflow-y-hidden p-4 snap-x snap-mandatory no-scrollbar">
+      {children}
+    </div>
   );
 }
 
 /**
  * Widget skeleton for loading state
  */
-function WidgetSkeleton() {
+function WidgetSkeleton({ size = 12 }: { size?: number }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
-      <div className="h-5 bg-gray-200 rounded w-32 mb-4" />
-      <div className="space-y-3">
-        <div className="h-16 bg-gray-100 rounded" />
-        <div className="h-16 bg-gray-100 rounded" />
+    <div className={`widget-col-${size} bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse`}>
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-gray-200 rounded" />
+          <div className="h-5 bg-gray-200 rounded w-32" />
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="flex gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex-shrink-0">
+              <div className="w-24 h-36 bg-gray-200 rounded-lg" />
+              <div className="w-20 h-4 bg-gray-200 rounded mt-2" />
+              <div className="w-16 h-3 bg-gray-200 rounded mt-1" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
 /**
- * Welcome Widget - Library stats
+ * Welcome Widget - Library stats (keep this as is, user requested)
  */
 function WelcomeWidget({
   totalBooks,
   currentlyReading,
   finishedThisYear,
+  size = 12,
 }: {
   totalBooks: number;
   currentlyReading: number;
   finishedThisYear: number;
+  size?: number;
 }) {
   return (
-    <div className="bg-gradient-to-br from-primary to-primary-dark text-white rounded-xl p-6">
+    <div className={`widget-col-${size} bg-gradient-to-br from-primary to-primary-dark text-white rounded-xl p-6`}>
       <h2 className="text-xl font-bold mb-4">Your Library</h2>
       <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
         <div>
@@ -157,153 +206,235 @@ function WelcomeWidget({
 /**
  * Currently Reading Widget
  */
-function CurrentlyReadingWidget({ books }: { books: Book[] }) {
-  if (books.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-blue-500" aria-hidden="true" />
-            Currently Reading
-          </h3>
-        </div>
-        <div className="text-center py-6">
-          <BookOpen className="w-8 h-8 text-gray-300 mx-auto" aria-hidden="true" />
-          <p className="text-sm text-gray-500 mt-2">No books in progress</p>
-          <Link
-            href="/books/add"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add a book
-          </Link>
-        </div>
-      </div>
-    );
-  }
+function CurrentlyReadingWidget({ books, config }: { books: Book[]; config: WidgetConfig }) {
+  const count = (config.settings?.count as number) || 6;
+  const displayBooks = books.slice(0, count);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-blue-500" aria-hidden="true" />
-          Currently Reading
-        </h3>
-        <span className="text-xs text-gray-500">{books.length} book{books.length !== 1 ? 's' : ''}</span>
-      </div>
-      <div className="space-y-2">
-        {books.slice(0, 3).map((book) => (
-          <WidgetBookCard key={book.id} book={book} />
+    <WidgetContainer
+      icon={BookOpen}
+      iconColor="text-blue-600"
+      title="Currently Reading"
+      seeAllLink="/books"
+      seeAllParams={{ status: 'reading' }}
+      emptyMessage="No books currently being read"
+      isEmpty={books.length === 0}
+      size={config.size || 6}
+    >
+      <HorizontalScroll>
+        {displayBooks.map((book) => (
+          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} />
         ))}
-      </div>
-      {books.length > 3 && (
-        <Link
-          href="/books?status=reading"
-          className="flex items-center justify-center gap-1 mt-3 text-sm text-primary hover:underline"
-        >
-          View all <ChevronRight className="w-4 h-4" />
-        </Link>
-      )}
-    </div>
+      </HorizontalScroll>
+    </WidgetContainer>
   );
 }
 
 /**
  * Recently Added Widget
  */
-function RecentlyAddedWidget({ books }: { books: Book[] }) {
+function RecentlyAddedWidget({ books, config }: { books: Book[]; config: WidgetConfig }) {
+  const count = (config.settings?.count as number) || 6;
+  const displayBooks = books.slice(0, count);
+
   if (books.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Plus className="w-4 h-4 text-green-500" aria-hidden="true" />
-          Recently Added
-        </h3>
-      </div>
-      <div className="space-y-2">
-        {books.slice(0, 3).map((book) => (
-          <WidgetBookCard key={book.id} book={book} />
+    <WidgetContainer
+      icon={PlusCircle}
+      iconColor="text-green-600"
+      title="Recently Added"
+      seeAllLink="/books"
+      seeAllParams={{ sort: 'createdAt-desc' }}
+      size={config.size || 12}
+    >
+      <HorizontalScroll>
+        {displayBooks.map((book) => (
+          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} />
         ))}
-      </div>
-      {books.length > 3 && (
-        <Link
-          href="/books?sort=createdAt-desc"
-          className="flex items-center justify-center gap-1 mt-3 text-sm text-primary hover:underline"
-        >
-          View all <ChevronRight className="w-4 h-4" />
-        </Link>
-      )}
-    </div>
+      </HorizontalScroll>
+    </WidgetContainer>
   );
 }
 
 /**
  * Top Rated Widget
  */
-function TopRatedWidget({ books }: { books: Book[] }) {
+function TopRatedWidget({ books, config }: { books: Book[]; config: WidgetConfig }) {
+  const count = (config.settings?.count as number) || 6;
+  const displayBooks = books.slice(0, count);
+
   if (books.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Star className="w-4 h-4 text-yellow-500" aria-hidden="true" />
-          Top Rated
-        </h3>
-      </div>
-      <div className="space-y-2">
-        {books.slice(0, 3).map((book) => (
-          <WidgetBookCard key={book.id} book={book} showRating />
+    <WidgetContainer
+      icon={Star}
+      iconColor="text-yellow-500"
+      title="Top Rated"
+      seeAllLink="/books"
+      seeAllParams={{ sort: 'rating-desc' }}
+      size={config.size || 6}
+    >
+      <HorizontalScroll>
+        {displayBooks.map((book) => (
+          <Link key={book.id} href={`/books/${book.id}`} className="flex-shrink-0 w-24 snap-start">
+            <div className="relative w-24 h-36 bg-primary rounded-lg shadow-md flex items-center justify-center overflow-hidden">
+              <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
+              {book.coverImageUrl && (
+                <Image
+                  src={book.coverImageUrl}
+                  alt=""
+                  width={96}
+                  height={144}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
+            <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
+            {book.rating != null && book.rating > 0 && (
+              <div className="flex items-center gap-0.5 mt-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-3 h-3 ${star <= book.rating! ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                  />
+                ))}
+              </div>
+            )}
+          </Link>
         ))}
-      </div>
-      {books.length > 3 && (
-        <Link
-          href="/books?sort=rating-desc"
-          className="flex items-center justify-center gap-1 mt-3 text-sm text-primary hover:underline"
-        >
-          View all <ChevronRight className="w-4 h-4" />
-        </Link>
-      )}
-    </div>
+      </HorizontalScroll>
+    </WidgetContainer>
   );
 }
 
 /**
  * Recently Finished Widget
  */
-function RecentlyFinishedWidget({ books }: { books: Book[] }) {
+function RecentlyFinishedWidget({ books, config }: { books: Book[]; config: WidgetConfig }) {
+  const count = (config.settings?.count as number) || 6;
+  const displayBooks = books.slice(0, count);
+
   if (books.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-green-500" aria-hidden="true" />
-          Recently Finished
-        </h3>
-      </div>
-      <div className="space-y-2">
-        {books.slice(0, 3).map((book) => (
-          <WidgetBookCard key={book.id} book={book} showRating />
+    <WidgetContainer
+      icon={CheckCircle}
+      iconColor="text-green-600"
+      title="Recently Finished"
+      seeAllLink="/books"
+      seeAllParams={{ status: 'finished' }}
+      size={config.size || 6}
+    >
+      <HorizontalScroll>
+        {displayBooks.map((book) => (
+          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} />
         ))}
+      </HorizontalScroll>
+    </WidgetContainer>
+  );
+}
+
+/**
+ * Wishlist Widget
+ */
+function WishlistWidget({ items, config }: { items: WishlistItem[]; config: WidgetConfig }) {
+  const count = (config.settings?.count as number) || 6;
+  const displayItems = items.slice(0, count);
+
+  return (
+    <WidgetContainer
+      icon={Heart}
+      iconColor="text-pink-500"
+      title="Wishlist"
+      seeAllLink="/wishlist"
+      emptyMessage="No books on your wishlist"
+      isEmpty={items.length === 0}
+      size={config.size || 6}
+    >
+      <HorizontalScroll>
+        {displayItems.map((item) => (
+          <Link key={item.id} href="/wishlist" className="flex-shrink-0 w-24 snap-start">
+            <div className="relative w-24 h-36 bg-pink-100 rounded-lg shadow-md flex items-center justify-center overflow-hidden">
+              <Heart className="w-8 h-8 text-pink-300" aria-hidden="true" />
+              {item.coverImageUrl && (
+                <Image
+                  src={item.coverImageUrl}
+                  alt=""
+                  width={96}
+                  height={144}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              )}
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{item.title}</h3>
+            <p className="text-xs text-gray-500 truncate">{item.author || 'Unknown'}</p>
+          </Link>
+        ))}
+      </HorizontalScroll>
+    </WidgetContainer>
+  );
+}
+
+/**
+ * Series Progress Widget
+ */
+function SeriesProgressWidget({
+  series,
+  booksBySeries,
+  config,
+}: {
+  series: Series[];
+  booksBySeries: Record<string, Book[]>;
+  config: WidgetConfig;
+}) {
+  const count = (config.settings?.count as number) || 4;
+  const activeSeries = series.filter((s) => booksBySeries[s.id]?.length > 0).slice(0, count);
+
+  if (activeSeries.length === 0) return null;
+
+  return (
+    <WidgetContainer
+      icon={Library}
+      iconColor="text-purple-600"
+      title="Series Progress"
+      seeAllLink="/books"
+      size={config.size || 6}
+    >
+      <div className="p-4 space-y-3">
+        {activeSeries.map((s) => {
+          const booksInSeries = booksBySeries[s.id] || [];
+          const totalBooks = s.totalBooks || booksInSeries.length;
+          const percentage = totalBooks > 0 ? Math.round((booksInSeries.length / totalBooks) * 100) : 0;
+          return (
+            <Link
+              key={s.id}
+              href={`/books?series=${s.id}`}
+              className="block p-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-gray-900 truncate">{s.name}</span>
+                <span className="text-xs text-gray-500">
+                  {booksInSeries.length}/{totalBooks}
+                </span>
+              </div>
+              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-purple-500 rounded-full transition-all"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </Link>
+          );
+        })}
       </div>
-      {books.length > 3 && (
-        <Link
-          href="/books?status=finished"
-          className="flex items-center justify-center gap-1 mt-3 text-sm text-primary hover:underline"
-        >
-          View all <ChevronRight className="w-4 h-4" />
-        </Link>
-      )}
-    </div>
+    </WidgetContainer>
   );
 }
 
 /**
  * Email Verification Banner
- * Shows when user's email is not verified
  */
 function EmailVerificationBanner({
   user,
@@ -340,8 +471,7 @@ function EmailVerificationBanner({
         <div className="flex-1 min-w-0">
           <p className="text-amber-800 font-medium">Please verify your email address</p>
           <p className="text-amber-700 text-sm mt-1">
-            We sent a verification link to <strong>{user.email}</strong>. Check your inbox and click
-            the link to verify.
+            We sent a verification link to <strong>{user.email}</strong>. Check your inbox.
           </p>
           {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
           {sent ? (
@@ -353,7 +483,7 @@ function EmailVerificationBanner({
             <button
               onClick={handleResend}
               disabled={isSending}
-              className="mt-2 text-sm text-amber-700 hover:text-amber-800 underline disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
+              className="mt-2 text-sm text-amber-700 hover:text-amber-800 underline disabled:opacity-50 inline-flex items-center gap-1"
             >
               {isSending ? (
                 <>
@@ -378,150 +508,6 @@ function EmailVerificationBanner({
   );
 }
 
-/**
- * Wishlist Widget
- */
-function WishlistWidget({ items }: { items: WishlistItem[] }) {
-  if (items.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <Heart className="w-4 h-4 text-pink-500" aria-hidden="true" />
-            Wishlist
-          </h3>
-        </div>
-        <div className="text-center py-6">
-          <Heart className="w-8 h-8 text-gray-300 mx-auto" aria-hidden="true" />
-          <p className="text-sm text-gray-500 mt-2">No books on your wishlist</p>
-          <Link
-            href="/wishlist"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add to wishlist
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // Priority badge colours
-  const priorityColours: Record<string, string> = {
-    high: 'bg-red-100 text-red-700',
-    medium: 'bg-amber-100 text-amber-700',
-    low: 'bg-gray-100 text-gray-600',
-  };
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Heart className="w-4 h-4 text-pink-500" aria-hidden="true" />
-          Wishlist
-        </h3>
-        <span className="text-xs text-gray-500">{items.length} book{items.length !== 1 ? 's' : ''}</span>
-      </div>
-      <div className="space-y-2">
-        {items.slice(0, 3).map((item) => (
-          <Link
-            key={item.id}
-            href={`/wishlist`}
-            className="flex gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-pink-300 hover:shadow-sm transition-all"
-          >
-            <div className="w-10 h-14 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-              {item.coverImageUrl ? (
-                <Image
-                  src={item.coverImageUrl}
-                  alt=""
-                  width={40}
-                  height={56}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-pink-200">
-                  <Heart className="w-4 h-4 text-pink-400" aria-hidden="true" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 text-sm truncate">{item.title}</p>
-              <p className="text-xs text-gray-500 truncate">{item.author}</p>
-              {item.priority && (
-                <span className={`inline-block mt-1 text-xs px-1.5 py-0.5 rounded ${priorityColours[item.priority]}`}>
-                  {item.priority}
-                </span>
-              )}
-            </div>
-          </Link>
-        ))}
-      </div>
-      {items.length > 3 && (
-        <Link
-          href="/wishlist"
-          className="flex items-center justify-center gap-1 mt-3 text-sm text-primary hover:underline"
-        >
-          View all <ChevronRight className="w-4 h-4" />
-        </Link>
-      )}
-    </div>
-  );
-}
-
-/**
- * Series Progress Widget
- */
-function SeriesProgressWidget({
-  series,
-  booksBySeries,
-}: {
-  series: Series[];
-  booksBySeries: Record<string, Book[]>;
-}) {
-  // Get series with at least one book
-  const activeSeries = series.filter((s) => booksBySeries[s.id]?.length > 0);
-
-  if (activeSeries.length === 0) return null;
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Library className="w-4 h-4 text-purple-500" aria-hidden="true" />
-          Series Progress
-        </h3>
-      </div>
-      <div className="space-y-3">
-        {activeSeries.slice(0, 4).map((s) => {
-          const booksInSeries = booksBySeries[s.id] || [];
-          const totalBooks = s.totalBooks || booksInSeries.length;
-          const percentage = totalBooks > 0 ? Math.round((booksInSeries.length / totalBooks) * 100) : 0;
-          return (
-            <Link
-              key={s.id}
-              href={`/books?series=${s.id}`}
-              className="block p-2 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-900 truncate">{s.name}</span>
-                <span className="text-xs text-gray-500">
-                  {booksInSeries.length}/{totalBooks}
-                </span>
-              </div>
-              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-500 rounded-full transition-all"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 const BANNER_DISMISSED_KEY = 'email-verification-banner-dismissed';
 
 export default function HomePage() {
@@ -531,9 +517,8 @@ export default function HomePage() {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [widgetConfigs, setWidgetConfigs] = useState<WidgetConfig[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bannerDismissed, setBannerDismissed] = useState(true); // Default true to prevent flash
+  const [bannerDismissed, setBannerDismissed] = useState(true);
 
-  // Check session storage for banner dismissed state
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const dismissed = sessionStorage.getItem(BANNER_DISMISSED_KEY) === 'true';
@@ -548,11 +533,8 @@ export default function HomePage() {
     }
   };
 
-  // Show banner if email not verified and not dismissed
-  const showVerificationBanner =
-    user && !user.emailVerified && !bannerDismissed;
+  const showVerificationBanner = user && !user.emailVerified && !bannerDismissed;
 
-  // Load data when user is available
   const loadData = useCallback(async () => {
     if (!user) return;
 
@@ -599,10 +581,8 @@ export default function HomePage() {
     };
   }, [user, loadData]);
 
-  // Get enabled widgets in order
   const enabledWidgets = useMemo(() => getEnabledWidgets(widgetConfigs), [widgetConfigs]);
 
-  // Computed data for widgets
   const {
     currentlyReading,
     recentlyAdded,
@@ -624,7 +604,6 @@ export default function HomePage() {
         currentlyReading.push(book);
       } else if (status === 'finished') {
         finished.push(book);
-        // Check if finished this year
         const latestRead = book.reads?.[book.reads.length - 1];
         if (latestRead?.finishedAt) {
           const finishTime =
@@ -638,7 +617,6 @@ export default function HomePage() {
       }
     });
 
-    // Recently added (by createdAt)
     const recentlyAdded = [...books]
       .sort((a, b) => {
         const aTime = a.createdAt
@@ -656,16 +634,12 @@ export default function HomePage() {
               : 0
           : 0;
         return bTime - aTime;
-      })
-      .slice(0, 5);
+      });
 
-    // Top rated (4+ stars)
     const topRated = books
       .filter((b) => b.rating != null && b.rating >= 4)
-      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      .slice(0, 5);
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
-    // Recently finished (by finishedAt)
     const recentlyFinished = finished
       .sort((a, b) => {
         const aRead = a.reads?.[a.reads.length - 1];
@@ -683,10 +657,8 @@ export default function HomePage() {
               : new Date(bRead.finishedAt as string).getTime()
             : 0;
         return bTime - aTime;
-      })
-      .slice(0, 5);
+      });
 
-    // Books by series
     const booksBySeries: Record<string, Book[]> = {};
     books.forEach((book) => {
       if (book.seriesId) {
@@ -707,25 +679,20 @@ export default function HomePage() {
     };
   }, [books]);
 
-  // Loading state
   if (authLoading || loading) {
     return (
-      <div id="loading-state" className="max-w-6xl mx-auto px-4 py-6">
-        <div className="h-8 bg-gray-200 rounded w-48 mb-6 animate-pulse" />
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <div className="h-32 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl animate-pulse" />
-          </div>
-          <WidgetSkeleton />
-          <WidgetSkeleton />
-          <WidgetSkeleton />
-          <WidgetSkeleton />
+      <div id="loading-state" className="max-w-6xl mx-auto px-4 py-6 pb-24">
+        <h1 className="sr-only">MyShelfControl Dashboard</h1>
+        <div className="widget-grid">
+          <WidgetSkeleton size={12} />
+          <WidgetSkeleton size={6} />
+          <WidgetSkeleton size={6} />
+          <WidgetSkeleton size={12} />
         </div>
       </div>
     );
   }
 
-  // Not logged in
   if (!user) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -747,69 +714,75 @@ export default function HomePage() {
   }
 
   return (
-    <div id="dashboard" className="max-w-6xl mx-auto px-4 py-6">
-      {/* Email Verification Banner */}
+    <div id="dashboard" className="max-w-6xl mx-auto px-4 py-6 pb-24">
+      <h1 className="sr-only">MyShelfControl Dashboard</h1>
+
       {showVerificationBanner && (
         <EmailVerificationBanner user={user} onDismiss={handleDismissBanner} />
       )}
 
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-      </div>
-
-      {/* Widgets Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Widget Grid (12-column responsive) */}
+      <div className="widget-grid">
         {enabledWidgets.map((config) => {
-          const isFullWidth = config.size === 12;
-          const wrapperClass = isFullWidth ? 'md:col-span-2' : '';
-
           switch (config.id) {
             case 'welcome':
               return (
-                <div key={config.id} className={wrapperClass}>
-                  <WelcomeWidget
-                    totalBooks={books.length}
-                    currentlyReading={currentlyReading.length}
-                    finishedThisYear={finishedThisYear}
-                  />
-                </div>
+                <WelcomeWidget
+                  key={config.id}
+                  totalBooks={books.length}
+                  currentlyReading={currentlyReading.length}
+                  finishedThisYear={finishedThisYear}
+                  size={config.size || 12}
+                />
               );
             case 'currentlyReading':
               return (
-                <div key={config.id} className={wrapperClass}>
-                  <CurrentlyReadingWidget books={currentlyReading} />
-                </div>
+                <CurrentlyReadingWidget
+                  key={config.id}
+                  books={currentlyReading}
+                  config={config}
+                />
               );
             case 'recentlyAdded':
               return recentlyAdded.length > 0 ? (
-                <div key={config.id} className={wrapperClass}>
-                  <RecentlyAddedWidget books={recentlyAdded} />
-                </div>
+                <RecentlyAddedWidget
+                  key={config.id}
+                  books={recentlyAdded}
+                  config={config}
+                />
               ) : null;
             case 'topRated':
               return topRated.length > 0 ? (
-                <div key={config.id} className={wrapperClass}>
-                  <TopRatedWidget books={topRated} />
-                </div>
+                <TopRatedWidget
+                  key={config.id}
+                  books={topRated}
+                  config={config}
+                />
               ) : null;
             case 'wishlist':
               return (
-                <div key={config.id} className={wrapperClass}>
-                  <WishlistWidget items={wishlistItems} />
-                </div>
+                <WishlistWidget
+                  key={config.id}
+                  items={wishlistItems}
+                  config={config}
+                />
               );
             case 'recentlyFinished':
               return recentlyFinished.length > 0 ? (
-                <div key={config.id} className={wrapperClass}>
-                  <RecentlyFinishedWidget books={recentlyFinished} />
-                </div>
+                <RecentlyFinishedWidget
+                  key={config.id}
+                  books={recentlyFinished}
+                  config={config}
+                />
               ) : null;
             case 'seriesProgress':
               return series.length > 0 ? (
-                <div key={config.id} className={wrapperClass}>
-                  <SeriesProgressWidget series={series} booksBySeries={booksBySeries} />
-                </div>
+                <SeriesProgressWidget
+                  key={config.id}
+                  series={series}
+                  booksBySeries={booksBySeries}
+                  config={config}
+                />
               ) : null;
             default:
               return null;

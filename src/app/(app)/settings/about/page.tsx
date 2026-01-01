@@ -5,7 +5,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Info, BookOpen, ExternalLink } from 'lucide-react';
+import { Info, BookOpen, ChevronRight } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 
 // Current app version
@@ -119,7 +119,7 @@ export default function AboutPage() {
               <Info className="w-5 h-5 text-gray-400" aria-hidden="true" />
               <span className="text-gray-900">Privacy Policy</span>
             </div>
-            <ExternalLink className="w-4 h-4 text-gray-400" aria-hidden="true" />
+            <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
           </Link>
         </div>
 

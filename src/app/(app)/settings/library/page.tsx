@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import Link from 'next/link';
 import {
@@ -19,14 +19,21 @@ import {
   GitMerge,
   Library,
   Check,
+  Loader2,
+  BookOpen,
+  Heart,
+  MinusCircle,
+  CheckCircle,
+  Sparkles,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
 import { getGenres, createGenre, updateGenre, deleteGenre } from '@/lib/repositories/genres';
 import { getSeries, createSeries, updateSeries, deleteSeries } from '@/lib/repositories/series';
-import { getBooks } from '@/lib/repositories/books';
+import { getBooks, getBinBooks, addBook } from '@/lib/repositories/books';
+import { getWishlist, addWishlistItem } from '@/lib/repositories/wishlist';
 import { getContrastColor, getNextAvailableColor, GENRE_COLORS } from '@/lib/utils';
-import type { Genre, Series, Book } from '@/lib/types';
+import type { Genre, Series, Book, WishlistItem } from '@/lib/types';
 
 /** Genre with book count */
 type GenreWithCount = Genre & { bookCount: number };
@@ -96,6 +103,13 @@ export default function LibrarySettingsPage() {
 
   // Picker settings
   const [pickerSettings, setPickerSettings] = useState<PickerSettings>(DEFAULT_PICKER_SETTINGS);
+
+  // Backup/restore state
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [importSummary, setImportSummary] = useState<string[] | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load picker settings on mount
   useEffect(() => {
@@ -433,6 +447,271 @@ export default function LibrarySettingsPage() {
     showToast(checked ? 'Series suggestions shown first' : 'Your series shown first', { type: 'info' });
   };
 
+  // ========== BACKUP HANDLERS ==========
+
+  /** Export backup data as JSON file */
+  const handleExport = useCallback(async () => {
+    if (!user || exporting) return;
+
+    setExporting(true);
+    setImportSummary(null);
+
+    try {
+      // Load all data for export
+      const [allBooks, allGenres, allSeries, allWishlist, binnedBooks] = await Promise.all([
+        getBooks(user.uid),
+        getGenres(user.uid),
+        getSeries(user.uid),
+        getWishlist(user.uid),
+        getBinBooks(user.uid),
+      ]);
+
+      if (allBooks.length === 0 && allGenres.length === 0 && allWishlist.length === 0 && allSeries.length === 0 && binnedBooks.length === 0) {
+        showToast('No data to export', { type: 'error' });
+        return;
+      }
+
+      // Prepare export data
+      const exportData = {
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        genres: allGenres.map(({ id, ...g }) => ({ ...g, _exportId: id })),
+        series: allSeries.map(({ id, ...s }) => ({ ...s, _exportId: id })),
+        books: allBooks.map(({ id, ...b }) => b),
+        wishlist: allWishlist.map(({ id, ...w }) => w),
+        bin: binnedBooks.map(({ id, ...b }) => b),
+      };
+
+      // Create and download file
+      const json = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `myshelfcontrol-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      // Show summary
+      const parts = [`${allBooks.length} books`, `${allGenres.length} genres`];
+      if (allSeries.length > 0) parts.push(`${allSeries.length} series`);
+      if (allWishlist.length > 0) parts.push(`${allWishlist.length} wishlist items`);
+      if (binnedBooks.length > 0) parts.push(`${binnedBooks.length} binned`);
+      showToast(`Exported ${parts.join(', ')}`, { type: 'success' });
+    } catch (err) {
+      console.error('Export failed:', err);
+      showToast('Export failed. Please try again.', { type: 'error' });
+    } finally {
+      setExporting(false);
+    }
+  }, [user, exporting, showToast]);
+
+  /** Import backup data from JSON file */
+  const handleImport = useCallback(async (file: File) => {
+    if (!user || importing) return;
+
+    setImporting(true);
+    setImportStatus('Reading file...');
+    setImportSummary(null);
+
+    try {
+      const text = await file.text();
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error('Invalid JSON file');
+      }
+
+      if (!data.version || (data.version !== 1 && data.version !== 2)) {
+        throw new Error('Unrecognised backup format');
+      }
+
+      // Migrate v1 to v2
+      if (data.version === 1) {
+        data.series = [];
+        data.bin = [];
+      }
+
+      const importGenres = data.genres || [];
+      const importSeries = data.series || [];
+      const importBooks = data.books || [];
+      const importWishlist = data.wishlist || [];
+      const importBin = data.bin || [];
+
+      if (importBooks.length === 0 && importGenres.length === 0 && importWishlist.length === 0 && importSeries.length === 0 && importBin.length === 0) {
+        throw new Error('Backup file is empty');
+      }
+
+      setImportStatus('Loading existing data...');
+      const [existingBooks, existingGenres, existingSeries, existingWishlist] = await Promise.all([
+        getBooks(user.uid),
+        getGenres(user.uid),
+        getSeries(user.uid),
+        getWishlist(user.uid),
+      ]);
+
+      const genreIdMap = new Map<string, string>();
+      let genresImported = 0;
+      let genresSkipped = 0;
+
+      // Import genres
+      if (importGenres.length > 0) {
+        setImportStatus('Importing genres...');
+        for (const genre of importGenres) {
+          const existing = existingGenres.find(g => g.name.toLowerCase() === genre.name.toLowerCase());
+          if (existing) {
+            genreIdMap.set(genre._exportId, existing.id);
+            genresSkipped++;
+          } else {
+            const newId = await createGenre(user.uid, genre.name, genre.color);
+            genreIdMap.set(genre._exportId, newId);
+            genresImported++;
+          }
+        }
+      }
+
+      // Import series
+      const seriesIdMap = new Map<string, string>();
+      let seriesImported = 0;
+      let seriesSkipped = 0;
+
+      if (importSeries.length > 0) {
+        setImportStatus('Importing series...');
+        for (const s of importSeries) {
+          const existing = existingSeries.find(es => es.name.toLowerCase() === s.name.toLowerCase());
+          if (existing) {
+            seriesIdMap.set(s._exportId, existing.id);
+            seriesSkipped++;
+          } else {
+            const newId = await createSeries(user.uid, s.name, s.totalBooks);
+            seriesIdMap.set(s._exportId, newId);
+            seriesImported++;
+          }
+        }
+      }
+
+      // Import books
+      let booksImported = 0;
+      let booksSkipped = 0;
+      const importedBookKeys = new Set<string>();
+
+      if (importBooks.length > 0) {
+        setImportStatus('Importing books...');
+        for (const book of importBooks) {
+          // Check for duplicates
+          const isDuplicate = existingBooks.some(existing => {
+            if (book.isbn && existing.isbn && book.isbn === existing.isbn) return true;
+            if (book.title && existing.title &&
+                book.title.toLowerCase() === existing.title.toLowerCase() &&
+                (book.author || '').toLowerCase() === (existing.author || '').toLowerCase()) return true;
+            return false;
+          });
+
+          if (isDuplicate) {
+            booksSkipped++;
+            continue;
+          }
+
+          // Remap genres
+          const remappedGenres = (book.genres || []).map((oldId: string) => genreIdMap.get(oldId)).filter(Boolean);
+          const remappedSeriesId = book.seriesId ? seriesIdMap.get(book.seriesId) || null : null;
+
+          await addBook(user.uid, {
+            ...book,
+            genres: remappedGenres,
+            seriesId: remappedSeriesId,
+          });
+          booksImported++;
+
+          // Track for wishlist cross-check
+          if (book.isbn) importedBookKeys.add(`isbn:${book.isbn}`);
+          if (book.title) importedBookKeys.add(`title:${book.title.toLowerCase()}|${(book.author || '').toLowerCase()}`);
+        }
+      }
+
+      // Import wishlist
+      let wishlistImported = 0;
+      let wishlistSkipped = 0;
+      let wishlistSkippedOwned = 0;
+
+      // Build owned books lookup
+      const ownedBooksLookup = new Set<string>();
+      for (const book of existingBooks) {
+        if (book.isbn) ownedBooksLookup.add(`isbn:${book.isbn}`);
+        if (book.title) ownedBooksLookup.add(`title:${book.title.toLowerCase()}|${(book.author || '').toLowerCase()}`);
+      }
+      for (const key of importedBookKeys) ownedBooksLookup.add(key);
+
+      if (importWishlist.length > 0) {
+        setImportStatus('Importing wishlist...');
+        for (const item of importWishlist) {
+          // Check for duplicates in existing wishlist
+          const isDuplicate = existingWishlist.some(existing => {
+            if (item.isbn && existing.isbn && item.isbn === existing.isbn) return true;
+            if (item.title && existing.title &&
+                item.title.toLowerCase() === existing.title.toLowerCase() &&
+                (item.author || '').toLowerCase() === (existing.author || '').toLowerCase()) return true;
+            return false;
+          });
+
+          if (isDuplicate) {
+            wishlistSkipped++;
+            continue;
+          }
+
+          // Skip if already owned
+          const isOwned = (item.isbn && ownedBooksLookup.has(`isbn:${item.isbn}`)) ||
+            (item.title && ownedBooksLookup.has(`title:${item.title.toLowerCase()}|${(item.author || '').toLowerCase()}`));
+
+          if (isOwned) {
+            wishlistSkippedOwned++;
+            continue;
+          }
+
+          await addWishlistItem(user.uid, item);
+          wishlistImported++;
+        }
+      }
+
+      // Build summary
+      const summaryLines: string[] = [];
+      if (booksImported > 0) summaryLines.push(`books:${booksImported} added`);
+      if (genresImported > 0) summaryLines.push(`genres:${genresImported} created`);
+      if (seriesImported > 0) summaryLines.push(`series:${seriesImported} created`);
+      if (wishlistImported > 0) summaryLines.push(`wishlist:${wishlistImported} added`);
+      if (booksSkipped > 0) summaryLines.push(`books-skip:${booksSkipped} duplicate`);
+      if (genresSkipped > 0) summaryLines.push(`genres-skip:${genresSkipped} existing`);
+      if (seriesSkipped > 0) summaryLines.push(`series-skip:${seriesSkipped} existing`);
+      if (wishlistSkipped > 0) summaryLines.push(`wishlist-skip:${wishlistSkipped} duplicate`);
+      if (wishlistSkippedOwned > 0) summaryLines.push(`wishlist-owned:${wishlistSkippedOwned} already owned`);
+
+      setImportSummary(summaryLines);
+      setImportStatus(null);
+
+      const totalImported = booksImported + genresImported + seriesImported + wishlistImported;
+      if (totalImported > 0) {
+        showToast('Import complete', { type: 'success' });
+        await loadData(); // Refresh data
+      } else {
+        showToast('Nothing new to import', { type: 'info' });
+      }
+    } catch (err) {
+      console.error('Import failed:', err);
+      showToast(err instanceof Error ? err.message : 'Import failed', { type: 'error' });
+      setImportStatus(null);
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }, [user, importing, showToast, loadData]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImport(file);
+  }, [handleImport]);
+
   if (authLoading) {
     return (
       <>
@@ -715,13 +994,23 @@ export default function LibrarySettingsPage() {
                 <Download className="w-5 h-5 text-gray-600" aria-hidden="true" />
                 <h3 className="font-medium text-gray-900">Export Backup</h3>
               </div>
-              <p className="text-gray-600 text-sm mb-4">Download all your books and genres as a JSON file.</p>
+              <p className="text-gray-600 text-sm mb-4">Download all your books, genres, series, and wishlist as a JSON file.</p>
               <button
-                id="export-btn"
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"
+                onClick={handleExport}
+                disabled={exporting}
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Download className="w-4 h-4" aria-hidden="true" />
-                <span>Download Backup</span>
+                {exporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                    <span>Exporting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" aria-hidden="true" />
+                    <span>Download Backup</span>
+                  </>
+                )}
               </button>
             </div>
 
@@ -732,16 +1021,69 @@ export default function LibrarySettingsPage() {
                 <h3 className="font-medium text-gray-900">Import Backup</h3>
               </div>
               <p className="text-gray-600 text-sm mb-4">
-                Restore books and genres from a backup file. Duplicates will be skipped.
+                Restore books, genres, series, and wishlist from a backup file. Duplicates will be skipped.
               </p>
-              <input type="file" id="import-file" accept=".json" className="hidden" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
               <button
-                id="import-btn"
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors min-h-[44px]"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Upload className="w-4 h-4" aria-hidden="true" />
-                <span>Select Backup File</span>
+                {importing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                    <span>Importing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" aria-hidden="true" />
+                    <span>Select Backup File</span>
+                  </>
+                )}
               </button>
+
+              {/* Import Progress */}
+              {importStatus && (
+                <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  <span>{importStatus}</span>
+                </div>
+              )}
+
+              {/* Import Summary */}
+              {importSummary && importSummary.length > 0 && (
+                <div className="mt-4 space-y-1">
+                  {importSummary.map((line, i) => {
+                    const [type, text] = line.split(':');
+                    let icon = <BookOpen className="w-4 h-4 text-green-600" />;
+                    let textClass = 'text-gray-700';
+
+                    if (type === 'genres') icon = <Tag className="w-4 h-4 text-green-600" />;
+                    else if (type === 'series') icon = <Library className="w-4 h-4 text-green-600" />;
+                    else if (type === 'wishlist') icon = <Heart className="w-4 h-4 text-green-600" />;
+                    else if (type.includes('-skip')) {
+                      icon = <MinusCircle className="w-4 h-4 text-gray-400" />;
+                      textClass = 'text-gray-500';
+                    } else if (type === 'wishlist-owned') {
+                      icon = <CheckCircle className="w-4 h-4 text-blue-500" />;
+                      textClass = 'text-blue-600';
+                    }
+
+                    return (
+                      <div key={i} className={`flex items-center gap-2 text-sm ${textClass}`}>
+                        {icon}
+                        <span>{text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </section>
         </div>

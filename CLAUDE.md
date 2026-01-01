@@ -155,7 +155,7 @@ The backup export/import functionality in `/settings/library` must be updated wh
 
 ## Migration Status
 
-This project is a migration from 11ty. See `docs/MIGRATION-NEXTJS.md` in the old repo for the full plan.
+This project is a migration from 11ty. Migration is complete.
 
 ### Completed
 - [x] Project setup with Next.js 16
@@ -164,13 +164,10 @@ This project is a migration from 11ty. See `docs/MIGRATION-NEXTJS.md` in the old
 - [x] Tailwind CSS with design tokens
 - [x] Auth middleware and context
 - [x] Base layout with header
-
-### In Progress
-- [ ] Port pages from old project
-- [ ] Port components
-- [ ] Port utilities and hooks
+- [x] All pages ported from old project
+- [x] All components ported
+- [x] E2E testing (Playwright - 74 tests)
+- [x] PWA configuration
 
 ### Pending
-- [ ] Testing setup (Vitest + Playwright)
-- [ ] PWA configuration
 - [ ] Multi-user features

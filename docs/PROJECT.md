@@ -1297,4 +1297,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2025-12-31* (Document reorganisation: added TOC, consolidated sections, added Security/Performance/Testing/Known Limitations)
+*Last updated: 2026-01-01* (Visual polish: BookCover component with loading spinners, BottomSheet swipe-to-dismiss, profile photo modal improvements)

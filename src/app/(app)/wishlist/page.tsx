@@ -22,6 +22,7 @@ import { useAuthContext } from '@/components/providers/auth-provider';
 import { getWishlist, deleteWishlistItem, updateWishlistItem } from '@/lib/repositories/wishlist';
 import { addBook } from '@/lib/repositories/books';
 import { useToast } from '@/components/ui/toast';
+import { BottomSheet } from '@/components/ui/modal';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import type { WishlistItem, WishlistPriority } from '@/lib/types';
 
@@ -437,128 +438,92 @@ export default function WishlistPage() {
       </div>
 
       {/* Move to Library Modal */}
-      {showMoveModal && selectedItem && (
-        <div className="fixed inset-0 bg-black/50 z-50 md:p-4" onClick={closeModals}>
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-sm p-4 md:p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle md:hidden" />
-            <h3 className="text-lg font-semibold mb-2">Add to Library?</h3>
-            <p className="text-gray-500 mb-6">&ldquo;{selectedItem.title}&rdquo; will be added to your library.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={closeModals}
-                disabled={isProcessing}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleMove}
-                disabled={isProcessing}
-                className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  'Add to Library'
-                )}
-              </button>
-            </div>
+      <BottomSheet
+        isOpen={showMoveModal && !!selectedItem}
+        onClose={closeModals}
+        title="Add to Library"
+        closeOnBackdrop={!isProcessing}
+        closeOnEscape={!isProcessing}
+        className="md:max-w-sm"
+      >
+        <div className="p-4 md:p-6">
+          <h3 className="text-lg font-semibold mb-2">Add to Library?</h3>
+          <p className="text-gray-500 mb-6">&ldquo;{selectedItem?.title}&rdquo; will be added to your library.</p>
+          <div className="flex gap-3">
+            <button
+              onClick={closeModals}
+              disabled={isProcessing}
+              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleMove}
+              disabled={isProcessing}
+              className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                'Add to Library'
+              )}
+            </button>
           </div>
         </div>
-      )}
+      </BottomSheet>
 
       {/* Edit Modal */}
-      {showEditModal && selectedItem && (
-        <div className="fixed inset-0 bg-black/50 z-50 md:p-4" onClick={closeModals}>
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-4 md:p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
+      <BottomSheet
+        isOpen={showEditModal && !!selectedItem}
+        onClose={closeModals}
+        title="Edit Wishlist Item"
+        closeOnBackdrop={!isProcessing}
+        closeOnEscape={!isProcessing}
+      >
+        <div className="p-4 md:p-6">
+          <h3 className="text-lg font-semibold mb-4">Edit Wishlist Item</h3>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleEditSave();
+            }}
+            className="space-y-4"
           >
-            <div className="bottom-sheet-handle md:hidden" />
-            <h3 className="text-lg font-semibold mb-4">Edit Wishlist Item</h3>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleEditSave();
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <label htmlFor="edit-priority" className="block font-semibold text-gray-700 mb-1">
-                  Priority
-                </label>
-                <select
-                  id="edit-priority"
-                  value={editPriority}
-                  onChange={(e) => setEditPriority(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none min-h-[44px]"
-                >
-                  <option value="">No priority</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="edit-notes" className="block font-semibold text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  id="edit-notes"
-                  value={editNotes}
-                  onChange={(e) => setEditNotes(e.target.value)}
-                  rows={3}
-                  placeholder="Why do you want this book?"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModals}
-                  disabled={isProcessing}
-                  className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isProcessing || !isEditFormDirty}
-                  className="flex-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save'
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && selectedItem && (
-        <div className="fixed inset-0 bg-black/50 z-50 md:p-4" onClick={closeModals}>
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-sm p-4 md:p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle md:hidden" />
-            <h3 className="text-lg font-semibold text-red-600 mb-2">Remove from Wishlist?</h3>
-            <p className="text-gray-500 mb-6">&ldquo;{selectedItem.title}&rdquo; will be removed from your wishlist.</p>
-            <div className="flex gap-3">
+            <div>
+              <label htmlFor="edit-priority" className="block font-semibold text-gray-700 mb-1">
+                Priority
+              </label>
+              <select
+                id="edit-priority"
+                value={editPriority}
+                onChange={(e) => setEditPriority(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none min-h-[44px]"
+              >
+                <option value="">No priority</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="edit-notes" className="block font-semibold text-gray-700 mb-1">
+                Notes
+              </label>
+              <textarea
+                id="edit-notes"
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                rows={3}
+                placeholder="Why do you want this book?"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
               <button
+                type="button"
                 onClick={closeModals}
                 disabled={isProcessing}
                 className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
@@ -566,23 +531,61 @@ export default function WishlistPage() {
                 Cancel
               </button>
               <button
-                onClick={handleDelete}
-                disabled={isProcessing}
-                className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2"
+                type="submit"
+                disabled={isProcessing || !isEditFormDirty}
+                className="flex-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Removing...
+                    Saving...
                   </>
                 ) : (
-                  'Remove'
+                  'Save'
                 )}
               </button>
             </div>
+          </form>
+        </div>
+      </BottomSheet>
+
+      {/* Delete Confirmation Modal */}
+      <BottomSheet
+        isOpen={showDeleteModal && !!selectedItem}
+        onClose={closeModals}
+        title="Remove from Wishlist"
+        closeOnBackdrop={!isProcessing}
+        closeOnEscape={!isProcessing}
+        className="md:max-w-sm"
+      >
+        <div className="p-4 md:p-6">
+          <h3 className="text-lg font-semibold text-red-600 mb-2">Remove from Wishlist?</h3>
+          <p className="text-gray-500 mb-6">&ldquo;{selectedItem?.title}&rdquo; will be removed from your wishlist.</p>
+          <div className="flex gap-3">
+            <button
+              onClick={closeModals}
+              disabled={isProcessing}
+              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isProcessing}
+              className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Removing...
+                </>
+              ) : (
+                'Remove'
+              )}
+            </button>
           </div>
         </div>
-      )}
+      </BottomSheet>
     </>
   );
 }

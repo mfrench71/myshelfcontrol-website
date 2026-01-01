@@ -36,6 +36,7 @@ import {
 import { auth } from '@/lib/firebase/client';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
+import { BottomSheet } from '@/components/ui/modal';
 import { checkPasswordStrength, getGravatarUrl } from '@/lib/utils';
 import {
   getProfileData,
@@ -158,22 +159,16 @@ function ChangePasswordModal({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 bottom-sheet-backdrop"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Change password"
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Change Password"
+      closeOnBackdrop={!loading}
+      closeOnEscape={!loading}
+      className="md:max-w-xl"
     >
-      <div
-        className="bottom-sheet-content bg-white w-full md:max-w-xl p-4 sm:p-6 md:mx-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bottom-sheet-handle md:hidden" />
-
+      <div className="p-4 sm:p-6">
         <h3 className="text-lg font-semibold mb-4">Change Password</h3>
 
         {success ? (
@@ -290,7 +285,7 @@ function ChangePasswordModal({
           </form>
         )}
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 
@@ -302,12 +297,14 @@ function PhotoModal({
   onClose,
   userId,
   currentPhotoUrl,
+  hasGravatar,
   onPhotoChange,
 }: {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
   currentPhotoUrl: string | null;
+  hasGravatar: boolean;
   onPhotoChange: (url: string | null) => void;
 }) {
   const { showToast } = useToast();
@@ -355,22 +352,16 @@ function PhotoModal({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 bottom-sheet-backdrop"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Update profile photo"
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Profile Photo"
+      closeOnBackdrop={!uploading && !removing}
+      closeOnEscape={!uploading && !removing}
+      className="md:max-w-sm"
     >
-      <div
-        className="bottom-sheet-content bg-white w-full md:max-w-sm p-6 md:mx-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bottom-sheet-handle" />
-
+      <div className="p-6">
         <h3 className="text-lg font-semibold mb-4">Profile Photo</h3>
 
         {/* Current photo preview */}
@@ -463,8 +454,29 @@ function PhotoModal({
         <p className="text-xs text-gray-500 text-center mt-4">
           JPG, PNG or WebP. Max 2MB. Photos are cropped to a square.
         </p>
+
+        {/* Gravatar fallback note */}
+        {!currentPhotoUrl && hasGravatar && (
+          <p className="text-xs text-gray-400 text-center mt-2">
+            Using your Gravatar as fallback. Upload a photo to override.
+          </p>
+        )}
+        {!currentPhotoUrl && !hasGravatar && (
+          <p className="text-xs text-gray-400 text-center mt-2">
+            No photo set. You can also use{' '}
+            <a
+              href="https://gravatar.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Gravatar
+            </a>{' '}
+            as a fallback.
+          </p>
+        )}
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 
@@ -520,22 +532,15 @@ function DeleteAccountModal({
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 bottom-sheet-backdrop"
-      onClick={handleClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Delete account confirmation"
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Delete Account"
+      closeOnBackdrop={!loading}
+      closeOnEscape={!loading}
     >
-      <div
-        className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bottom-sheet-handle" />
-
+      <div className="p-6">
         <h3 className="text-lg font-semibold text-red-600 mb-2">Delete Account</h3>
         <p className="text-gray-500 mb-4">
           This action is permanent and cannot be undone. All your books, genres, series, and settings will be deleted.
@@ -597,7 +602,7 @@ function DeleteAccountModal({
           </div>
         </form>
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 
@@ -902,6 +907,7 @@ export default function ProfileSettingsPage() {
           onClose={() => setShowPhotoModal(false)}
           userId={user.uid}
           currentPhotoUrl={profileData?.photoUrl || null}
+          hasGravatar={!!gravatarUrl}
           onPhotoChange={handlePhotoChange}
         />
       )}

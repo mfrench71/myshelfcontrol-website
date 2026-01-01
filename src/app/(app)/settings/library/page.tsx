@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
+import { BottomSheet } from '@/components/ui/modal';
 import { getGenres, createGenre, updateGenre, deleteGenre } from '@/lib/repositories/genres';
 import { getSeries, createSeries, updateSeries, deleteSeries } from '@/lib/repositories/series';
 import { getBooks, getBinBooks, addBook } from '@/lib/repositories/books';
@@ -1127,376 +1128,340 @@ export default function LibrarySettingsPage() {
       </div>
 
       {/* Genre Add/Edit Modal */}
-      {showGenreModal && (
-        <div
-          className="fixed inset-0 z-50 bottom-sheet-backdrop"
-          onClick={closeGenreModal}
-          role="dialog"
-          aria-modal="true"
-          aria-label={editingGenre ? 'Edit Genre' : 'Add Genre'}
-        >
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {editingGenre ? 'Edit Genre' : 'Add Genre'}
-            </h3>
+      <BottomSheet
+        isOpen={showGenreModal}
+        onClose={closeGenreModal}
+        title={editingGenre ? 'Edit Genre' : 'Add Genre'}
+        closeOnBackdrop={!genreSaving}
+        closeOnEscape={!genreSaving}
+      >
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            {editingGenre ? 'Edit Genre' : 'Add Genre'}
+          </h3>
 
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="genre-name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Genre Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="genre-name"
-                    type="text"
-                    value={genreName}
-                    onChange={(e) => setGenreName(e.target.value)}
-                    placeholder="e.g., Science Fiction"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                    autoFocus
-                  />
-                </div>
-
-                {/* Show color picker only when editing */}
-                {editingGenre && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Colour</label>
-                    <div className="flex flex-wrap gap-2">
-                      {availableColors.map((color) => {
-                        const isSelected = color.toLowerCase() === genreColor.toLowerCase();
-                        const textColor = getContrastColor(color);
-                        return (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => setGenreColor(color)}
-                            className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${
-                              isSelected ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' : 'border-transparent'
-                            }`}
-                            style={{ backgroundColor: color }}
-                            aria-label={`Select ${color} colour${isSelected ? ' (selected)' : ''}`}
-                            aria-pressed={isSelected}
-                          >
-                            {isSelected && (
-                              <Check className="w-4 h-4 mx-auto" style={{ color: textColor }} aria-hidden="true" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={closeGenreModal}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveGenre}
-                disabled={!isGenreFormDirty() || genreSaving}
-                className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                {genreSaving ? 'Saving...' : 'Save'}
-              </button>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="genre-name" className="block text-sm font-medium text-gray-700 mb-1">
+                Genre Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="genre-name"
+                type="text"
+                value={genreName}
+                onChange={(e) => setGenreName(e.target.value)}
+                placeholder="e.g., Science Fiction"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                autoFocus
+              />
             </div>
+
+            {/* Show color picker only when editing */}
+            {editingGenre && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Colour</label>
+                <div className="flex flex-wrap gap-2">
+                  {availableColors.map((color) => {
+                    const isSelected = color.toLowerCase() === genreColor.toLowerCase();
+                    const textColor = getContrastColor(color);
+                    return (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setGenreColor(color)}
+                        className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform ${
+                          isSelected ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-400' : 'border-transparent'
+                        }`}
+                        style={{ backgroundColor: color }}
+                        aria-label={`Select ${color} colour${isSelected ? ' (selected)' : ''}`}
+                        aria-pressed={isSelected}
+                      >
+                        {isSelected && (
+                          <Check className="w-4 h-4 mx-auto" style={{ color: textColor }} aria-hidden="true" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={closeGenreModal}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveGenre}
+              disabled={!isGenreFormDirty() || genreSaving}
+              className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              {genreSaving ? 'Saving...' : 'Save'}
+            </button>
           </div>
         </div>
-      )}
+      </BottomSheet>
 
       {/* Genre Delete Confirmation Modal */}
-      {genreDeleteConfirm && (
-        <div
-          className="fixed inset-0 z-50 bottom-sheet-backdrop"
-          onClick={() => setGenreDeleteConfirm(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Delete Genre"
-        >
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Genre</h3>
-            <p className="text-gray-600 mb-6">
-              {genreDeleteConfirm.bookCount > 0 ? (
-                <>
-                  This will remove &quot;{genreDeleteConfirm.name}&quot; from{' '}
-                  <span className="text-amber-600 font-medium">
-                    {genreDeleteConfirm.bookCount} book
-                    {genreDeleteConfirm.bookCount !== 1 ? 's' : ''}
-                  </span>
-                  .
-                </>
-              ) : (
-                <>Are you sure you want to delete &quot;{genreDeleteConfirm.name}&quot;?</>
-              )}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setGenreDeleteConfirm(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteGenre}
-                disabled={genreSaving}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                {genreSaving ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
+      <BottomSheet
+        isOpen={!!genreDeleteConfirm}
+        onClose={() => setGenreDeleteConfirm(null)}
+        title="Delete Genre"
+        closeOnBackdrop={!genreSaving}
+        closeOnEscape={!genreSaving}
+      >
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Genre</h3>
+          <p className="text-gray-600 mb-6">
+            {genreDeleteConfirm && genreDeleteConfirm.bookCount > 0 ? (
+              <>
+                This will remove &quot;{genreDeleteConfirm.name}&quot; from{' '}
+                <span className="text-amber-600 font-medium">
+                  {genreDeleteConfirm.bookCount} book
+                  {genreDeleteConfirm.bookCount !== 1 ? 's' : ''}
+                </span>
+                .
+              </>
+            ) : (
+              <>Are you sure you want to delete &quot;{genreDeleteConfirm?.name}&quot;?</>
+            )}
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setGenreDeleteConfirm(null)}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteGenre}
+              disabled={genreSaving}
+              className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              {genreSaving ? 'Deleting...' : 'Delete'}
+            </button>
           </div>
         </div>
-      )}
+      </BottomSheet>
 
       {/* Genre Merge Modal */}
-      {showMergeGenreModal && mergingGenre && (
-        <div
-          className="fixed inset-0 z-50 bottom-sheet-backdrop"
-          onClick={closeMergeGenreModal}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Merge Genre"
-        >
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Genre</h3>
+      <BottomSheet
+        isOpen={showMergeGenreModal && !!mergingGenre}
+        onClose={closeMergeGenreModal}
+        title="Merge Genre"
+        closeOnBackdrop={!genreSaving}
+        closeOnEscape={!genreSaving}
+      >
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Genre</h3>
 
-            <p className="text-gray-600 text-sm mb-4">
-              Merge &quot;<span className="font-medium">{mergingGenre.name}</span>&quot; into another genre. Books will be moved and the source genre will be deleted.
-            </p>
+          <p className="text-gray-600 text-sm mb-4">
+            Merge &quot;<span className="font-medium">{mergingGenre?.name}</span>&quot; into another genre. Books will be moved and the source genre will be deleted.
+          </p>
 
-            <div>
-              <label htmlFor="merge-target" className="block font-semibold text-gray-700 mb-1">
-                Target Genre
-              </label>
-              <select
-                id="merge-target"
-                value={mergeTargetId}
-                onChange={(e) => setMergeTargetId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">Select a genre...</option>
-                {genres
-                  .filter((g) => g.id !== mergingGenre.id)
-                  .map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
+          <div>
+            <label htmlFor="merge-target" className="block font-semibold text-gray-700 mb-1">
+              Target Genre
+            </label>
+            <select
+              id="merge-target"
+              value={mergeTargetId}
+              onChange={(e) => setMergeTargetId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">Select a genre...</option>
+              {genres
+                .filter((g) => g.id !== mergingGenre?.id)
+                .map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+            </select>
+          </div>
 
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={closeMergeGenreModal}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleMergeGenre}
-                disabled={!mergeTargetId || genreSaving}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                {genreSaving ? 'Merging...' : 'Merge'}
-              </button>
-            </div>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={closeMergeGenreModal}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleMergeGenre}
+              disabled={!mergeTargetId || genreSaving}
+              className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              {genreSaving ? 'Merging...' : 'Merge'}
+            </button>
           </div>
         </div>
-      )}
+      </BottomSheet>
 
       {/* Series Add/Edit Modal */}
-      {showSeriesModal && (
-        <div
-          className="fixed inset-0 z-50 bottom-sheet-backdrop"
-          onClick={closeSeriesModal}
-          role="dialog"
-          aria-modal="true"
-          aria-label={editingSeries ? 'Edit Series' : 'Add Series'}
-        >
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {editingSeries ? 'Edit Series' : 'Add Series'}
-            </h3>
+      <BottomSheet
+        isOpen={showSeriesModal}
+        onClose={closeSeriesModal}
+        title={editingSeries ? 'Edit Series' : 'Add Series'}
+        closeOnBackdrop={!seriesSaving}
+        closeOnEscape={!seriesSaving}
+      >
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            {editingSeries ? 'Edit Series' : 'Add Series'}
+          </h3>
 
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="series-name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Series Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="series-name"
-                  type="text"
-                  value={seriesName}
-                  onChange={(e) => setSeriesName(e.target.value)}
-                  placeholder="e.g., Harry Potter"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label htmlFor="series-total" className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Books in Series
-                </label>
-                <input
-                  id="series-total"
-                  type="number"
-                  value={seriesTotalBooks}
-                  onChange={(e) => setSeriesTotalBooks(e.target.value)}
-                  placeholder="e.g., 7"
-                  min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Optional. Shows completion progress (e.g., 3/7). You can have more books than this total.
-                </p>
-              </div>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="series-name" className="block text-sm font-medium text-gray-700 mb-1">
+                Series Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="series-name"
+                type="text"
+                value={seriesName}
+                onChange={(e) => setSeriesName(e.target.value)}
+                placeholder="e.g., Harry Potter"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                autoFocus
+              />
             </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={closeSeriesModal}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveSeries}
-                disabled={!isSeriesFormDirty() || seriesSaving}
-                className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                {seriesSaving ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Series Delete Confirmation Modal */}
-      {seriesDeleteConfirm && (
-        <div
-          className="fixed inset-0 z-50 bottom-sheet-backdrop"
-          onClick={() => setSeriesDeleteConfirm(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Delete Series"
-        >
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Series</h3>
-            <p className="text-gray-600 mb-6">
-              {seriesDeleteConfirm.bookCount > 0 ? (
-                <>
-                  This will remove &quot;{seriesDeleteConfirm.name}&quot; from{' '}
-                  <span className="text-amber-600 font-medium">
-                    {seriesDeleteConfirm.bookCount} book
-                    {seriesDeleteConfirm.bookCount !== 1 ? 's' : ''}
-                  </span>
-                  .
-                </>
-              ) : (
-                <>Are you sure you want to delete &quot;{seriesDeleteConfirm.name}&quot;?</>
-              )}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setSeriesDeleteConfirm(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteSeries}
-                disabled={seriesSaving}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                {seriesSaving ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Series Merge Modal */}
-      {showMergeSeriesModal && mergingSeries && (
-        <div
-          className="fixed inset-0 z-50 bottom-sheet-backdrop"
-          onClick={closeMergeSeriesModal}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Merge Series"
-        >
-          <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="bottom-sheet-handle" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Series</h3>
-
-            <p className="text-gray-600 text-sm mb-4">
-              Merge &quot;<span className="font-medium">{mergingSeries.name}</span>&quot; into another series. Books will be moved and the source series will be deleted.
-            </p>
 
             <div>
-              <label htmlFor="merge-series-target" className="block font-semibold text-gray-700 mb-1">
-                Target Series
+              <label htmlFor="series-total" className="block text-sm font-medium text-gray-700 mb-1">
+                Total Books in Series
               </label>
-              <select
-                id="merge-series-target"
-                value={mergeSeriesTargetId}
-                onChange={(e) => setMergeSeriesTargetId(e.target.value)}
+              <input
+                id="series-total"
+                type="number"
+                value={seriesTotalBooks}
+                onChange={(e) => setSeriesTotalBooks(e.target.value)}
+                placeholder="e.g., 7"
+                min="1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">Select a series...</option>
-                {seriesList
-                  .filter((s) => s.id !== mergingSeries.id)
-                  .map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={closeMergeSeriesModal}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleMergeSeries}
-                disabled={!mergeSeriesTargetId || seriesSaving}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                {seriesSaving ? 'Merging...' : 'Merge'}
-              </button>
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Optional. Shows completion progress (e.g., 3/7). You can have more books than this total.
+              </p>
             </div>
           </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={closeSeriesModal}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveSeries}
+              disabled={!isSeriesFormDirty() || seriesSaving}
+              className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              {seriesSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
-      )}
+      </BottomSheet>
+
+      {/* Series Delete Confirmation Modal */}
+      <BottomSheet
+        isOpen={!!seriesDeleteConfirm}
+        onClose={() => setSeriesDeleteConfirm(null)}
+        title="Delete Series"
+        closeOnBackdrop={!seriesSaving}
+        closeOnEscape={!seriesSaving}
+      >
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Series</h3>
+          <p className="text-gray-600 mb-6">
+            {seriesDeleteConfirm && seriesDeleteConfirm.bookCount > 0 ? (
+              <>
+                This will remove &quot;{seriesDeleteConfirm.name}&quot; from{' '}
+                <span className="text-amber-600 font-medium">
+                  {seriesDeleteConfirm.bookCount} book
+                  {seriesDeleteConfirm.bookCount !== 1 ? 's' : ''}
+                </span>
+                .
+              </>
+            ) : (
+              <>Are you sure you want to delete &quot;{seriesDeleteConfirm?.name}&quot;?</>
+            )}
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setSeriesDeleteConfirm(null)}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteSeries}
+              disabled={seriesSaving}
+              className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              {seriesSaving ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
+
+      {/* Series Merge Modal */}
+      <BottomSheet
+        isOpen={showMergeSeriesModal && !!mergingSeries}
+        onClose={closeMergeSeriesModal}
+        title="Merge Series"
+        closeOnBackdrop={!seriesSaving}
+        closeOnEscape={!seriesSaving}
+      >
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Series</h3>
+
+          <p className="text-gray-600 text-sm mb-4">
+            Merge &quot;<span className="font-medium">{mergingSeries?.name}</span>&quot; into another series. Books will be moved and the source series will be deleted.
+          </p>
+
+          <div>
+            <label htmlFor="merge-series-target" className="block font-semibold text-gray-700 mb-1">
+              Target Series
+            </label>
+            <select
+              id="merge-series-target"
+              value={mergeSeriesTargetId}
+              onChange={(e) => setMergeSeriesTargetId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">Select a series...</option>
+              {seriesList
+                .filter((s) => s.id !== mergingSeries?.id)
+                .map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={closeMergeSeriesModal}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleMergeSeries}
+              disabled={!mergeSeriesTargetId || seriesSaving}
+              className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              {seriesSaving ? 'Merging...' : 'Merge'}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
     </>
   );
 }

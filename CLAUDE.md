@@ -141,6 +141,18 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 - **Project**: `book-tracker-b786e` (same as old project)
 - **Collections**: `/users/{userId}/books`, `/genres`, `/series`, `/bin`, `/wishlist`
 
+## Development Notes
+
+### Backup Export/Import
+The backup export/import functionality in `/settings/library` must be updated whenever new data types are added. Currently exports:
+- Books (with genre/series ID remapping on import)
+- Genres
+- Series
+- Wishlist (with cross-check against owned books)
+- Bin
+
+**Review `handleExport` and `handleImport` in `src/app/(app)/settings/library/page.tsx` when adding new collections or fields.**
+
 ## Migration Status
 
 This project is a migration from 11ty. See `docs/MIGRATION-NEXTJS.md` in the old repo for the full plan.

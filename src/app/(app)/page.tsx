@@ -52,8 +52,8 @@ function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
 function HorizontalBookCard({ book, href }: { book: Book; href: string }) {
   return (
     <Link href={href} className="flex-shrink-0 w-24 snap-start">
-      <div className="relative w-24 h-36 bg-primary rounded-lg shadow-md flex items-center justify-center overflow-hidden">
-        <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
+      <div className="relative w-24 h-36 rounded-lg shadow-cover flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary to-primary-dark">
+        <BookOpen className="w-8 h-8 text-white/80" aria-hidden="true" />
         {book.coverImageUrl && (
           <Image
             src={book.coverImageUrl}

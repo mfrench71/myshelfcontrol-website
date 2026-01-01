@@ -194,7 +194,7 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
       className="book-card flex gap-4 p-3 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all"
     >
       {/* Cover Image */}
-      <div className="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+      <div className="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden shadow-cover">
         {book.coverImageUrl ? (
           <Image
             src={book.coverImageUrl}
@@ -205,7 +205,9 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
             loading="lazy"
           />
         ) : (
-          <BookOpen className="w-6 h-6 text-white/60" aria-hidden="true" />
+          <div className="w-full h-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
+            <BookOpen className="w-6 h-6 text-white/80" aria-hidden="true" />
+          </div>
         )}
       </div>
 

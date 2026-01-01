@@ -137,6 +137,23 @@ export interface BottomSheetProps {
 }
 
 /**
+ * Find a scrollable ancestor element between target and stopAt
+ */
+function findScrollableAncestor(target: HTMLElement, stopAt: HTMLElement): HTMLElement | null {
+  let el: HTMLElement | null = target;
+  while (el && el !== stopAt) {
+    const style = window.getComputedStyle(el);
+    const overflowY = style.overflowY;
+    const isScrollable = (overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight;
+    if (isScrollable) {
+      return el;
+    }
+    el = el.parentElement;
+  }
+  return null;
+}
+
+/**
  * BottomSheet - Mobile-first sheet that slides up from bottom
  * On desktop (md+), displays as centered modal
  */
@@ -153,6 +170,7 @@ export function BottomSheet({
   const [isClosing, setIsClosing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const currentY = useRef(0);
   const isDragging = useRef(false);
@@ -199,42 +217,75 @@ export function BottomSheet({
     }
   };
 
-  // Swipe-to-dismiss handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!swipeToDismiss || !contentRef.current) return;
+  // Setup swipe gesture on touch devices
+  useEffect(() => {
+    if (!isOpen || !swipeToDismiss || !containerRef.current) return;
 
-    // Only start swipe if at top of content
-    if (contentRef.current.scrollTop === 0) {
-      isDragging.current = true;
-      startY.current = e.touches[0].clientY;
-      currentY.current = 0;
-      contentRef.current.style.transition = 'none';
-    }
-  };
+    // Only enable on touch devices
+    if (!('ontouchstart' in window)) return;
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging.current || !contentRef.current) return;
+    const container = containerRef.current;
 
-    const deltaY = e.touches[0].clientY - startY.current;
-    if (deltaY > 0) {
-      currentY.current = deltaY;
-      contentRef.current.style.transform = `translateY(${deltaY}px)`;
-    }
-  };
+    const handleTouchStart = (e: TouchEvent) => {
+      const content = contentRef.current;
+      const handle = handleRef.current;
+      if (!content) return;
 
-  const handleTouchEnd = () => {
-    if (!isDragging.current || !contentRef.current) return;
+      const target = e.target as HTMLElement;
 
-    isDragging.current = false;
-    contentRef.current.style.transition = '';
+      // Check for nested scrollable ancestor
+      const nestedScrollable = findScrollableAncestor(target, content);
+      if (nestedScrollable && nestedScrollable.scrollTop < nestedScrollable.scrollHeight - nestedScrollable.clientHeight) {
+        // Inner scrollable can still scroll down, don't start dismiss
+        return;
+      }
 
-    // If dragged more than 100px, close; otherwise snap back
-    if (currentY.current > 100) {
-      handleClose();
-    } else {
-      contentRef.current.style.transform = '';
-    }
-  };
+      // Allow drag from handle or if content is scrolled to top
+      const isHandle = handle && handle.contains(target);
+      const isScrolledToTop = content.scrollTop === 0;
+
+      if (isHandle || isScrolledToTop) {
+        isDragging.current = true;
+        startY.current = e.touches[0].clientY;
+        currentY.current = 0;
+        content.style.transition = 'none';
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging.current || !contentRef.current) return;
+
+      const deltaY = e.touches[0].clientY - startY.current;
+      if (deltaY > 0) {
+        currentY.current = deltaY;
+        contentRef.current.style.transform = `translateY(${deltaY}px)`;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      if (!isDragging.current || !contentRef.current) return;
+
+      isDragging.current = false;
+      contentRef.current.style.transition = '';
+
+      // If dragged more than 100px, close; otherwise snap back
+      if (currentY.current > 100) {
+        handleClose();
+      } else {
+        contentRef.current.style.transform = '';
+      }
+    };
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isOpen, swipeToDismiss, handleClose]);
 
   if (!isOpen) return null;
 
@@ -252,12 +303,9 @@ export function BottomSheet({
       <div
         ref={contentRef}
         className={`bottom-sheet-content bg-white w-full md:max-w-md md:rounded-xl md:shadow-xl max-h-[90vh] overflow-y-auto ${className}`}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
         {/* Swipe handle (mobile only) */}
-        <div className="bottom-sheet-handle md:hidden" />
+        <div ref={handleRef} className="bottom-sheet-handle md:hidden" />
         {children}
       </div>
     </div>

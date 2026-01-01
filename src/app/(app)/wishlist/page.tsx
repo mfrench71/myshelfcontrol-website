@@ -104,7 +104,7 @@ function WishlistItemCard({
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-3">
       {/* Cover - 48x72 matching old site */}
-      <div className="w-12 h-[72px] flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+      <div className="w-12 h-[72px] flex-shrink-0 rounded-lg overflow-hidden shadow-cover">
         {item.coverImageUrl ? (
           <Image
             src={item.coverImageUrl}
@@ -114,8 +114,8 @@ function WishlistItemCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
-            <Book className="w-5 h-5" aria-hidden="true" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
+            <Book className="w-5 h-5 text-white/80" aria-hidden="true" />
           </div>
         )}
       </div>

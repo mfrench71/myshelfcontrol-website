@@ -526,8 +526,8 @@ export default function BookDetailPage() {
                   priority
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                  <BookOpen className="w-16 h-16 text-white/60" aria-hidden="true" />
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
+                  <BookOpen className="w-16 h-16 text-white/80" aria-hidden="true" />
                 </div>
               )}
             </button>

@@ -85,11 +85,11 @@ function CoverOption({
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <div className="text-xs text-gray-500 text-center mb-1">{SOURCE_LABELS[source]}</div>
-      <div className="relative w-16 h-24 mx-auto">
+      <div className="relative w-16 h-24 mx-auto rounded-lg overflow-hidden shadow-cover">
         {/* Loading spinner */}
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
-            <Loader2 className="w-5 h-5 text-gray-400 animate-spin" aria-hidden="true" />
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
+            <Loader2 className="w-5 h-5 text-white/80 animate-spin" aria-hidden="true" />
           </div>
         )}
         {/* Cover image */}
@@ -98,7 +98,7 @@ function CoverOption({
           alt={`${SOURCE_LABELS[source]} cover`}
           width={64}
           height={96}
-          className={`w-16 h-24 rounded object-cover ${loading ? 'opacity-0' : 'opacity-100'}`}
+          className={`w-16 h-24 object-cover ${loading ? 'opacity-0' : 'opacity-100'}`}
           onLoad={() => setLoading(false)}
           onError={() => {
             setLoading(false);
@@ -188,8 +188,8 @@ export function CoverPicker({
       ) : (
         /* No cover placeholder */
         <div className="flex flex-col items-center">
-          <div className="w-24 h-36 bg-gray-100 rounded-lg flex items-center justify-center text-gray-300">
-            <BookOpen className="w-10 h-10" aria-hidden="true" />
+          <div className="w-24 h-36 rounded-lg shadow-cover overflow-hidden flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
+            <BookOpen className="w-10 h-10 text-white/80" aria-hidden="true" />
           </div>
           <p className="text-xs text-gray-400 mt-1">No cover available</p>
         </div>

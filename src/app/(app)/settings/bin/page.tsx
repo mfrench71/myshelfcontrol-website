@@ -311,7 +311,7 @@ export default function BinPage() {
                   className="flex gap-4 p-4 bg-white rounded-xl border border-gray-200"
                 >
                   {/* Cover */}
-                  <div className="w-16 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-cover">
                     {book.coverImageUrl ? (
                       <Image
                         src={book.coverImageUrl}
@@ -321,8 +321,8 @@ export default function BinPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="w-6 h-6 text-gray-300" aria-hidden="true" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
+                        <BookOpen className="w-6 h-6 text-white/80" aria-hidden="true" />
                       </div>
                     )}
                   </div>

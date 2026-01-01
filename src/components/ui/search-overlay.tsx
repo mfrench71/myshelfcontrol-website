@@ -14,10 +14,10 @@ import {
   BookOpen,
   Book as BookIcon,
   Clock,
-  Loader2,
   Star,
   Library,
   CheckCircle,
+  Calendar,
 } from 'lucide-react';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import { useAuthContext } from '@/components/providers/auth-provider';
@@ -163,18 +163,17 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [books, setBooks] = useState<Book[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   // Lock body scroll when open
   useBodyScrollLock(isOpen);
 
-  // Load books, series, and genres when overlay opens
+  // Load books, series, and genres when overlay opens (only once)
   useEffect(() => {
-    if (!isOpen || !user) return;
+    if (!isOpen || !user || dataLoaded) return;
 
     async function loadData() {
-      setLoading(true);
       try {
         const [userBooks, userSeries, userGenres] = await Promise.all([
           getBooks(user!.uid),
@@ -184,16 +183,15 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         setBooks(userBooks);
         setSeries(userSeries);
         setGenres(userGenres);
+        setDataLoaded(true);
       } catch (err) {
         console.error('Failed to load search data:', err);
-      } finally {
-        setLoading(false);
       }
     }
 
     loadData();
     setRecentSearches(getRecentSearches());
-  }, [isOpen, user]);
+  }, [isOpen, user, dataLoaded]);
 
   // Focus input when opening
   useEffect(() => {
@@ -325,14 +323,10 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
       {/* Search Content */}
       <div className="flex-1 overflow-y-auto overscroll-contain">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
-        ) : query.length < 2 ? (
+        {query.length < 2 ? (
           /* Initial State or Recent Searches */
           recentSearches.length > 0 ? (
-            <div className="p-4 max-w-6xl mx-auto w-full">
+            <div className="p-4 max-w-6xl mx-auto w-full section-enter">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-medium text-gray-500">Recent searches</h3>
                 <button
@@ -360,7 +354,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             </div>
           ) : (
             /* Empty initial state */
-            <div className="p-4 max-w-6xl mx-auto w-full">
+            <div className="p-4 max-w-6xl mx-auto w-full section-enter">
               <div className="py-8 text-center">
                 <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
                 <p className="text-gray-500 mt-3">Search your library</p>
@@ -372,7 +366,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           )
         ) : results.length === 0 ? (
           /* No Results */
-          <div className="p-4 max-w-6xl mx-auto w-full">
+          <div className="p-4 max-w-6xl mx-auto w-full section-enter">
             <div className="py-8 text-center">
               <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
               <p className="text-gray-500 mt-3">No books found for &quot;{query}&quot;</p>
@@ -381,7 +375,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           </div>
         ) : (
           /* Search Results */
-          <div className="p-4 space-y-3 max-w-6xl mx-auto w-full">
+          <div className="p-4 space-y-3 max-w-6xl mx-auto w-full section-enter">
             <div className="space-y-3">
               {results.map((book, index) => {
                 const seriesData = book.seriesId ? seriesLookup[book.seriesId] : null;
@@ -394,7 +388,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     className="flex gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md active:scale-[0.99] transition-all animate-fade-in"
                     style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
                   >
-                    <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                    <div className="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-cover">
                       {book.coverImageUrl ? (
                         <Image
                           src={book.coverImageUrl}
@@ -404,8 +398,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <BookIcon className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
+                          <BookIcon className="w-5 h-5 text-white/80" aria-hidden="true" />
                         </div>
                       )}
                     </div>
@@ -484,7 +478,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       )}
                       {/* Date added */}
                       {book.createdAt && (
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                          <Calendar className="w-3 h-3" aria-hidden="true" />
                           Added {formatDate(book.createdAt)}
                         </p>
                       )}

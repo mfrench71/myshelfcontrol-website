@@ -296,14 +296,14 @@ function PhotoModal({
   onClose,
   userId,
   currentPhotoUrl,
-  hasGravatar,
+  gravatarUrl,
   onPhotoChange,
 }: {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
   currentPhotoUrl: string | null;
-  hasGravatar: boolean;
+  gravatarUrl: string | null;
   onPhotoChange: (url: string | null) => void;
 }) {
   const { showToast } = useToast();
@@ -364,10 +364,10 @@ function PhotoModal({
         <h3 className="text-lg font-semibold mb-4">Profile Photo</h3>
 
         {/* Current photo preview */}
-        {currentPhotoUrl && (
+        {(currentPhotoUrl || gravatarUrl) && (
           <div className="flex justify-center mb-4">
             <Image
-              src={currentPhotoUrl}
+              src={currentPhotoUrl || gravatarUrl!}
               alt="Current profile photo"
               width={128}
               height={128}
@@ -455,12 +455,12 @@ function PhotoModal({
         </p>
 
         {/* Gravatar fallback note */}
-        {!currentPhotoUrl && hasGravatar && (
+        {!currentPhotoUrl && gravatarUrl && (
           <p className="text-xs text-gray-400 text-center mt-2">
             Using your Gravatar as fallback. Upload a photo to override.
           </p>
         )}
-        {!currentPhotoUrl && !hasGravatar && (
+        {!currentPhotoUrl && !gravatarUrl && (
           <p className="text-xs text-gray-400 text-center mt-2">
             No photo set. You can also use{' '}
             <a
@@ -816,8 +816,8 @@ export default function ProfileSettingsPage() {
           {/* Change Password */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h3 className="font-medium text-gray-900">Change Password</h3>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-gray-900">Password</h3>
                 <p className="text-gray-500 text-sm mt-1">Update your account password</p>
               </div>
               <button
@@ -826,7 +826,7 @@ export default function ProfileSettingsPage() {
                 className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm rounded-lg transition-colors min-h-[44px] whitespace-nowrap"
               >
                 <Key className="w-4 h-4" aria-hidden="true" />
-                <span>Change Password</span>
+                <span>Change</span>
               </button>
             </div>
           </div>
@@ -853,7 +853,7 @@ export default function ProfileSettingsPage() {
             </Link>
 
             <Link
-              href="/settings/library"
+              href="/settings/library#backup"
               className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -906,7 +906,7 @@ export default function ProfileSettingsPage() {
           onClose={() => setShowPhotoModal(false)}
           userId={user.uid}
           currentPhotoUrl={profileData?.photoUrl || null}
-          hasGravatar={!!gravatarUrl}
+          gravatarUrl={gravatarUrl}
           onPhotoChange={handlePhotoChange}
         />
       )}

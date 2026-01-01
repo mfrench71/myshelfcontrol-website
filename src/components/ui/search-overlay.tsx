@@ -12,9 +12,12 @@ import {
   X,
   ArrowLeft,
   BookOpen,
+  Book as BookIcon,
   Clock,
   Loader2,
   Star,
+  Library,
+  CheckCircle,
 } from 'lucide-react';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import { useAuthContext } from '@/components/providers/auth-provider';
@@ -99,10 +102,21 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   return (
     <>
       {before}
-      <mark className="bg-yellow-200 rounded">{match}</mark>
+      <mark className="bg-yellow-200 text-yellow-900 rounded px-0.5">{match}</mark>
       {after}
     </>
   );
+}
+
+/**
+ * Get book reading status from reads array
+ */
+function getBookStatus(book: Book): 'reading' | 'finished' | 'want-to-read' {
+  if (!book.reads || book.reads.length === 0) return 'want-to-read';
+  const lastRead = book.reads[book.reads.length - 1];
+  if (lastRead.finishedAt) return 'finished';
+  if (lastRead.startedAt) return 'reading';
+  return 'want-to-read';
 }
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
@@ -325,13 +339,14 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           <div className="p-4 space-y-3 max-w-6xl mx-auto w-full">
             <div className="space-y-3">
               {results.map((book, index) => {
-                const seriesName = book.seriesId ? seriesLookup[book.seriesId]?.name : null;
+                const seriesData = book.seriesId ? seriesLookup[book.seriesId] : null;
+                const status = getBookStatus(book);
                 return (
                   <Link
                     key={book.id}
                     href={`/books/${book.id}`}
                     onClick={handleSelectResult}
-                    className="flex gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-primary hover:shadow-sm transition-all animate-fade-in"
+                    className="flex gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md active:scale-[0.99] transition-all animate-fade-in"
                     style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
                   >
                     <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
@@ -344,23 +359,45 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/40">
-                          <BookOpen className="w-5 h-5 text-white/60" aria-hidden="true" />
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <BookIcon className="w-5 h-5 text-gray-400" aria-hidden="true" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">
+                      <h3 className="font-medium text-gray-900 truncate">
                         {highlightMatch(book.title || 'Untitled', query)}
-                      </p>
+                      </h3>
                       <p className="text-sm text-gray-500 truncate">
-                        {highlightMatch(book.author || 'Unknown Author', query)}
+                        {highlightMatch(book.author || 'Unknown author', query)}
                       </p>
-                      {seriesName && (
-                        <p className="text-xs text-purple-600 mt-1">
-                          {highlightMatch(seriesName, query)}
-                          {book.seriesPosition && ` #${book.seriesPosition}`}
-                        </p>
+                      {/* Status and Series badges */}
+                      {(status !== 'want-to-read' || seriesData) && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {status === 'reading' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                              <BookOpen className="w-3 h-3" aria-hidden="true" />
+                              <span>Reading</span>
+                            </span>
+                          )}
+                          {status === 'finished' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                              <CheckCircle className="w-3 h-3" aria-hidden="true" />
+                              <span>Finished</span>
+                            </span>
+                          )}
+                          {seriesData && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-700">
+                              <Library className="w-3 h-3" aria-hidden="true" />
+                              <span>
+                                {seriesData.name.length > 20
+                                  ? seriesData.name.substring(0, 19) + '…'
+                                  : seriesData.name}
+                                {book.seriesPosition && ` #${book.seriesPosition}`}
+                              </span>
+                            </span>
+                          )}
+                        </div>
                       )}
                       {book.rating != null && book.rating > 0 && (
                         <div className="flex items-center gap-0.5 mt-1">
@@ -368,7 +405,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                             <Star
                               key={star}
                               className={`w-3 h-3 ${
-                                star <= book.rating! ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                star <= book.rating! ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
                               }`}
                             />
                           ))}

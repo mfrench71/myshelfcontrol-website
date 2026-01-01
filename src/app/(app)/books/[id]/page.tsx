@@ -7,8 +7,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
+import { BottomSheet } from '@/components/ui/modal';
 import Link from 'next/link';
 import Image from 'next/image';
+import { BookCover } from '@/components/ui/book-cover';
 import {
   BookOpen,
   Book as BookIcon,
@@ -124,22 +126,15 @@ function DeleteModal({
   deleteSeriesChecked: boolean;
   onDeleteSeriesChange: (checked: boolean) => void;
 }) {
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 bottom-sheet-backdrop"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Move to bin confirmation"
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Move to Bin"
+      closeOnBackdrop={!loading}
+      closeOnEscape={!loading}
     >
-      <div
-        className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bottom-sheet-handle" />
-
+      <div className="p-6">
         <h3 className="text-lg font-semibold mb-2">Move to Bin?</h3>
         <p className="text-gray-500 mb-4">
           This book will be moved to the bin and automatically deleted after 30 days. You can restore it from Settings.
@@ -182,7 +177,7 @@ function DeleteModal({
           </button>
         </div>
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 
@@ -516,20 +511,13 @@ export default function BookDetailPage() {
               disabled={allImages.length === 0}
               aria-label={allImages.length > 0 ? 'View full-size image' : undefined}
             >
-              {book.coverImageUrl ? (
-                <Image
-                  src={book.coverImageUrl}
-                  alt=""
-                  width={288}
-                  height={432}
-                  className="w-full h-full object-cover"
-                  priority
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
-                  <BookOpen className="w-16 h-16 text-white/80" aria-hidden="true" />
-                </div>
-              )}
+              <BookCover
+                src={book.coverImageUrl}
+                width={288}
+                height={432}
+                priority
+                className="w-full h-full"
+              />
             </button>
 
             {/* Additional Images Gallery */}
@@ -772,20 +760,25 @@ export default function BookDetailPage() {
             {book.reads && book.reads.length > 0 && (
               <div>
                 <h2 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-base">
-                  <Calendar className="w-4 h-4" aria-hidden="true" />
+                  <BookOpen className="w-4 h-4" aria-hidden="true" />
                   Reading History
                 </h2>
                 <div className="space-y-2">
-                  {book.reads.map((read, index) => (
-                    <div key={index} className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-                      {read.startedAt && (
-                        <span>Started: {formatDate(read.startedAt)}</span>
-                      )}
-                      {read.finishedAt && (
-                        <span className="ml-4">Finished: {formatDate(read.finishedAt)}</span>
-                      )}
-                    </div>
-                  ))}
+                  {book.reads.map((read, index) => {
+                    const startDate = read.startedAt ? formatDate(read.startedAt) : null;
+                    const endDate = read.finishedAt ? formatDate(read.finishedAt) : null;
+                    const status = endDate ? 'Finished' : 'In progress';
+
+                    return (
+                      <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+                        <span>
+                          {startDate}
+                          {endDate ? ` – ${endDate}` : ` - ${status}`}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -793,8 +786,11 @@ export default function BookDetailPage() {
             {/* Notes */}
             {book.notes && (
               <div>
-                <h2 className="font-semibold text-gray-700 mb-2 text-base">Notes</h2>
-                <div className="bg-gray-50 rounded-lg p-4 text-gray-700 whitespace-pre-wrap">
+                <h2 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-base">
+                  <Pencil className="w-4 h-4" aria-hidden="true" />
+                  Notes
+                </h2>
+                <div className="text-sm text-gray-600 whitespace-pre-wrap">
                   {book.notes}
                 </div>
               </div>

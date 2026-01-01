@@ -1,11 +1,23 @@
 // Service Worker for MyShelfControl PWA
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `myshelfcontrol-static-${CACHE_VERSION}`;
 const IMAGE_CACHE = `myshelfcontrol-images-${CACHE_VERSION}`;
 const API_CACHE = `myshelfcontrol-api-${CACHE_VERSION}`;
 
-// Core app shell routes (for navigation fallback)
-const APP_SHELL = ['/', '/books', '/settings', '/login'];
+// Core app shell routes (pre-cached for offline access)
+const APP_SHELL = [
+  '/',
+  '/login',
+  '/privacy',
+  '/books',
+  '/wishlist',
+  '/settings',
+  '/settings/library',
+  '/settings/preferences',
+  '/settings/maintenance',
+  '/settings/bin',
+  '/settings/about',
+];
 
 // Cache durations
 const API_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes for API responses

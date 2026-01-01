@@ -22,13 +22,7 @@ import {
   Play,
   RotateCcw,
   Loader2,
-  Barcode,
-  FileText,
-  Building,
-  Clock,
-  StickyNote,
-  BookMarked,
-  CalendarPlus,
+  Star,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
@@ -95,14 +89,11 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((star) => (
-        <svg
+        <Star
           key={star}
-          className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-          viewBox="0 0 24 24"
+          className={`w-5 h-5 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
           aria-hidden="true"
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
+        />
       ))}
     </div>
   );
@@ -713,72 +704,47 @@ export default function BookDetailPage() {
 
             {/* Metadata */}
             <div>
-              <h2 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-base">
-                <BookMarked className="w-4 h-4" aria-hidden="true" />
-                Book Details
-              </h2>
               <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                 {book.isbn && (
-                  <div className="flex items-start gap-2">
-                    <Barcode className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <div>
-                      <dt className="text-gray-500">ISBN</dt>
-                      <dd className="font-medium text-gray-900">{book.isbn}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-gray-500">ISBN</dt>
+                    <dd className="font-medium text-gray-900">{book.isbn}</dd>
                   </div>
                 )}
                 {book.pageCount != null && book.pageCount > 0 && (
-                  <div className="flex items-start gap-2">
-                    <FileText className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <div>
-                      <dt className="text-gray-500">Pages</dt>
-                      <dd className="font-medium text-gray-900">{book.pageCount}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-gray-500">Pages</dt>
+                    <dd className="font-medium text-gray-900">{book.pageCount}</dd>
                   </div>
                 )}
                 {book.physicalFormat && (
-                  <div className="flex items-start gap-2">
-                    <BookOpen className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <div>
-                      <dt className="text-gray-500">Format</dt>
-                      <dd className="font-medium text-gray-900 capitalize">{book.physicalFormat}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-gray-500">Format</dt>
+                    <dd className="font-medium text-gray-900 capitalize">{book.physicalFormat}</dd>
                   </div>
                 )}
                 {book.publisher && (
-                  <div className="flex items-start gap-2">
-                    <Building className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <div>
-                      <dt className="text-gray-500">Publisher</dt>
-                      <dd className="font-medium text-gray-900">{book.publisher}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-gray-500">Publisher</dt>
+                    <dd className="font-medium text-gray-900">{book.publisher}</dd>
                   </div>
                 )}
                 {book.publishedDate && (
-                  <div className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <div>
-                      <dt className="text-gray-500">Published</dt>
-                      <dd className="font-medium text-gray-900">{book.publishedDate}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-gray-500">Published</dt>
+                    <dd className="font-medium text-gray-900">{book.publishedDate}</dd>
                   </div>
                 )}
                 {book.createdAt && (
-                  <div className="flex items-start gap-2">
-                    <CalendarPlus className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <div>
-                      <dt className="text-gray-500">Added</dt>
-                      <dd className="font-medium text-gray-900">{formatDate(book.createdAt)}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-gray-500">Added</dt>
+                    <dd className="font-medium text-gray-900">{formatDate(book.createdAt)}</dd>
                   </div>
                 )}
                 {book.updatedAt && (
-                  <div className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <div>
-                      <dt className="text-gray-500">Modified</dt>
-                      <dd className="font-medium text-gray-900">{formatDate(book.updatedAt)}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-gray-500">Modified</dt>
+                    <dd className="font-medium text-gray-900">{formatDate(book.updatedAt)}</dd>
                   </div>
                 )}
               </dl>
@@ -809,10 +775,7 @@ export default function BookDetailPage() {
             {/* Notes */}
             {book.notes && (
               <div>
-                <h2 className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-base">
-                  <StickyNote className="w-4 h-4" aria-hidden="true" />
-                  Notes
-                </h2>
+                <h2 className="font-semibold text-gray-700 mb-2 text-base">Notes</h2>
                 <div className="bg-gray-50 rounded-lg p-4 text-gray-700 whitespace-pre-wrap">
                   {book.notes}
                 </div>

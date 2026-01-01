@@ -305,8 +305,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             </div>
           ) : (
             /* Empty initial state */
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Search className="w-12 h-12 text-gray-300 mb-4" aria-hidden="true" />
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Search className="w-10 h-10 text-gray-300 mb-3" aria-hidden="true" />
               <p className="text-gray-700 font-medium">Search your library</p>
               <p className="text-sm text-gray-400 mt-1">
                 Find books by title, author, ISBN, series, notes or publisher
@@ -315,8 +315,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           )
         ) : results.length === 0 ? (
           /* No Results */
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Search className="w-12 h-12 text-gray-300 mb-4" aria-hidden="true" />
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <Search className="w-10 h-10 text-gray-300 mb-3" aria-hidden="true" />
             <p className="text-gray-500">No books found for &quot;{query}&quot;</p>
             <p className="text-sm text-gray-400 mt-1">Try a different search term</p>
           </div>

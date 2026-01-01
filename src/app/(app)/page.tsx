@@ -710,7 +710,7 @@ export default function HomePage() {
   // Loading state
   if (authLoading || loading) {
     return (
-      <div id="loading-state" className="max-w-4xl mx-auto px-4 py-6">
+      <div id="loading-state" className="max-w-6xl mx-auto px-4 py-6">
         <div className="h-8 bg-gray-200 rounded w-48 mb-6 animate-pulse" />
         <div className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
@@ -728,7 +728,7 @@ export default function HomePage() {
   // Not logged in
   if (!user) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="text-center py-12">
           <BookOpen className="w-16 h-16 text-gray-300 mx-auto" aria-hidden="true" />
           <h1 className="text-2xl font-bold text-gray-900 mt-4">Welcome to MyShelfControl</h1>
@@ -747,7 +747,7 @@ export default function HomePage() {
   }
 
   return (
-    <div id="dashboard" className="max-w-4xl mx-auto px-4 py-6">
+    <div id="dashboard" className="max-w-6xl mx-auto px-4 py-6">
       {/* Email Verification Banner */}
       {showVerificationBanner && (
         <EmailVerificationBanner user={user} onDismiss={handleDismissBanner} />

@@ -169,10 +169,10 @@ function ChangePasswordModal({
       aria-label="Change password"
     >
       <div
-        className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+        className="bottom-sheet-content bg-white w-full md:max-w-lg p-4 sm:p-6 md:mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bottom-sheet-handle" />
+        <div className="bottom-sheet-handle md:hidden" />
 
         <h3 className="text-lg font-semibold mb-4">Change Password</h3>
 
@@ -270,19 +270,19 @@ function ChangePasswordModal({
               />
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:flex-1 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:flex-1 py-3 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Changing...' : 'Change Password'}
               </button>

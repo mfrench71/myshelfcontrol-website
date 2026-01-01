@@ -2,7 +2,7 @@
 // Matches the old site's header design with menu bottom sheet
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ import {
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getGravatarUrl } from '@/lib/utils';
 import { SearchOverlay } from '@/components/ui/search-overlay';
+import { getWishlist } from '@/lib/repositories/wishlist';
 
 /** localStorage key for caching Gravatar availability per email hash */
 const GRAVATAR_CACHE_KEY = 'gravatar_cache';
@@ -34,10 +35,42 @@ export function Header() {
   const [showSearch, setShowSearch] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when menu is open
   useBodyScrollLock(showMenu);
+
+  /**
+   * Fetch wishlist count
+   */
+  const loadWishlistCount = useCallback(async () => {
+    if (!user) {
+      setWishlistCount(0);
+      return;
+    }
+    try {
+      const items = await getWishlist(user.uid);
+      setWishlistCount(items.length);
+    } catch (err) {
+      console.error('Failed to load wishlist count:', err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadWishlistCount();
+  }, [loadWishlistCount]);
+
+  // Reload wishlist count on visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadWishlistCount();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [loadWishlistCount]);
 
   /**
    * Check if Gravatar exists for user email
@@ -278,6 +311,11 @@ export function Header() {
               >
                 <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
                 <span>Wishlist</span>
+                {wishlistCount > 0 && (
+                  <span className="ml-auto bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               <Link
@@ -352,6 +390,11 @@ export function Header() {
               >
                 <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
                 <span>Wishlist</span>
+                {wishlistCount > 0 && (
+                  <span className="ml-auto bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               <Link

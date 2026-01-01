@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -21,6 +21,8 @@ import {
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { getBooks, getBinBooks } from '@/lib/repositories/books';
+import { analyzeLibraryHealth, getBooksWithIssues } from '@/lib/utils/library-health';
 
 // Settings menu items
 const SETTINGS_SECTIONS = [
@@ -88,6 +90,33 @@ export default function SettingsPage() {
   const { user, loading: authLoading } = useAuthContext();
   const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [binCount, setBinCount] = useState(0);
+  const [issueCount, setIssueCount] = useState(0);
+
+  // Load counts
+  const loadCounts = useCallback(async () => {
+    if (!user) return;
+    try {
+      const [books, binBooks] = await Promise.all([
+        getBooks(user.uid),
+        getBinBooks(user.uid),
+      ]);
+      setBinCount(binBooks.length);
+
+      // Analyse library health to get issue count
+      const report = analyzeLibraryHealth(books);
+      const booksWithIssues = getBooksWithIssues(report);
+      setIssueCount(booksWithIssues.length);
+    } catch (err) {
+      console.error('Failed to load counts:', err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      loadCounts();
+    }
+  }, [user, authLoading, loadCounts]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -150,6 +179,17 @@ export default function SettingsPage() {
       <div className="space-y-3 mb-6">
         {SETTINGS_SECTIONS.map((section) => {
           const Icon = section.icon;
+          // Get count for sections that need badges
+          let count = 0;
+          let badgeColour = '';
+          if (section.id === 'maintenance' && issueCount > 0) {
+            count = issueCount;
+            badgeColour = 'bg-amber-100 text-amber-700';
+          } else if (section.id === 'bin' && binCount > 0) {
+            count = binCount;
+            badgeColour = 'bg-gray-100 text-gray-600';
+          }
+
           return (
             <Link
               key={section.id}
@@ -160,7 +200,14 @@ export default function SettingsPage() {
                 <Icon className="w-5 h-5 text-gray-600" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900">{section.label}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-900">{section.label}</p>
+                  {count > 0 && (
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeColour}`}>
+                      {count}
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-500">{section.description}</p>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" aria-hidden="true" />

@@ -19,10 +19,13 @@ import {
   CheckCircle,
   Calendar,
   Images,
+  Play,
+  RotateCcw,
+  Loader2,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
-import { getBook, softDeleteBook, getBooksBySeries } from '@/lib/repositories/books';
+import { getBook, softDeleteBook, getBooksBySeries, updateBook } from '@/lib/repositories/books';
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
 import { getSeries, deleteSeries } from '@/lib/repositories/series';
 import { Lightbox } from '@/components/lightbox';
@@ -201,9 +204,81 @@ export default function BookDetailPage() {
   const [deleteSeriesChecked, setDeleteSeriesChecked] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Lock body scroll when modal/lightbox is open
   useBodyScrollLock(showDeleteModal || lightboxOpen);
+
+  /**
+   * Handle starting to read a book
+   */
+  const handleStartReading = async () => {
+    if (!user || !book) return;
+
+    setUpdatingStatus(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const newReads = [...(book.reads || []), { startedAt: today.getTime(), finishedAt: null }];
+
+      await updateBook(user.uid, book.id, { reads: newReads });
+      setBook({ ...book, reads: newReads });
+      showToast('Started reading!', { type: 'success' });
+    } catch (err) {
+      console.error('Failed to update reading status:', err);
+      showToast('Failed to update status', { type: 'error' });
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  /**
+   * Handle marking a book as finished
+   */
+  const handleMarkFinished = async () => {
+    if (!user || !book || !book.reads || book.reads.length === 0) return;
+
+    setUpdatingStatus(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const newReads = [...book.reads];
+      const lastRead = { ...newReads[newReads.length - 1], finishedAt: today.getTime() };
+      newReads[newReads.length - 1] = lastRead;
+
+      await updateBook(user.uid, book.id, { reads: newReads });
+      setBook({ ...book, reads: newReads });
+      showToast('Marked as finished!', { type: 'success' });
+    } catch (err) {
+      console.error('Failed to update reading status:', err);
+      showToast('Failed to update status', { type: 'error' });
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  /**
+   * Handle starting a re-read
+   */
+  const handleStartReread = async () => {
+    if (!user || !book) return;
+
+    setUpdatingStatus(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const newReads = [...(book.reads || []), { startedAt: today.getTime(), finishedAt: null }];
+
+      await updateBook(user.uid, book.id, { reads: newReads });
+      setBook({ ...book, reads: newReads });
+      showToast('Started re-read!', { type: 'success' });
+    } catch (err) {
+      console.error('Failed to start re-read:', err);
+      showToast('Failed to start re-read', { type: 'error' });
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   const genreLookup = createGenreLookup(genres);
 
@@ -513,22 +588,66 @@ export default function BookDetailPage() {
               </div>
             )}
 
-            {/* Reading Status */}
-            {status !== 'want-to-read' && (
-              <div>
-                {status === 'reading' ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                    <BookOpen className="w-4 h-4" aria-hidden="true" />
-                    Currently Reading
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-700">
+            {/* Reading Status with Quick Actions */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Status Badge */}
+              {status === 'reading' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                  <BookOpen className="w-4 h-4" aria-hidden="true" />
+                  Currently Reading
+                </span>
+              )}
+              {status === 'finished' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-700">
+                  <CheckCircle className="w-4 h-4" aria-hidden="true" />
+                  Finished
+                </span>
+              )}
+
+              {/* Quick Action Buttons */}
+              {status === 'want-to-read' && (
+                <button
+                  onClick={handleStartReading}
+                  disabled={updatingStatus}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50"
+                >
+                  {updatingStatus ? (
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Play className="w-4 h-4" aria-hidden="true" />
+                  )}
+                  Start Reading
+                </button>
+              )}
+              {status === 'reading' && (
+                <button
+                  onClick={handleMarkFinished}
+                  disabled={updatingStatus}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-green-600 hover:bg-green-700 text-white transition-colors disabled:opacity-50"
+                >
+                  {updatingStatus ? (
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  ) : (
                     <CheckCircle className="w-4 h-4" aria-hidden="true" />
-                    Finished
-                  </span>
-                )}
-              </div>
-            )}
+                  )}
+                  Mark as Finished
+                </button>
+              )}
+              {status === 'finished' && (
+                <button
+                  onClick={handleStartReread}
+                  disabled={updatingStatus}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors disabled:opacity-50"
+                >
+                  {updatingStatus ? (
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <RotateCcw className="w-4 h-4" aria-hidden="true" />
+                  )}
+                  Start Re-read
+                </button>
+              )}
+            </div>
 
             {/* Genres */}
             {bookGenres.length > 0 && (

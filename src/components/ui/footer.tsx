@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import { APP_VERSION } from '@/lib/constants';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -14,7 +15,7 @@ export function Footer() {
           <Link href="/privacy" className="hover:text-gray-700 transition-colors">
             Privacy Policy
           </Link>
-          <span className="text-gray-400">v1.0.0</span>
+          <span className="text-gray-400">v{APP_VERSION}</span>
         </div>
       </div>
     </footer>

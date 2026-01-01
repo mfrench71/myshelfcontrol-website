@@ -5,12 +5,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { Info, BookOpen, ChevronRight, ChevronDown, History } from 'lucide-react';
+import { BookOpen, ChevronDown, History } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
-
-// Current app version
-const APP_VERSION = '0.2.0';
+import { APP_VERSION } from '@/lib/constants';
 
 // Changelog entries - newest first
 const CHANGELOG = [
@@ -54,7 +51,7 @@ const CHANGELOG = [
 
 export default function AboutPage() {
   const { loading: authLoading } = useAuthContext();
-  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set([CHANGELOG[0]?.date]));
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
 
   const toggleDate = (date: string) => {
     setExpandedDates((prev) => {
@@ -70,40 +67,15 @@ export default function AboutPage() {
 
   if (authLoading) {
     return (
-      <>
-        <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
-          <div className="max-w-6xl mx-auto px-4 py-2 min-h-[52px]">
-            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
-          </div>
-        </div>
-        <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
-          <div className="h-8 bg-gray-200 rounded w-24 mb-6 animate-pulse" />
-          <div className="h-48 bg-gray-200 rounded-xl animate-pulse" />
-        </div>
-      </>
+      <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
+        <div className="h-8 bg-gray-200 rounded w-24 mb-6 animate-pulse" />
+        <div className="h-48 bg-gray-200 rounded-xl animate-pulse" />
+      </div>
     );
   }
 
   return (
-    <>
-      {/* Sub-navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3 min-h-[52px]">
-          <nav aria-label="Breadcrumb">
-            <ol className="flex items-center text-sm">
-              <li>
-                <Link href="/settings" className="text-gray-500 hover:text-gray-700">
-                  Settings
-                </Link>
-              </li>
-              <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium">About</li>
-            </ol>
-          </nav>
-        </div>
-      </div>
-
-      <div id="about-content" className="max-w-2xl mx-auto px-4 py-6">
+    <div id="about-content" className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">About</h1>
 
         {/* App Info */}
@@ -121,20 +93,6 @@ export default function AboutPage() {
             A personal book tracking app to manage your reading collection.
             Track books, series, reading progress, and more.
           </p>
-        </div>
-
-        {/* Links */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-          <Link
-            href="/privacy"
-            className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors border-b border-gray-100"
-          >
-            <div className="flex items-center gap-3">
-              <Info className="w-5 h-5 text-gray-400" aria-hidden="true" />
-              <span className="text-gray-900">Privacy Policy</span>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
-          </Link>
         </div>
 
         {/* Changelog */}
@@ -176,7 +134,6 @@ export default function AboutPage() {
             })}
           </div>
         </div>
-      </div>
-    </>
+    </div>
   );
 }

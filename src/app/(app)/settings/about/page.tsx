@@ -4,8 +4,9 @@
  */
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { Info, BookOpen, ChevronRight } from 'lucide-react';
+import { Info, BookOpen, ChevronRight, ChevronDown, History } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 
 // Current app version
@@ -53,6 +54,19 @@ const CHANGELOG = [
 
 export default function AboutPage() {
   const { loading: authLoading } = useAuthContext();
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set([CHANGELOG[0]?.date]));
+
+  const toggleDate = (date: string) => {
+    setExpandedDates((prev) => {
+      const next = new Set(prev);
+      if (next.has(date)) {
+        next.delete(date);
+      } else {
+        next.add(date);
+      }
+      return next;
+    });
+  };
 
   if (authLoading) {
     return (
@@ -125,20 +139,41 @@ export default function AboutPage() {
 
         {/* Changelog */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">What&apos;s New</h2>
-          <div className="space-y-6">
-            {CHANGELOG.map((release, releaseIndex) => (
-              <div key={release.date}>
-                <div className="mb-2">
-                  <span className="font-medium text-gray-900">{release.date}</span>
+          <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
+            <History className="w-4 h-4 text-purple-600" aria-hidden="true" />
+            Changelog
+          </h3>
+
+          <div className="space-y-2">
+            {CHANGELOG.map((release) => {
+              const isExpanded = expandedDates.has(release.date);
+              return (
+                <div key={release.date} className="border border-gray-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => toggleDate(release.date)}
+                    className="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 text-left min-h-[44px]"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" aria-hidden="true" />
+                      <span className="font-medium text-gray-900">{release.date}</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  {isExpanded && (
+                    <div className="px-3 pb-3 text-sm text-gray-600 bg-white">
+                      <ul className="space-y-1 pl-4 list-disc">
+                        {release.changes.map((change, index) => (
+                          <li key={index}>{change}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                  {release.changes.map((change, index) => (
-                    <li key={index}>{change}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

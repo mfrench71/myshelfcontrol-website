@@ -14,7 +14,7 @@ export type WidgetId =
   | 'seriesProgress';
 
 /** Widget size options (column span in a 12-column grid) */
-export type WidgetSize = 6 | 12;
+export type WidgetSize = 3 | 6 | 9 | 12;
 
 /** Widget-specific settings */
 export type WidgetSettings = {

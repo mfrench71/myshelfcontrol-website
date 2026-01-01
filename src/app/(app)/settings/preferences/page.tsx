@@ -279,7 +279,7 @@ export default function PreferencesSettingsPage() {
   };
 
   // Update widget size
-  const updateWidgetSize = (widgetId: WidgetId, size: 6 | 12) => {
+  const updateWidgetSize = (widgetId: WidgetId, size: 3 | 6 | 9 | 12) => {
     const newWidgets = widgets.map((w) =>
       w.id === widgetId ? { ...w, size } : w
     );
@@ -630,11 +630,13 @@ export default function PreferencesSettingsPage() {
                               <select
                                 id={`size-${widget.id}`}
                                 value={widget.size || 6}
-                                onChange={(e) => updateWidgetSize(widget.id, Number(e.target.value) as 6 | 12)}
+                                onChange={(e) => updateWidgetSize(widget.id, Number(e.target.value) as 3 | 6 | 9 | 12)}
                                 disabled={saving}
                                 className="text-sm border border-gray-300 rounded-md px-2 py-1 min-h-[32px] disabled:opacity-50"
                               >
-                                <option value={6}>Half</option>
+                                <option value={3}>Small</option>
+                                <option value={6}>Medium</option>
+                                <option value={9}>Large</option>
                                 <option value={12}>Full</option>
                               </select>
                             </div>

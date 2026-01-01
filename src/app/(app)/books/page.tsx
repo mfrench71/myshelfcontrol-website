@@ -827,7 +827,7 @@ function BooksPageContent() {
           )}
           {/* Empty State */}
           {books.length === 0 ? (
-            <div id="empty-state" className="text-center py-12">
+            <div id="empty-state" className="text-center py-12 empty-state-animate">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
               <h2 className="text-lg font-medium text-gray-900 mt-4">No books yet</h2>
               <p className="text-gray-500 mt-1">
@@ -843,7 +843,7 @@ function BooksPageContent() {
             </div>
           ) : filteredAndSortedBooks.length === 0 ? (
             /* No results after filtering */
-            <div className="text-center py-12">
+            <div className="text-center py-12 empty-state-animate">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
               <p className="text-gray-500 mt-3">No books match your filters</p>
               <button
@@ -857,12 +857,13 @@ function BooksPageContent() {
             /* Books List */
             <div id="book-list" className="space-y-4">
               {visibleBooks.map((book) => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  genres={genreLookup}
-                  series={seriesLookup}
-                />
+                <div key={book.id} className="card-animate">
+                  <BookCard
+                    book={book}
+                    genres={genreLookup}
+                    series={seriesLookup}
+                  />
+                </div>
               ))}
 
               {/* Infinite scroll sentinel and loading indicator */}
@@ -897,7 +898,7 @@ function BooksPageContent() {
       {/* Floating Action Button */}
       <Link
         href="/books/add"
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary hover:bg-primary-dark text-white rounded-full shadow-lg flex items-center justify-center transition-all z-30 active:scale-[0.92] active:shadow-md"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary hover:bg-primary-dark text-white rounded-full shadow-lg flex items-center justify-center z-30 fab-press"
         aria-label="Add book"
       >
         <Plus className="w-6 h-6" aria-hidden="true" />

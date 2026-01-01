@@ -398,7 +398,7 @@ export default function BookDetailPage() {
                 </Link>
               </li>
               <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium truncate max-w-[200px]">
+              <li className="text-gray-900 font-medium truncate max-w-[100px] sm:max-w-[150px] md:max-w-[200px]">
                 {book.title}
               </li>
             </ol>
@@ -534,16 +534,17 @@ export default function BookDetailPage() {
             {bookGenres.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {bookGenres.map((genre) => (
-                  <span
+                  <Link
                     key={genre.id}
-                    className="inline-block px-3 py-1 rounded-full text-sm"
+                    href={`/books?genre=${genre.id}`}
+                    className="inline-block px-3 py-1 rounded-full text-sm genre-badge-link"
                     style={{
                       backgroundColor: genre.color,
                       color: getContrastColor(genre.color),
                     }}
                   >
                     {genre.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}

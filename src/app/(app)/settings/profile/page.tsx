@@ -736,8 +736,8 @@ export default function ProfileSettingsPage() {
 
         {/* User Info */}
         {user && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-            <div className="flex items-center gap-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-6">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
               {/* Avatar with edit button */}
               <div className="relative">
                 {profileData?.photoUrl ? (
@@ -769,8 +769,8 @@ export default function ProfileSettingsPage() {
                   <Camera className="w-4 h-4 text-gray-600" aria-hidden="true" />
                 </button>
               </div>
-              <div>
-                <p className="text-gray-900 font-medium">{user.email}</p>
+              <div className="text-center sm:text-left">
+                <p className="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-full">{user.email}</p>
                 <p className="text-gray-500 text-sm">
                   Member since{' '}
                   <span>

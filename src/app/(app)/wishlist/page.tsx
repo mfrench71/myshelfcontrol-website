@@ -407,7 +407,7 @@ export default function WishlistPage() {
 
         {/* Empty state */}
         {items.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 empty-state-animate">
             <Heart className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
             <p className="text-gray-500 mt-3">Your wishlist is empty</p>
             <p className="text-gray-400 text-sm mt-1">Books you want to buy will appear here.</p>
@@ -423,13 +423,14 @@ export default function WishlistPage() {
           /* Wishlist items */
           <div className="space-y-4">
             {sortedItems.map((item) => (
-              <WishlistItemCard
-                key={item.id}
-                item={item}
-                onMove={() => openMoveModal(item)}
-                onEdit={() => openEditModal(item)}
-                onDelete={() => openDeleteModal(item)}
-              />
+              <div key={item.id} className="card-animate">
+                <WishlistItemCard
+                  item={item}
+                  onMove={() => openMoveModal(item)}
+                  onEdit={() => openEditModal(item)}
+                  onDelete={() => openDeleteModal(item)}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -439,7 +440,7 @@ export default function WishlistPage() {
       {showMoveModal && selectedItem && (
         <div className="fixed inset-0 bg-black/50 z-50 md:p-4" onClick={closeModals}>
           <div
-            className="bottom-sheet-content bg-white w-full md:max-w-sm p-6 md:mx-auto"
+            className="bottom-sheet-content bg-white w-full md:max-w-sm p-4 md:p-6 md:mx-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bottom-sheet-handle md:hidden" />
@@ -476,7 +477,7 @@ export default function WishlistPage() {
       {showEditModal && selectedItem && (
         <div className="fixed inset-0 bg-black/50 z-50 md:p-4" onClick={closeModals}>
           <div
-            className="bottom-sheet-content bg-white w-full md:max-w-md p-6 md:mx-auto"
+            className="bottom-sheet-content bg-white w-full md:max-w-md p-4 md:p-6 md:mx-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bottom-sheet-handle md:hidden" />
@@ -550,7 +551,7 @@ export default function WishlistPage() {
       {showDeleteModal && selectedItem && (
         <div className="fixed inset-0 bg-black/50 z-50 md:p-4" onClick={closeModals}>
           <div
-            className="bottom-sheet-content bg-white w-full md:max-w-sm p-6 md:mx-auto"
+            className="bottom-sheet-content bg-white w-full md:max-w-sm p-4 md:p-6 md:mx-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bottom-sheet-handle md:hidden" />

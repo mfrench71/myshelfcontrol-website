@@ -136,7 +136,7 @@ function WelcomeWidget({
   return (
     <div className="bg-gradient-to-br from-primary to-primary-dark text-white rounded-xl p-6">
       <h2 className="text-xl font-bold mb-4">Your Library</h2>
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
         <div>
           <p className="text-3xl font-bold">{totalBooks}</p>
           <p className="text-sm text-white/80">Books</p>

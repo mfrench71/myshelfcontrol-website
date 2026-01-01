@@ -228,6 +228,20 @@ select {
   animation: modalBackdropOut 0.15s ease-in forwards;
 }
 
+/* Keep bottom alignment during exit on mobile */
+.modal-exit.bottom-sheet-exit {
+  display: flex;
+  align-items: flex-end;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+  .modal-exit.bottom-sheet-exit {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 /* Bottom Sheet Content */
 .bottom-sheet-content {
   animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);

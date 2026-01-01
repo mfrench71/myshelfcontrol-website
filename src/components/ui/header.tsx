@@ -160,10 +160,13 @@ export function Header() {
   };
 
   /**
-   * Close menu when clicking outside (desktop)
+   * Close menu when clicking outside (desktop only)
    */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Only handle on desktop (md+)
+      if (window.innerWidth < 768) return;
+
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }
@@ -320,10 +323,13 @@ export function Header() {
 
           {/* Navigation */}
           <nav className="space-y-1">
-            <Link
-              href="/wishlist"
-              onClick={() => setShowMenu(false)}
-              className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+            <button
+              type="button"
+              onClick={() => {
+                setShowMenu(false);
+                router.push('/wishlist');
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
                 pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
               }`}
             >
@@ -334,18 +340,21 @@ export function Header() {
                   {wishlistCount}
                 </span>
               )}
-            </Link>
+            </button>
 
-            <Link
-              href="/settings"
-              onClick={() => setShowMenu(false)}
-              className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+            <button
+              type="button"
+              onClick={() => {
+                setShowMenu(false);
+                router.push('/settings');
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
                 pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
               }`}
             >
               <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
               <span>Settings</span>
-            </Link>
+            </button>
 
             {user && (
               <button
@@ -406,10 +415,13 @@ export function Header() {
             </div>
 
             <nav className="p-2">
-              <Link
-                href="/wishlist"
-                onClick={() => setShowMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMenu(false);
+                  router.push('/wishlist');
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
                   pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
                 }`}
               >
@@ -420,18 +432,21 @@ export function Header() {
                     {wishlistCount}
                   </span>
                 )}
-              </Link>
+              </button>
 
-              <Link
-                href="/settings"
-                onClick={() => setShowMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors ${
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMenu(false);
+                  router.push('/settings');
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
                   pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
                 }`}
               >
                 <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
                 <span>Settings</span>
-              </Link>
+              </button>
 
               <hr className="my-2" />
 

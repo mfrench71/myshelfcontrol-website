@@ -234,6 +234,12 @@ export function BottomSheet({
 
       const target = e.target as HTMLElement;
 
+      // Don't start drag on interactive elements (links, buttons)
+      const isInteractive = target.closest('a, button, input, textarea, select, [role="button"]');
+      if (isInteractive && !handle?.contains(target)) {
+        return;
+      }
+
       // Check for nested scrollable ancestor
       const nestedScrollable = findScrollableAncestor(target, content);
       if (nestedScrollable && nestedScrollable.scrollTop < nestedScrollable.scrollHeight - nestedScrollable.clientHeight) {
@@ -308,7 +314,7 @@ export function BottomSheet({
     <div
       ref={containerRef}
       className={`fixed inset-0 z-50 md:flex md:items-center md:justify-center md:p-4 ${
-        isClosing ? 'modal-exit' : 'bottom-sheet-backdrop'
+        isClosing ? 'modal-exit bottom-sheet-exit' : 'bottom-sheet-backdrop'
       }`}
       onClick={handleBackdropClick}
       role="dialog"
@@ -318,6 +324,7 @@ export function BottomSheet({
       <div
         ref={contentRef}
         className={`bottom-sheet-content bg-white w-full md:max-w-md md:rounded-xl md:shadow-xl max-h-[90vh] overflow-y-auto ${className}`}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Swipe handle (mobile only) */}
         <div ref={handleRef} className="bottom-sheet-handle md:hidden" />

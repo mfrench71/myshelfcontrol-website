@@ -187,7 +187,7 @@ export function CoverPicker({
         </div>
       ) : (
         /* No cover placeholder */
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-start">
           <div className="w-24 h-36 rounded-lg shadow-cover overflow-hidden flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
             <BookOpen className="w-10 h-10 text-white/80" aria-hidden="true" />
           </div>

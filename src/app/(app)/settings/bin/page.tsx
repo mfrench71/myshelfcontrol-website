@@ -8,124 +8,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Trash2, BookOpen, RotateCcw, AlertCircle, Clock, Loader2, ChevronRight } from 'lucide-react';
+import { Trash2, BookOpen, RotateCcw, AlertCircle, Clock, ChevronRight } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBinBooks, restoreBook, deleteBook } from '@/lib/repositories/books';
 import { useToast } from '@/components/ui/toast';
-import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
+import { ConfirmModal } from '@/components/ui/modal';
 import type { Book } from '@/lib/types';
-
-/**
- * Confirmation Modal Component
- */
-function ConfirmModal({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  message,
-  confirmText,
-  confirmingText,
-  isConfirming,
-  variant = 'danger',
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
-  confirmText: string;
-  confirmingText: string;
-  isConfirming: boolean;
-  variant?: 'danger' | 'success';
-}) {
-  // Lock body scroll when modal is open
-  useBodyScrollLock(isOpen);
-
-  if (!isOpen) return null;
-
-  const confirmButtonClass =
-    variant === 'danger'
-      ? 'bg-red-600 hover:bg-red-700 text-white'
-      : 'bg-green-600 hover:bg-green-700 text-white';
-
-  return (
-    <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}>
-      {/* Mobile: Bottom sheet */}
-      <div
-        className="md:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-center mb-4">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
-        <h3 className={`text-lg font-semibold mb-2 ${variant === 'danger' ? 'text-red-600' : 'text-gray-900'}`}>
-          {title}
-        </h3>
-        <p className="text-gray-500 mb-6">{message}</p>
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            disabled={isConfirming}
-            className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={isConfirming}
-            className={`flex-1 py-2 px-4 rounded-lg min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2 ${confirmButtonClass}`}
-          >
-            {isConfirming ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {confirmingText}
-              </>
-            ) : (
-              confirmText
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Desktop: Centered modal */}
-      <div
-        className="hidden md:flex items-center justify-center h-full p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
-          <h3 className={`text-lg font-semibold mb-2 ${variant === 'danger' ? 'text-red-600' : 'text-gray-900'}`}>
-            {title}
-          </h3>
-          <p className="text-gray-500 mb-6">{message}</p>
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              disabled={isConfirming}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              disabled={isConfirming}
-              className={`flex-1 py-2 px-4 rounded-lg min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-2 ${confirmButtonClass}`}
-            >
-              {isConfirming ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {confirmingText}
-                </>
-              ) : (
-                confirmText
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function BinPage() {
   const { user, loading: authLoading } = useAuthContext();
@@ -372,9 +260,8 @@ export default function BinPage() {
         title="Restore Book?"
         message="This book will be restored to your library."
         confirmText="Restore"
-        confirmingText="Restoring..."
-        isConfirming={isRestoring}
-        variant="success"
+        isLoading={isRestoring}
+        variant="primary"
       />
 
       {/* Permanent Delete Confirmation Modal */}
@@ -388,8 +275,7 @@ export default function BinPage() {
         title="Permanently Delete?"
         message="This action cannot be undone. The book will be permanently deleted."
         confirmText="Delete Forever"
-        confirmingText="Deleting..."
-        isConfirming={isDeleting}
+        isLoading={isDeleting}
         variant="danger"
       />
 
@@ -401,8 +287,7 @@ export default function BinPage() {
         title="Empty Bin?"
         message={`All ${books.length} book${books.length > 1 ? 's' : ''} will be permanently deleted. This cannot be undone.`}
         confirmText="Empty Bin"
-        confirmingText="Emptying..."
-        isConfirming={isEmptying}
+        isLoading={isEmptying}
         variant="danger"
       />
     </>

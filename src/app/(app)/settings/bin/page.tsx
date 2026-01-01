@@ -247,70 +247,38 @@ export default function BinPage() {
 
   if (authLoading || loading) {
     return (
-      <>
-        <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
-          <div className="max-w-6xl mx-auto px-4 py-2 min-h-[52px]">
-            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
-          </div>
+      <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
+        <div className="h-8 bg-gray-200 rounded w-32 mb-6 animate-pulse" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-24 bg-gray-200 rounded-xl animate-pulse" />
+          ))}
         </div>
-        <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
-          <div className="h-8 bg-gray-200 rounded w-32 mb-6 animate-pulse" />
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-xl animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </>
+      </div>
     );
   }
 
   return (
     <>
-      {/* Sub-navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between min-h-[52px]">
-          <nav aria-label="Breadcrumb">
-            <ol className="flex items-center text-sm">
-              <li className="flex items-center min-w-0">
-                <Link href="/" className="text-gray-500 hover:text-primary hover:underline">
-                  Home
-                </Link>
-              </li>
-              <li className="flex items-center min-w-0">
-                <ChevronRight className="w-4 h-4 text-gray-400 mx-1 flex-shrink-0" aria-hidden="true" />
-                <Link href="/settings" className="text-gray-500 hover:text-primary hover:underline">
-                  Settings
-                </Link>
-              </li>
-              <li className="flex items-center min-w-0">
-                <ChevronRight className="w-4 h-4 text-gray-400 mx-1 flex-shrink-0" aria-hidden="true" />
-                <span className="text-gray-900 font-medium" aria-current="page">
-                  Bin
-                </span>
-              </li>
-            </ol>
-          </nav>
-          {books.length > 0 && (
-            <button
-              onClick={() => setShowEmptyBinModal(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors min-h-[44px]"
-            >
-              <Trash2 className="w-4 h-4" aria-hidden="true" />
-              <span>Empty Bin</span>
-            </button>
-          )}
-        </div>
-      </div>
-
       <div id="bin-content" className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Bin</h1>
-          {books.length > 0 && (
-            <p className="text-sm text-gray-500">
-              {books.length} book{books.length !== 1 ? 's' : ''}
-            </p>
-          )}
+          <div className="flex items-center gap-3">
+            {books.length > 0 && (
+              <>
+                <p className="text-sm text-gray-500">
+                  {books.length} book{books.length !== 1 ? 's' : ''}
+                </p>
+                <button
+                  onClick={() => setShowEmptyBinModal(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors min-h-[44px]"
+                >
+                  <Trash2 className="w-4 h-4" aria-hidden="true" />
+                  <span>Empty Bin</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {error && (

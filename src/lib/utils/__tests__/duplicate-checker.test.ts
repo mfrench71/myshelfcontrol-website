@@ -1,10 +1,12 @@
 /**
  * Unit Tests for lib/utils/duplicate-checker.ts
- * Tests for ISBN validation and cleaning functions
+ * Tests for ISBN validation, cleaning, and duplicate checking functions
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Firebase before importing the module
+const mockGetDocs = vi.fn();
+
 vi.mock('@/lib/firebase/client', () => ({
   db: {},
   auth: {},
@@ -12,14 +14,14 @@ vi.mock('@/lib/firebase/client', () => ({
 }));
 
 vi.mock('firebase/firestore', () => ({
-  collection: vi.fn(),
-  query: vi.fn(),
+  collection: vi.fn(() => 'books-collection'),
+  query: vi.fn(() => 'query'),
   where: vi.fn(),
   limit: vi.fn(),
-  getDocs: vi.fn(),
+  getDocs: (...args: unknown[]) => mockGetDocs(...args),
 }));
 
-import { isISBN, cleanISBN, DUPLICATE_CHECK_LIMIT } from '../duplicate-checker';
+import { isISBN, cleanISBN, checkForDuplicate, DUPLICATE_CHECK_LIMIT } from '../duplicate-checker';
 
 describe('isISBN', () => {
   describe('valid ISBN-10', () => {

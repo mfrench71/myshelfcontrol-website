@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getGravatarUrl } from '@/lib/utils';
+import { SearchOverlay } from '@/components/ui/search-overlay';
 
 /** localStorage key for caching Gravatar availability per email hash */
 const GRAVATAR_CACHE_KEY = 'gravatar_cache';
@@ -30,6 +31,7 @@ export function Header() {
   const router = useRouter();
   const { user, loading } = useAuthContext();
   const [showMenu, setShowMenu] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -216,6 +218,7 @@ export function Header() {
 
             {/* Search button */}
             <button
+              onClick={() => setShowSearch(true)}
               className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
               aria-label="Search books"
             >
@@ -387,6 +390,9 @@ export function Header() {
           </div>
         </div>
       )}
+
+      {/* Search Overlay */}
+      <SearchOverlay isOpen={showSearch} onClose={() => setShowSearch(false)} />
     </>
   );
 }

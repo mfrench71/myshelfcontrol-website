@@ -14,6 +14,7 @@ import {
   Pencil,
   Trash2,
   AlertCircle,
+  ArrowRight,
   ChevronRight,
   Library,
   CheckCircle,
@@ -688,15 +689,13 @@ export default function BookDetailPage() {
                         {seriesBook.title}
                       </Link>
                     ))}
-                    {seriesBooks.length > 5 && (
-                      <Link
-                        href={`/books?series=${series.id}`}
-                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-                      >
-                        View all {seriesBooks.length} in series
-                        <ChevronRight className="w-3 h-3" aria-hidden="true" />
-                      </Link>
-                    )}
+                    <Link
+                      href={`/books?series=${series.id}`}
+                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
+                    >
+                      View all in series
+                      <ArrowRight className="w-3 h-3" aria-hidden="true" />
+                    </Link>
                   </div>
                 )}
               </div>

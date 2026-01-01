@@ -19,13 +19,15 @@ import {
   X,
   Loader2,
   Mail,
+  Heart,
 } from 'lucide-react';
 import { sendEmailVerification } from 'firebase/auth';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
 import { getGenres } from '@/lib/repositories/genres';
 import { getSeries, createSeriesLookup } from '@/lib/repositories/series';
-import type { Book, Genre, Series } from '@/lib/types';
+import { getWishlist } from '@/lib/repositories/wishlist';
+import type { Book, Genre, Series, WishlistItem } from '@/lib/types';
 
 /**
  * Get reading status from book's reads array
@@ -372,6 +374,96 @@ function EmailVerificationBanner({
 }
 
 /**
+ * Wishlist Widget
+ */
+function WishlistWidget({ items }: { items: WishlistItem[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+            <Heart className="w-4 h-4 text-pink-500" aria-hidden="true" />
+            Wishlist
+          </h3>
+        </div>
+        <div className="text-center py-6">
+          <Heart className="w-8 h-8 text-gray-300 mx-auto" aria-hidden="true" />
+          <p className="text-sm text-gray-500 mt-2">No books on your wishlist</p>
+          <Link
+            href="/wishlist"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add to wishlist
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Priority badge colours
+  const priorityColours: Record<string, string> = {
+    high: 'bg-red-100 text-red-700',
+    medium: 'bg-amber-100 text-amber-700',
+    low: 'bg-gray-100 text-gray-600',
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+          <Heart className="w-4 h-4 text-pink-500" aria-hidden="true" />
+          Wishlist
+        </h3>
+        <span className="text-xs text-gray-500">{items.length} book{items.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div className="space-y-2">
+        {items.slice(0, 3).map((item) => (
+          <Link
+            key={item.id}
+            href={`/wishlist`}
+            className="flex gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-pink-300 hover:shadow-sm transition-all"
+          >
+            <div className="w-10 h-14 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+              {item.coverImageUrl ? (
+                <Image
+                  src={item.coverImageUrl}
+                  alt=""
+                  width={40}
+                  height={56}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-pink-200">
+                  <Heart className="w-4 h-4 text-pink-400" aria-hidden="true" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 text-sm truncate">{item.title}</p>
+              <p className="text-xs text-gray-500 truncate">{item.author}</p>
+              {item.priority && (
+                <span className={`inline-block mt-1 text-xs px-1.5 py-0.5 rounded ${priorityColours[item.priority]}`}>
+                  {item.priority}
+                </span>
+              )}
+            </div>
+          </Link>
+        ))}
+      </div>
+      {items.length > 3 && (
+        <Link
+          href="/wishlist"
+          className="flex items-center justify-center gap-1 mt-3 text-sm text-primary hover:underline"
+        >
+          View all <ChevronRight className="w-4 h-4" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+/**
  * Series Progress Widget
  */
 function SeriesProgressWidget({
@@ -431,6 +523,7 @@ export default function HomePage() {
   const { user, loading: authLoading } = useAuthContext();
   const [books, setBooks] = useState<Book[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [bannerDismissed, setBannerDismissed] = useState(true); // Default true to prevent flash
 
@@ -459,12 +552,14 @@ export default function HomePage() {
 
       try {
         setLoading(true);
-        const [userBooks, userSeries] = await Promise.all([
+        const [userBooks, userSeries, userWishlist] = await Promise.all([
           getBooks(user.uid),
           getSeries(user.uid),
+          getWishlist(user.uid),
         ]);
         setBooks(userBooks);
         setSeries(userSeries);
+        setWishlistItems(userWishlist);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
@@ -654,6 +749,9 @@ export default function HomePage() {
 
         {/* Top Rated */}
         <TopRatedWidget books={topRated} />
+
+        {/* Wishlist */}
+        <WishlistWidget items={wishlistItems} />
 
         {/* Recently Finished */}
         <RecentlyFinishedWidget books={recentlyFinished} />

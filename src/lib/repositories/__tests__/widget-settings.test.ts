@@ -2,7 +2,7 @@
  * Unit Tests for lib/repositories/widget-settings.ts
  * Tests for widget settings repository
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   loadWidgetSettings,
   saveWidgetSettings,

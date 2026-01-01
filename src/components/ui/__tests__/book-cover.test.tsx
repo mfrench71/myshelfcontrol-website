@@ -2,7 +2,7 @@
  * Unit Tests for components/ui/book-cover.tsx
  * Tests for book cover component with loading and error states
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BookCover } from '../book-cover';
 

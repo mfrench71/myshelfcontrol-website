@@ -8,7 +8,6 @@ import {
   getProfileData,
   saveProfileData,
   compressProfilePhoto,
-  uploadProfilePhoto,
   removeProfilePhoto,
 } from '../profile-photo';
 

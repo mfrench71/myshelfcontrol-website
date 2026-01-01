@@ -397,6 +397,7 @@ export function SeriesPicker({
         <input
           ref={inputRef}
           type="text"
+          role="combobox"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           placeholder={isLoading ? 'Loading...' : 'Search or add series...'}
           value={searchQuery}
@@ -410,12 +411,15 @@ export function SeriesPicker({
           disabled={disabled || isLoading}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
+          aria-controls="series-picker-listbox"
           aria-labelledby="series-picker-label"
+          aria-autocomplete="list"
         />
 
         {/* Dropdown */}
         {isOpen && (
           <div
+            id="series-picker-listbox"
             className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
             role="listbox"
             aria-label="Series options"

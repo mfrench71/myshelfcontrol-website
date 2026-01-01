@@ -174,6 +174,7 @@ export function BottomSheet({
   const startY = useRef(0);
   const currentY = useRef(0);
   const isDragging = useRef(false);
+  const hasMoved = useRef(false);
 
   // Handle close with animation
   const handleClose = useCallback(() => {
@@ -246,9 +247,9 @@ export function BottomSheet({
 
       if (isHandle || isScrolledToTop) {
         isDragging.current = true;
+        hasMoved.current = false;
         startY.current = e.touches[0].clientY;
         currentY.current = 0;
-        content.style.transition = 'none';
       }
     };
 
@@ -257,8 +258,15 @@ export function BottomSheet({
 
       const deltaY = e.touches[0].clientY - startY.current;
       if (deltaY > 0) {
-        currentY.current = deltaY;
-        contentRef.current.style.transform = `translateY(${deltaY}px)`;
+        // Only start visual drag after moving at least 5px (distinguishes tap from drag)
+        if (!hasMoved.current && deltaY > 5) {
+          hasMoved.current = true;
+          contentRef.current.style.transition = 'none';
+        }
+        if (hasMoved.current) {
+          currentY.current = deltaY;
+          contentRef.current.style.transform = `translateY(${deltaY}px)`;
+        }
       }
     };
 
@@ -266,6 +274,13 @@ export function BottomSheet({
       if (!isDragging.current || !contentRef.current) return;
 
       isDragging.current = false;
+
+      // Only handle drag end if actual movement occurred
+      if (!hasMoved.current) {
+        return;
+      }
+
+      hasMoved.current = false;
       contentRef.current.style.transition = '';
 
       // If dragged more than 100px, close; otherwise snap back

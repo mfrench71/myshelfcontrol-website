@@ -333,6 +333,7 @@ export function GenrePicker({
         <input
           ref={inputRef}
           type="text"
+          role="combobox"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           placeholder={isLoading ? 'Loading genres...' : 'Add genre...'}
           value={searchQuery}
@@ -346,12 +347,15 @@ export function GenrePicker({
           disabled={disabled || isLoading}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
+          aria-controls="genre-picker-listbox"
           aria-labelledby="genre-picker-label"
+          aria-autocomplete="list"
         />
 
         {/* Dropdown */}
         {isOpen && (
           <div
+            id="genre-picker-listbox"
             className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
             role="listbox"
             aria-label="Genre options"

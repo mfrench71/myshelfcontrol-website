@@ -7,7 +7,6 @@ import {
   validateImage,
   getImageDimensions,
   compressImage,
-  uploadImage,
   deleteImage,
   deleteImages,
 } from '../image-upload';

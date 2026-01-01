@@ -24,7 +24,6 @@ import { useAuthContext } from '@/components/providers/auth-provider';
 import { getGravatarUrl } from '@/lib/utils';
 import { SearchOverlay } from '@/components/ui/search-overlay';
 import { getWishlist } from '@/lib/repositories/wishlist';
-import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 
 /** localStorage key for caching Gravatar availability per email hash */
 const GRAVATAR_CACHE_KEY = 'gravatar_cache';

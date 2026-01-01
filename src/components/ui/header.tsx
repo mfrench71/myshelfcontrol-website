@@ -304,7 +304,6 @@ export function Header() {
         isOpen={showMenu}
         onClose={() => setShowMenu(false)}
         title="Menu"
-        swipeToDismiss={true}
         className="md:hidden"
       >
         <div className="p-6 pt-2">

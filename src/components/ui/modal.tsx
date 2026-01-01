@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { X, Loader2 } from 'lucide-react';
+import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 
 // ============================================================================
 // Modal Component
@@ -43,6 +44,9 @@ export function Modal({
   const [isClosing, setIsClosing] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
+  // Lock body scroll when modal is open
+  useBodyScrollLock(isOpen);
+
   // Handle close with animation
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -65,18 +69,6 @@ export function Modal({
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, closeOnEscape, handleClose]);
-
-  // Lock body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
 
   // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -130,32 +122,16 @@ export interface BottomSheetProps {
   closeOnBackdrop?: boolean;
   /** Close on Escape key (default: true) */
   closeOnEscape?: boolean;
-  /** Enable swipe to dismiss on mobile (default: true) */
-  swipeToDismiss?: boolean;
+  /** Show close button (default: true) */
+  showCloseButton?: boolean;
   /** Additional class for content */
   className?: string;
 }
 
 /**
- * Find a scrollable ancestor element between target and stopAt
- */
-function findScrollableAncestor(target: HTMLElement, stopAt: HTMLElement): HTMLElement | null {
-  let el: HTMLElement | null = target;
-  while (el && el !== stopAt) {
-    const style = window.getComputedStyle(el);
-    const overflowY = style.overflowY;
-    const isScrollable = (overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight;
-    if (isScrollable) {
-      return el;
-    }
-    el = el.parentElement;
-  }
-  return null;
-}
-
-/**
  * BottomSheet - Mobile-first sheet that slides up from bottom
  * On desktop (md+), displays as centered modal
+ * Note: Swipe-to-dismiss is intentionally disabled to avoid conflicts with content scrolling
  */
 export function BottomSheet({
   isOpen,
@@ -164,17 +140,14 @@ export function BottomSheet({
   title,
   closeOnBackdrop = true,
   closeOnEscape = true,
-  swipeToDismiss = true,
+  showCloseButton = true,
   className = '',
 }: BottomSheetProps) {
   const [isClosing, setIsClosing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
-  const startY = useRef(0);
-  const currentY = useRef(0);
-  const isDragging = useRef(false);
-  const hasMoved = useRef(false);
+
+  // Lock body scroll when bottom sheet is open
+  useBodyScrollLock(isOpen);
 
   // Handle close with animation
   const handleClose = useCallback(() => {
@@ -199,114 +172,12 @@ export function BottomSheet({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, closeOnEscape, handleClose]);
 
-  // Lock body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
   // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (closeOnBackdrop && e.target === containerRef.current) {
       handleClose();
     }
   };
-
-  // Setup swipe gesture on touch devices
-  useEffect(() => {
-    if (!isOpen || !swipeToDismiss || !containerRef.current) return;
-
-    // Only enable on touch devices
-    if (!('ontouchstart' in window)) return;
-
-    const container = containerRef.current;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      const content = contentRef.current;
-      const handle = handleRef.current;
-      if (!content) return;
-
-      const target = e.target as HTMLElement;
-
-      // Don't start drag on interactive elements (links, buttons)
-      const isInteractive = target.closest('a, button, input, textarea, select, [role="button"]');
-      if (isInteractive && !handle?.contains(target)) {
-        return;
-      }
-
-      // Check for nested scrollable ancestor
-      const nestedScrollable = findScrollableAncestor(target, content);
-      if (nestedScrollable && nestedScrollable.scrollTop < nestedScrollable.scrollHeight - nestedScrollable.clientHeight) {
-        // Inner scrollable can still scroll down, don't start dismiss
-        return;
-      }
-
-      // Allow drag from handle or if content is scrolled to top
-      const isHandle = handle && handle.contains(target);
-      const isScrolledToTop = content.scrollTop === 0;
-
-      if (isHandle || isScrolledToTop) {
-        isDragging.current = true;
-        hasMoved.current = false;
-        startY.current = e.touches[0].clientY;
-        currentY.current = 0;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging.current || !contentRef.current) return;
-
-      const deltaY = e.touches[0].clientY - startY.current;
-      if (deltaY > 0) {
-        // Only start visual drag after moving at least 5px (distinguishes tap from drag)
-        if (!hasMoved.current && deltaY > 5) {
-          hasMoved.current = true;
-          contentRef.current.style.transition = 'none';
-        }
-        if (hasMoved.current) {
-          currentY.current = deltaY;
-          contentRef.current.style.transform = `translateY(${deltaY}px)`;
-        }
-      }
-    };
-
-    const handleTouchEnd = () => {
-      if (!isDragging.current || !contentRef.current) return;
-
-      isDragging.current = false;
-
-      // Only handle drag end if actual movement occurred
-      if (!hasMoved.current) {
-        return;
-      }
-
-      hasMoved.current = false;
-      contentRef.current.style.transition = '';
-
-      // If dragged more than 100px, close; otherwise snap back
-      if (currentY.current > 100) {
-        handleClose();
-      } else {
-        contentRef.current.style.transform = '';
-      }
-    };
-
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchmove', handleTouchMove, { passive: true });
-    container.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [isOpen, swipeToDismiss, handleClose]);
 
   if (!isOpen) return null;
 
@@ -322,12 +193,18 @@ export function BottomSheet({
       aria-labelledby={title ? 'sheet-title' : undefined}
     >
       <div
-        ref={contentRef}
-        className={`bottom-sheet-content bg-white w-full md:max-w-md md:rounded-xl md:shadow-xl max-h-[90vh] overflow-y-auto ${className}`}
+        className={`bottom-sheet-content bg-white w-full md:max-w-md md:rounded-xl md:shadow-xl max-h-[90vh] overflow-y-auto relative ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Swipe handle (mobile only) */}
-        <div ref={handleRef} className="bottom-sheet-handle md:hidden" />
+        {showCloseButton && (
+          <button
+            onClick={handleClose}
+            className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center z-10"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5 text-gray-500" aria-hidden="true" />
+          </button>
+        )}
         {children}
       </div>
     </div>
@@ -411,6 +288,7 @@ export function ConfirmModal({
       title={title}
       closeOnBackdrop={!isLoading}
       closeOnEscape={!isLoading}
+      showCloseButton={false}
     >
       {content}
     </BottomSheet>

@@ -7,6 +7,11 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import { Modal, BottomSheet, ConfirmModal, useConfirmModal } from '../modal';
 
+// Mock useBodyScrollLock hook
+vi.mock('@/lib/hooks/use-body-scroll-lock', () => ({
+  useBodyScrollLock: vi.fn(),
+}));
+
 describe('Modal', () => {
   const mockOnClose = vi.fn();
 
@@ -293,14 +298,24 @@ describe('BottomSheet', () => {
       expect(dialog).toHaveAttribute('aria-labelledby', 'sheet-title');
     });
 
-    it('renders swipe handle', () => {
+    it('renders close button by default', () => {
       render(
         <BottomSheet isOpen={true} onClose={mockOnClose}>
           <div>Sheet content</div>
         </BottomSheet>
       );
 
-      expect(document.querySelector('.bottom-sheet-handle')).toBeInTheDocument();
+      expect(screen.getByLabelText('Close')).toBeInTheDocument();
+    });
+
+    it('hides close button when showCloseButton is false', () => {
+      render(
+        <BottomSheet isOpen={true} onClose={mockOnClose} showCloseButton={false}>
+          <div>Sheet content</div>
+        </BottomSheet>
+      );
+
+      expect(screen.queryByLabelText('Close')).not.toBeInTheDocument();
     });
 
     it('applies custom className', () => {

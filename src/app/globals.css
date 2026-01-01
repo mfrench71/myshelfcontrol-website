@@ -55,7 +55,8 @@ body.scroll-locked {
   overflow: hidden;
   position: fixed;
   width: 100%;
-  height: 100%;
+  left: 0;
+  right: 0;
 }
 
 /* Form Elements */
@@ -270,20 +271,6 @@ select {
   }
 }
 
-/* Bottom Sheet Handle (drag indicator) */
-.bottom-sheet-handle {
-  width: 2rem;
-  height: 0.2rem;
-  background-color: #d1d5db;
-  border-radius: 9999px;
-  margin: 0.75rem auto;
-}
-
-@media (min-width: 768px) {
-  .bottom-sheet-handle {
-    display: none; /* Hide on tablet+ */
-  }
-}
 
 /* Skeleton Loading */
 @keyframes shimmer {
@@ -508,11 +495,6 @@ select {
 /* ============================================
    PWA & TOUCH
    ============================================ */
-
-/* Prevent pull-to-refresh on iOS */
-html, body {
-  overscroll-behavior-y: none;
-}
 
 /* Better touch handling */
 * {

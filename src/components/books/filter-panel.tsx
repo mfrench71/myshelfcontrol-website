@@ -622,14 +622,21 @@ export function FilterBottomSheet({
       isOpen={isOpen}
       onClose={onClose}
       title="Filters"
-      swipeToDismiss={true}
       className="md:hidden"
+      showCloseButton={false}
     >
       {/* Header */}
-      <div className="px-4 pb-3 border-b border-gray-200">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
         <h2 id="filter-sheet-title" className="text-lg font-semibold">
           Filters
         </h2>
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5 text-gray-500" aria-hidden="true" />
+        </button>
       </div>
 
       {/* Content */}

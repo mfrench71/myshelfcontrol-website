@@ -31,16 +31,19 @@ export function BookCover({
   const [loading, setLoading] = useState(!!src);
   const [error, setError] = useState(false);
 
+  // Check if className contains full sizing classes (let container control size)
+  const hasFullSizing = className.includes('w-full') || className.includes('h-full');
+  const containerStyle = hasFullSizing ? undefined : { width, height };
+
   // No source or error - show placeholder
   if (!src || error) {
     return (
       <div
         className={`flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark ${className}`}
-        style={{ width, height }}
+        style={containerStyle}
       >
         <BookOpen
-          className="text-white/80"
-          style={{ width: width * 0.35, height: height * 0.35 }}
+          className="text-white/80 w-[35%] h-[35%]"
           aria-hidden="true"
         />
       </div>
@@ -48,13 +51,12 @@ export function BookCover({
   }
 
   return (
-    <div className={`relative ${className}`} style={{ width, height }}>
+    <div className={`relative ${className}`} style={containerStyle}>
       {/* Loading spinner */}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
           <Loader2
-            className="text-white/80 animate-spin"
-            style={{ width: width * 0.3, height: height * 0.3 }}
+            className="text-white/80 animate-spin w-[30%] h-[30%]"
             aria-hidden="true"
           />
         </div>

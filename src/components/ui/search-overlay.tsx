@@ -207,6 +207,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   // Handle close
   const handleClose = useCallback(() => {
     setQuery('');
+    // Reset dataLoaded so fresh data is fetched next time
+    setDataLoaded(false);
     onClose();
   }, [onClose]);
 

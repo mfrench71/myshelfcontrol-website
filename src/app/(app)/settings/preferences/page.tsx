@@ -210,7 +210,9 @@ export default function PreferencesSettingsPage() {
     setSaving(true);
     try {
       await resetWidgetSettings(user.uid);
-      await loadSettings();
+      // Reload settings without showing loading skeleton (preserves scroll position)
+      const settings = await loadWidgetSettings(user.uid);
+      setWidgets(settings.sort((a, b) => a.order - b.order));
       showToast('Settings reset to defaults', { type: 'success' });
     } catch (err) {
       console.error('Failed to reset settings:', err);

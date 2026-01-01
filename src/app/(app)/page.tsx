@@ -103,7 +103,7 @@ function WidgetContainer({
   return (
     <div className={`widget-col-${size} bg-white rounded-xl border border-gray-200 overflow-hidden`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <Icon className={`w-5 h-5 ${iconColor}`} aria-hidden="true" />
           <h3 className="font-semibold text-gray-900">{title}</h3>
@@ -135,7 +135,7 @@ function WidgetContainer({
  */
 function HorizontalScroll({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex gap-4 overflow-x-auto overflow-y-hidden p-4 snap-x snap-mandatory no-scrollbar">
+    <div className="flex gap-4 overflow-x-auto overflow-y-hidden p-4 snap-x snap-mandatory no-scrollbar scroll-pl-4">
       {children}
     </div>
   );

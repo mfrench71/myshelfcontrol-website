@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Edit3,
   ChevronRight,
+  ChevronLeft,
   Loader2,
   AlertCircle,
   Star,
@@ -684,18 +685,18 @@ export default function AddBookPage() {
       await addBook(user.uid, {
         title: title.trim(),
         author: author.trim(),
-        isbn: isbn.trim() || undefined,
-        coverImageUrl: coverUrl || undefined,
-        covers: Object.keys(coverOptions).length > 0 ? coverOptions : undefined,
-        publisher: publisher.trim() || undefined,
-        publishedDate: publishedDate.trim() || undefined,
-        physicalFormat: physicalFormat || undefined,
-        pageCount: pageCount ? parseInt(pageCount, 10) : undefined,
-        rating: rating || undefined,
-        notes: notes.trim() || undefined,
+        isbn: isbn.trim() || null,
+        coverImageUrl: coverUrl || null,
+        covers: Object.keys(coverOptions).length > 0 ? coverOptions : null,
+        publisher: publisher.trim() || null,
+        publishedDate: publishedDate.trim() || null,
+        physicalFormat: physicalFormat || null,
+        pageCount: pageCount ? parseInt(pageCount, 10) : null,
+        rating: rating || null,
+        notes: notes.trim() || null,
         genres: selectedGenres,
-        seriesId: seriesSelection.seriesId || undefined,
-        seriesPosition: seriesSelection.position || undefined,
+        seriesId: seriesSelection.seriesId || null,
+        seriesPosition: seriesSelection.position || null,
         reads,
         images: images.map((img) => ({
           id: img.id,
@@ -716,7 +717,8 @@ export default function AddBookPage() {
       router.push('/books');
     } catch (error) {
       console.error('Failed to add book:', error);
-      showToast('Error adding book', { type: 'error' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showToast(`Error adding book: ${errorMessage}`, { type: 'error' });
       setSubmitting(false);
     }
   };
@@ -913,8 +915,8 @@ export default function AddBookPage() {
                 onClick={handleStartOver}
                 className="text-sm text-primary hover:underline inline-flex items-center gap-1"
               >
-                <X className="w-4 h-4" aria-hidden="true" />
-                <span>Start over</span>
+                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                <span>Back to search</span>
               </button>
               {dataSource && (
                 <div className="flex items-center gap-2 text-sm">
@@ -1000,37 +1002,6 @@ export default function AddBookPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="isbn" className="block font-semibold text-gray-700 mb-1">
-                    ISBN
-                  </label>
-                  <input
-                    type="text"
-                    id="isbn"
-                    name="isbn"
-                    value={isbn}
-                    onChange={(e) => setIsbn(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="pageCount" className="block font-semibold text-gray-700 mb-1">
-                    Pages
-                  </label>
-                  <input
-                    type="number"
-                    id="pageCount"
-                    name="pageCount"
-                    value={pageCount}
-                    onChange={(e) => setPageCount(e.target.value)}
-                    placeholder="e.g., 320"
-                    inputMode="numeric"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
                   <label htmlFor="publisher" className="block font-semibold text-gray-700 mb-1">
                     Publisher
                   </label>
@@ -1045,36 +1016,58 @@ export default function AddBookPage() {
                 </div>
                 <div>
                   <label htmlFor="publishedDate" className="block font-semibold text-gray-700 mb-1">
-                    Published Date
+                    Year Published
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     id="publishedDate"
                     name="publishedDate"
                     value={publishedDate}
                     onChange={(e) => setPublishedDate(e.target.value)}
+                    placeholder="e.g., 2024"
+                    inputMode="numeric"
+                    min="1000"
+                    max="2100"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                   />
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 mb-1">
-                  Format
-                </label>
-                <select
-                  id="physicalFormat"
-                  name="physicalFormat"
-                  value={physicalFormat}
-                  onChange={(e) => setPhysicalFormat(e.target.value as PhysicalFormat)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
-                >
-                  {FORMAT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="pageCount" className="block font-semibold text-gray-700 mb-1">
+                    Pages
+                  </label>
+                  <input
+                    type="number"
+                    id="pageCount"
+                    name="pageCount"
+                    value={pageCount}
+                    onChange={(e) => setPageCount(e.target.value)}
+                    placeholder="e.g., 320"
+                    inputMode="numeric"
+                    min="1"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 mb-1">
+                    Format
+                  </label>
+                  <select
+                    id="physicalFormat"
+                    name="physicalFormat"
+                    value={physicalFormat}
+                    onChange={(e) => setPhysicalFormat(e.target.value as PhysicalFormat)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+                  >
+                    {FORMAT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>

@@ -471,7 +471,7 @@ export default function BookDetailPage() {
                 </Link>
               </li>
               <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium truncate max-w-[100px] sm:max-w-[150px] md:max-w-[200px]">
+              <li className="text-gray-900 font-medium truncate max-w-[150px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-none">
                 {book.title}
               </li>
             </ol>

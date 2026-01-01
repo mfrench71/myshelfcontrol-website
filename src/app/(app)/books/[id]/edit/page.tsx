@@ -603,7 +603,7 @@ export default function EditBookPage({ params }: PageProps) {
               <li>
                 <Link
                   href={`/books/${id}`}
-                  className="text-gray-500 hover:text-gray-700 max-w-[150px] truncate inline-block align-middle"
+                  className="text-gray-500 hover:text-gray-700 max-w-[100px] sm:max-w-[200px] md:max-w-[300px] lg:max-w-none truncate inline-block align-middle"
                 >
                   {title || 'Book'}
                 </Link>

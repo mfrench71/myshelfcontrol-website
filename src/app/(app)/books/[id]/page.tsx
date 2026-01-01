@@ -11,6 +11,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   BookOpen,
+  Book as BookIcon,
   Pencil,
   Trash2,
   AlertCircle,
@@ -677,18 +678,36 @@ export default function BookDetailPage() {
                 </h2>
                 {seriesBooks.length > 1 && (
                   <div className="space-y-1">
-                    {seriesBooks.slice(0, 5).map((seriesBook) => (
-                      <Link
-                        key={seriesBook.id}
-                        href={`/books/${seriesBook.id}`}
-                        className={`block text-sm py-1 px-2 rounded hover:bg-gray-100 ${
-                          seriesBook.id === bookId ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600'
-                        }`}
-                      >
-                        {seriesBook.seriesPosition && `#${seriesBook.seriesPosition} `}
-                        {seriesBook.title}
-                      </Link>
-                    ))}
+                    {seriesBooks.slice(0, 5).map((seriesBook) => {
+                      const isCurrent = seriesBook.id === bookId;
+                      const displayText = seriesBook.seriesPosition
+                        ? `#${seriesBook.seriesPosition} ${seriesBook.title}`
+                        : seriesBook.title;
+
+                      if (isCurrent) {
+                        return (
+                          <div
+                            key={seriesBook.id}
+                            className="flex items-center gap-2 text-sm py-1 text-primary font-medium"
+                          >
+                            <BookOpen className="w-4 h-4" aria-hidden="true" />
+                            <span>{displayText}</span>
+                            <span className="text-xs text-gray-400">(viewing)</span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <Link
+                          key={seriesBook.id}
+                          href={`/books/${seriesBook.id}`}
+                          className="flex items-center gap-2 text-sm py-1 text-gray-700 hover:text-primary"
+                        >
+                          <BookIcon className="w-4 h-4 text-gray-400" aria-hidden="true" />
+                          <span>{displayText}</span>
+                        </Link>
+                      );
+                    })}
                     <Link
                       href={`/books?series=${series.id}`}
                       className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"

@@ -23,7 +23,8 @@ import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
 import { getSeries } from '@/lib/repositories/series';
-import type { Book, Series } from '@/lib/types';
+import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
+import type { Book, Series, Genre } from '@/lib/types';
 
 const RECENT_SEARCHES_KEY = 'recent_searches';
 const MAX_RECENT_SEARCHES = 5;
@@ -119,31 +120,59 @@ function getBookStatus(book: Book): 'reading' | 'finished' | 'want-to-read' {
   return 'want-to-read';
 }
 
+/**
+ * Get contrast colour for text on a background
+ */
+function getContrastColor(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#1f2937' : '#ffffff';
+}
+
+/**
+ * Format date for display
+ */
+function formatDate(date: unknown): string {
+  if (!date) return '';
+  try {
+    const d = date instanceof Date ? date : new Date(date as string | number);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {
+    return '';
+  }
+}
+
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const { user } = useAuthContext();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [books, setBooks] = useState<Book[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   // Lock body scroll when open
   useBodyScrollLock(isOpen);
 
-  // Load books and series when overlay opens
+  // Load books, series, and genres when overlay opens
   useEffect(() => {
     if (!isOpen || !user) return;
 
     async function loadData() {
       setLoading(true);
       try {
-        const [userBooks, userSeries] = await Promise.all([
+        const [userBooks, userSeries, userGenres] = await Promise.all([
           getBooks(user!.uid),
           getSeries(user!.uid),
+          getGenres(user!.uid),
         ]);
         setBooks(userBooks);
         setSeries(userSeries);
+        setGenres(userGenres);
       } catch (err) {
         console.error('Failed to load search data:', err);
       } finally {
@@ -194,6 +223,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     });
     return lookup;
   }, [series]);
+
+  // Create genre lookup
+  const genreLookup = useMemo(() => {
+    return createGenreLookup(genres);
+  }, [genres]);
 
   // Filter books based on query
   const results = useMemo(() => {
@@ -410,6 +444,38 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                             />
                           ))}
                         </div>
+                      )}
+                      {/* Genre badges */}
+                      {book.genres && book.genres.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {book.genres.slice(0, 3).map((genreId) => {
+                            const genre = genreLookup[genreId];
+                            if (!genre) return null;
+                            return (
+                              <span
+                                key={genreId}
+                                className="px-1.5 py-0.5 rounded text-xs font-medium"
+                                style={{
+                                  backgroundColor: genre.color,
+                                  color: getContrastColor(genre.color),
+                                }}
+                              >
+                                {genre.name}
+                              </span>
+                            );
+                          })}
+                          {book.genres.length > 3 && (
+                            <span className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                              +{book.genres.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {/* Date added */}
+                      {book.createdAt && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Added {formatDate(book.createdAt)}
+                        </p>
                       )}
                     </div>
                   </Link>

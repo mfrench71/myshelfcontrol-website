@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Calendar,
   Loader2,
+  Star,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
@@ -54,15 +55,15 @@ function RatingInput({
           key={star}
           type="button"
           onClick={() => onChange(value === star ? 0 : star)}
-          className="p-1 hover:scale-110 transition-transform min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className={`p-1 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+            star <= value ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'
+          }`}
           aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
         >
-          <svg
-            className={`w-8 h-8 ${star <= value ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
+          <Star
+            className={`w-6 h-6 ${star <= value ? 'fill-yellow-400' : ''}`}
+            aria-hidden="true"
+          />
         </button>
       ))}
       {value > 0 && (

@@ -91,6 +91,29 @@ select {
   scrollbar-width: none;
 }
 
+/* Scrollable container with bottom fade indicator */
+.scroll-fade-container {
+  position: relative;
+}
+
+.scroll-fade-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+/* Hide fade when scrolled to bottom (controlled via JS class) */
+.scroll-fade-container.scrolled-to-bottom::after {
+  opacity: 0;
+}
+
 /* ============================================
    ANIMATIONS
    ============================================ */

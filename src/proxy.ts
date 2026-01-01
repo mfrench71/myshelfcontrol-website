@@ -1,4 +1,5 @@
-// Middleware - Route protection and authentication checks
+// Proxy - Route protection and authentication checks
+// Migrated from middleware.ts for Next.js 16 compatibility
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -8,7 +9,7 @@ const protectedRoutes = ['/books', '/settings', '/wishlist'];
 // Routes that should redirect to home if already authenticated
 const authRoutes = ['/login'];
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check for session cookie (set by Firebase Auth)

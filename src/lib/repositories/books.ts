@@ -155,8 +155,17 @@ export async function updateBook(
 ): Promise<void> {
   const bookRef = doc(db, 'users', userId, 'books', bookId);
 
+  // Filter out undefined values (Firestore doesn't accept undefined)
+  // Use null to explicitly clear a field, or omit to leave unchanged
+  const cleanedUpdates: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) {
+      cleanedUpdates[key] = value;
+    }
+  }
+
   await updateDoc(bookRef, {
-    ...updates,
+    ...cleanedUpdates,
     updatedAt: Timestamp.now(),
   });
 }

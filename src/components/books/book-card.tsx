@@ -4,10 +4,10 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { BookOpen, CheckCircle, Library, Calendar } from 'lucide-react';
 import type { Book, Genre, Series, FirestoreTimestamp } from '@/lib/types';
 import { Timestamp } from 'firebase/firestore';
+import { BookCover } from '@/components/ui/book-cover';
 
 /**
  * Format a Firestore timestamp to a short date string
@@ -195,20 +195,11 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
     >
       {/* Cover Image */}
       <div className="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden shadow-cover">
-        {book.coverImageUrl ? (
-          <Image
-            src={book.coverImageUrl}
-            alt=""
-            width={64}
-            height={96}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-white/80" aria-hidden="true" />
-          </div>
-        )}
+        <BookCover
+          src={book.coverImageUrl}
+          width={64}
+          height={96}
+        />
       </div>
 
       {/* Book Details */}

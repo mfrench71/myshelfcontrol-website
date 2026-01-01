@@ -36,6 +36,7 @@ function docToGenre(doc: QueryDocumentSnapshot<DocumentData>): Genre {
     id: doc.id,
     name: data.name || '',
     color: data.color || '#6b7280',
+    bookCount: data.bookCount || 0,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };
@@ -92,7 +93,7 @@ export async function createGenre(
 export async function updateGenre(
   userId: string,
   genreId: string,
-  updates: Partial<Pick<Genre, 'name' | 'color'>>
+  updates: Partial<Pick<Genre, 'name' | 'color' | 'bookCount'>>
 ): Promise<void> {
   const genreRef = doc(db, 'users', userId, 'genres', genreId);
 

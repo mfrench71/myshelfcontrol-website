@@ -87,6 +87,7 @@ export type Genre = {
   id: string;
   name: string;
   color: string;
+  bookCount?: number;
   createdAt?: FirestoreTimestamp;
   updatedAt?: FirestoreTimestamp;
 };
@@ -110,6 +111,7 @@ export type Series = {
   name: string;
   description?: string | null;
   totalBooks?: number | null;
+  bookCount?: number;
   expectedBooks?: ExpectedBook[];
   deletedAt?: number | null;
   createdAt?: FirestoreTimestamp;

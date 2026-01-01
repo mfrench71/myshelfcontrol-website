@@ -36,6 +36,7 @@ function docToSeries(doc: QueryDocumentSnapshot<DocumentData>): Series {
     id: doc.id,
     name: data.name || '',
     totalBooks: data.totalBooks ?? null,
+    bookCount: data.bookCount || 0,
     expectedBooks: data.expectedBooks,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
@@ -94,7 +95,7 @@ export async function createSeries(
 export async function updateSeries(
   userId: string,
   seriesId: string,
-  updates: Partial<Pick<Series, 'name' | 'totalBooks'>>
+  updates: Partial<Pick<Series, 'name' | 'totalBooks' | 'bookCount'>>
 ): Promise<void> {
   const seriesRef = doc(db, 'users', userId, 'series', seriesId);
 

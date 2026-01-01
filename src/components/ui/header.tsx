@@ -18,6 +18,7 @@ import {
   Heart,
   Settings,
   LogOut,
+  WifiOff,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getGravatarUrl } from '@/lib/utils';
@@ -36,7 +37,25 @@ export function Header() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [isOffline, setIsOffline] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Track online/offline status
+  useEffect(() => {
+    // Set initial state
+    setIsOffline(!navigator.onLine);
+
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Lock body scroll when menu is open
   useBodyScrollLock(showMenu);
@@ -222,6 +241,16 @@ export function Header() {
 
   return (
     <>
+      {/* Offline Banner */}
+      {isOffline && (
+        <div className="bg-amber-500 text-white text-center text-sm py-1 px-4">
+          <span className="inline-flex items-center gap-1">
+            <WifiOff className="w-4 h-4" aria-hidden="true" />
+            You&apos;re offline - viewing cached data
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 h-14">
         <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">

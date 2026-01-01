@@ -275,8 +275,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : query.length < 2 ? (
-          /* Recent Searches */
-          recentSearches.length > 0 && (
+          /* Initial State or Recent Searches */
+          recentSearches.length > 0 ? (
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-gray-500">Recent Searches</h3>
@@ -302,6 +302,15 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   </button>
                 ))}
               </div>
+            </div>
+          ) : (
+            /* Empty initial state */
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Search className="w-12 h-12 text-gray-300 mb-4" aria-hidden="true" />
+              <p className="text-gray-700 font-medium">Search your library</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Find books by title, author, ISBN, series, notes or publisher
+              </p>
             </div>
           )
         ) : results.length === 0 ? (

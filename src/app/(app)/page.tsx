@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -27,7 +27,12 @@ import { getBooks } from '@/lib/repositories/books';
 import { getGenres } from '@/lib/repositories/genres';
 import { getSeries, createSeriesLookup } from '@/lib/repositories/series';
 import { getWishlist } from '@/lib/repositories/wishlist';
+import {
+  loadWidgetSettings,
+  getEnabledWidgets,
+} from '@/lib/repositories/widget-settings';
 import type { Book, Genre, Series, WishlistItem } from '@/lib/types';
+import type { WidgetConfig, WidgetId } from '@/lib/types/widgets';
 
 /**
  * Get reading status from book's reads array
@@ -524,6 +529,7 @@ export default function HomePage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [widgetConfigs, setWidgetConfigs] = useState<WidgetConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [bannerDismissed, setBannerDismissed] = useState(true); // Default true to prevent flash
 
@@ -546,33 +552,55 @@ export default function HomePage() {
   const showVerificationBanner =
     user && !user.emailVerified && !bannerDismissed;
 
-  useEffect(() => {
-    async function loadData() {
-      if (!user) return;
+  // Load data when user is available
+  const loadData = useCallback(async () => {
+    if (!user) return;
 
-      try {
-        setLoading(true);
-        const [userBooks, userSeries, userWishlist] = await Promise.all([
-          getBooks(user.uid),
-          getSeries(user.uid),
-          getWishlist(user.uid),
-        ]);
-        setBooks(userBooks);
-        setSeries(userSeries);
-        setWishlistItems(userWishlist);
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-      } finally {
-        setLoading(false);
-      }
+    try {
+      setLoading(true);
+      const [userBooks, userSeries, userWishlist, userWidgets] = await Promise.all([
+        getBooks(user.uid),
+        getSeries(user.uid),
+        getWishlist(user.uid),
+        loadWidgetSettings(user.uid),
+      ]);
+      setBooks(userBooks);
+      setSeries(userSeries);
+      setWishlistItems(userWishlist);
+      setWidgetConfigs(userWidgets);
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+    } finally {
+      setLoading(false);
     }
+  }, [user]);
 
+  useEffect(() => {
     if (!authLoading && user) {
       loadData();
     } else if (!authLoading && !user) {
       setLoading(false);
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, loadData]);
+
+  // Visibility-based auto-sync
+  useEffect(() => {
+    if (!user) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user, loadData]);
+
+  // Get enabled widgets in order
+  const enabledWidgets = useMemo(() => getEnabledWidgets(widgetConfigs), [widgetConfigs]);
 
   // Computed data for widgets
   const {
@@ -732,36 +760,61 @@ export default function HomePage() {
 
       {/* Widgets Grid */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Welcome Widget - Full Width */}
-        <div className="md:col-span-2">
-          <WelcomeWidget
-            totalBooks={books.length}
-            currentlyReading={currentlyReading.length}
-            finishedThisYear={finishedThisYear}
-          />
-        </div>
+        {enabledWidgets.map((config) => {
+          const isFullWidth = config.size === 12;
+          const wrapperClass = isFullWidth ? 'md:col-span-2' : '';
 
-        {/* Currently Reading */}
-        <CurrentlyReadingWidget books={currentlyReading} />
-
-        {/* Recently Added */}
-        <RecentlyAddedWidget books={recentlyAdded} />
-
-        {/* Top Rated */}
-        <TopRatedWidget books={topRated} />
-
-        {/* Wishlist */}
-        <WishlistWidget items={wishlistItems} />
-
-        {/* Recently Finished */}
-        <RecentlyFinishedWidget books={recentlyFinished} />
-
-        {/* Series Progress - Full Width */}
-        {series.length > 0 && (
-          <div className="md:col-span-2">
-            <SeriesProgressWidget series={series} booksBySeries={booksBySeries} />
-          </div>
-        )}
+          switch (config.id) {
+            case 'welcome':
+              return (
+                <div key={config.id} className={wrapperClass}>
+                  <WelcomeWidget
+                    totalBooks={books.length}
+                    currentlyReading={currentlyReading.length}
+                    finishedThisYear={finishedThisYear}
+                  />
+                </div>
+              );
+            case 'currentlyReading':
+              return (
+                <div key={config.id} className={wrapperClass}>
+                  <CurrentlyReadingWidget books={currentlyReading} />
+                </div>
+              );
+            case 'recentlyAdded':
+              return recentlyAdded.length > 0 ? (
+                <div key={config.id} className={wrapperClass}>
+                  <RecentlyAddedWidget books={recentlyAdded} />
+                </div>
+              ) : null;
+            case 'topRated':
+              return topRated.length > 0 ? (
+                <div key={config.id} className={wrapperClass}>
+                  <TopRatedWidget books={topRated} />
+                </div>
+              ) : null;
+            case 'wishlist':
+              return (
+                <div key={config.id} className={wrapperClass}>
+                  <WishlistWidget items={wishlistItems} />
+                </div>
+              );
+            case 'recentlyFinished':
+              return recentlyFinished.length > 0 ? (
+                <div key={config.id} className={wrapperClass}>
+                  <RecentlyFinishedWidget books={recentlyFinished} />
+                </div>
+              ) : null;
+            case 'seriesProgress':
+              return series.length > 0 ? (
+                <div key={config.id} className={wrapperClass}>
+                  <SeriesProgressWidget series={series} booksBySeries={booksBySeries} />
+                </div>
+              ) : null;
+            default:
+              return null;
+          }
+        })}
       </div>
 
       {/* Empty State */}

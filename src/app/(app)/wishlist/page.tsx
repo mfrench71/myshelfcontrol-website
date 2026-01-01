@@ -6,18 +6,17 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Heart,
   ChevronRight,
   Loader2,
-  Book,
   ShoppingBag,
   Pencil,
   Trash2,
   MessageSquare,
   Search,
 } from 'lucide-react';
+import { BookCover } from '@/components/ui/book-cover';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getWishlist, deleteWishlistItem, updateWishlistItem } from '@/lib/repositories/wishlist';
 import { addBook } from '@/lib/repositories/books';
@@ -105,21 +104,13 @@ function WishlistItemCard({
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-3">
       {/* Cover - 48x72 matching old site */}
-      <div className="w-12 h-[72px] flex-shrink-0 rounded-lg overflow-hidden shadow-cover">
-        {item.coverImageUrl ? (
-          <Image
-            src={item.coverImageUrl}
-            alt=""
-            width={48}
-            height={72}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
-            <Book className="w-5 h-5 text-white/80" aria-hidden="true" />
-          </div>
-        )}
-      </div>
+      <BookCover
+        src={item.coverImageUrl}
+        alt={item.title}
+        width={48}
+        height={72}
+        className="w-12 h-[72px] flex-shrink-0 rounded-lg overflow-hidden shadow-cover"
+      />
 
       {/* Content */}
       <div className="flex-1 min-w-0">

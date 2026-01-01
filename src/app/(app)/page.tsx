@@ -7,7 +7,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   BookOpen,
   Plus,
@@ -22,6 +21,7 @@ import {
   Heart,
   PlusCircle,
 } from 'lucide-react';
+import { BookCover } from '@/components/ui/book-cover';
 import { sendEmailVerification } from 'firebase/auth';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
@@ -52,18 +52,13 @@ function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
 function HorizontalBookCard({ book, href }: { book: Book; href: string }) {
   return (
     <Link href={href} className="flex-shrink-0 w-24 snap-start">
-      <div className="relative w-24 h-36 rounded-lg shadow-cover flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary to-primary-dark">
-        <BookOpen className="w-8 h-8 text-white/80" aria-hidden="true" />
-        {book.coverImageUrl && (
-          <Image
-            src={book.coverImageUrl}
-            alt=""
-            width={96}
-            height={144}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-      </div>
+      <BookCover
+        src={book.coverImageUrl}
+        alt={book.title}
+        width={96}
+        height={144}
+        className="w-24 h-36 rounded-lg shadow-cover overflow-hidden"
+      />
       <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
       <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
     </Link>
@@ -278,18 +273,13 @@ function TopRatedWidget({ books, config }: { books: Book[]; config: WidgetConfig
       <HorizontalScroll>
         {displayBooks.map((book) => (
           <Link key={book.id} href={`/books/${book.id}`} className="flex-shrink-0 w-24 snap-start">
-            <div className="relative w-24 h-36 bg-primary rounded-lg shadow-md flex items-center justify-center overflow-hidden">
-              <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
-              {book.coverImageUrl && (
-                <Image
-                  src={book.coverImageUrl}
-                  alt=""
-                  width={96}
-                  height={144}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              )}
-            </div>
+            <BookCover
+              src={book.coverImageUrl}
+              alt={book.title}
+              width={96}
+              height={144}
+              className="w-24 h-36 rounded-lg shadow-md overflow-hidden"
+            />
             <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
             <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
             {book.rating != null && book.rating > 0 && (
@@ -356,18 +346,13 @@ function WishlistWidget({ items, config }: { items: WishlistItem[]; config: Widg
       <HorizontalScroll>
         {displayItems.map((item) => (
           <Link key={item.id} href="/wishlist" className="flex-shrink-0 w-24 snap-start">
-            <div className="relative w-24 h-36 bg-pink-100 rounded-lg shadow-md flex items-center justify-center overflow-hidden">
-              <Heart className="w-8 h-8 text-pink-300" aria-hidden="true" />
-              {item.coverImageUrl && (
-                <Image
-                  src={item.coverImageUrl}
-                  alt=""
-                  width={96}
-                  height={144}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              )}
-            </div>
+            <BookCover
+              src={item.coverImageUrl}
+              alt={item.title}
+              width={96}
+              height={144}
+              className="w-24 h-36 rounded-lg shadow-md overflow-hidden"
+            />
             <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{item.title}</h3>
             <p className="text-xs text-gray-500 truncate">{item.author || 'Unknown'}</p>
           </Link>

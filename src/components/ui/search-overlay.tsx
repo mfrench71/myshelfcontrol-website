@@ -6,19 +6,18 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Search,
   X,
   ArrowLeft,
   BookOpen,
-  Book as BookIcon,
   Clock,
   Star,
   Library,
   CheckCircle,
   Calendar,
 } from 'lucide-react';
+import { BookCover } from '@/components/ui/book-cover';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks } from '@/lib/repositories/books';
@@ -396,21 +395,13 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     className="flex gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md active:scale-[0.99] transition-all animate-fade-in"
                     style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
                   >
-                    <div className="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-cover">
-                      {book.coverImageUrl ? (
-                        <Image
-                          src={book.coverImageUrl}
-                          alt=""
-                          width={48}
-                          height={64}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
-                          <BookIcon className="w-5 h-5 text-white/80" aria-hidden="true" />
-                        </div>
-                      )}
-                    </div>
+                    <BookCover
+                      src={book.coverImageUrl}
+                      alt={book.title || ''}
+                      width={48}
+                      height={64}
+                      className="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-cover"
+                    />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 truncate">
                         {highlightMatch(book.title || 'Untitled', query)}

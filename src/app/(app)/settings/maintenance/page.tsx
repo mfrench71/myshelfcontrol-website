@@ -7,7 +7,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   RefreshCw,
   Calculator,
@@ -25,6 +24,7 @@ import {
   Calendar,
   Barcode,
 } from 'lucide-react';
+import { BookCover } from '@/components/ui/book-cover';
 import { ref, listAll, deleteObject, getMetadata, StorageReference, FullMetadata } from 'firebase/storage';
 import { storage } from '@/lib/firebase/client';
 import { useAuthContext } from '@/components/providers/auth-provider';
@@ -369,21 +369,13 @@ export default function MaintenanceSettingsPage() {
                         key={book.id}
                         className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200"
                       >
-                        <div className="w-8 h-12 flex-shrink-0 bg-gray-200 rounded overflow-hidden">
-                          {book.coverImageUrl ? (
-                            <Image
-                              src={book.coverImageUrl}
-                              alt=""
-                              width={32}
-                              height={48}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              <BookOpen className="w-4 h-4" aria-hidden="true" />
-                            </div>
-                          )}
-                        </div>
+                        <BookCover
+                          src={book.coverImageUrl}
+                          alt={book.title || ''}
+                          width={32}
+                          height={48}
+                          className="w-8 h-12 flex-shrink-0 rounded overflow-hidden"
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900 truncate">
                             {book.title || 'Untitled'}

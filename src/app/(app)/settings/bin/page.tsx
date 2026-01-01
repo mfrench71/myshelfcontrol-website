@@ -6,8 +6,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
-import { Trash2, BookOpen, RotateCcw, AlertCircle, Clock } from 'lucide-react';
+import { Trash2, RotateCcw, AlertCircle, Clock } from 'lucide-react';
+import { BookCover } from '@/components/ui/book-cover';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBinBooks, restoreBook, deleteBook } from '@/lib/repositories/books';
 import { useToast } from '@/components/ui/toast';
@@ -198,21 +198,13 @@ export default function BinPage() {
                   className="flex gap-4 p-4 bg-white rounded-xl border border-gray-200"
                 >
                   {/* Cover */}
-                  <div className="w-16 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-cover">
-                    {book.coverImageUrl ? (
-                      <Image
-                        src={book.coverImageUrl}
-                        alt=""
-                        width={64}
-                        height={96}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
-                        <BookOpen className="w-6 h-6 text-white/80" aria-hidden="true" />
-                      </div>
-                    )}
-                  </div>
+                  <BookCover
+                    src={book.coverImageUrl}
+                    alt={book.title}
+                    width={64}
+                    height={96}
+                    className="w-16 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-cover"
+                  />
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">

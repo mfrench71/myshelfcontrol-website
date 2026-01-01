@@ -169,7 +169,7 @@ function ChangePasswordModal({
       aria-label="Change password"
     >
       <div
-        className="bottom-sheet-content bg-white w-full md:max-w-lg p-4 sm:p-6 md:mx-auto"
+        className="bottom-sheet-content bg-white w-full md:max-w-xl p-4 sm:p-6 md:mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bottom-sheet-handle md:hidden" />

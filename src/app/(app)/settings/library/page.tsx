@@ -4,9 +4,8 @@
  */
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
-import Link from 'next/link';
 import {
   Tag,
   Layers,
@@ -714,21 +713,14 @@ export default function LibrarySettingsPage() {
 
   if (authLoading) {
     return (
-      <>
-        <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
-          <div className="max-w-6xl mx-auto px-4 py-2 min-h-[52px]">
-            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
-          </div>
+      <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
+        <div className="h-8 bg-gray-200 rounded w-24 mb-6 animate-pulse" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 bg-gray-200 rounded-xl animate-pulse" />
+          ))}
         </div>
-        <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
-          <div className="h-8 bg-gray-200 rounded w-24 mb-6 animate-pulse" />
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-xl animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </>
+      </div>
     );
   }
 
@@ -737,27 +729,70 @@ export default function LibrarySettingsPage() {
 
   return (
     <>
-      {/* Sub-navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3 min-h-[52px]">
-          <nav aria-label="Breadcrumb">
-            <ol className="flex items-center text-sm">
-              <li>
-                <Link href="/settings" className="text-gray-500 hover:text-gray-700">
-                  Settings
-                </Link>
-              </li>
-              <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium">Library</li>
-            </ol>
-          </nav>
-        </div>
-      </div>
+      <div id="library-content" className="max-w-6xl mx-auto px-4 py-6">
+        <div className="lg:flex lg:gap-8">
+          {/* Sidebar Navigation (Desktop Only) */}
+          <aside className="hidden lg:block w-48 flex-shrink-0">
+            <nav className="sticky top-36" aria-label="In this section">
+              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">In this section</h2>
+              <ul className="space-y-1">
+                <li>
+                  <a
+                    href="#genres"
+                    className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
+                  >
+                    Genres
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#series"
+                    className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
+                  >
+                    Series
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#backup"
+                    className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
+                  >
+                    Backup & Restore
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </aside>
 
-      <div id="library-content" className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Library</h1>
+          {/* Main Content */}
+          <div className="flex-1 min-w-0 max-w-2xl mx-auto lg:mx-0">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Library</h1>
 
-        <div className="space-y-6">
+            {/* Mobile Section Navigation (Pills) */}
+            <nav className="lg:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
+              <div className="flex gap-2">
+                <a
+                  href="#genres"
+                  className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+                >
+                  Genres
+                </a>
+                <a
+                  href="#series"
+                  className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+                >
+                  Series
+                </a>
+                <a
+                  href="#backup"
+                  className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+                >
+                  Backup
+                </a>
+              </div>
+            </nav>
+
+            <div className="space-y-6">
           {/* Genres Section */}
           <section id="genres" className="scroll-mt-36">
             <div className="flex items-center justify-between mb-4">
@@ -1086,6 +1121,8 @@ export default function LibrarySettingsPage() {
               )}
             </div>
           </section>
+            </div>
+          </div>
         </div>
       </div>
 

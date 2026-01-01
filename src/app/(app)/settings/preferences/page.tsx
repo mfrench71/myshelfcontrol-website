@@ -26,7 +26,6 @@ import {
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
 import { BottomSheet } from '@/components/ui/modal';
-import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import {
   loadWidgetSettings,
   saveWidgetSettings,

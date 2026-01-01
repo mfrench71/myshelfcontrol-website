@@ -11,7 +11,6 @@ import {
   FilterBottomSheet,
   ActiveFilterChip,
   FilterSidebarSkeleton,
-  type SortOption,
   type BookCounts,
 } from '../filter-panel';
 import type { Genre, Series, BookFilters } from '@/lib/types';

@@ -135,8 +135,16 @@ export async function getRecentBooks(userId: string, count: number = 10): Promis
 export async function addBook(userId: string, bookData: BookFormData): Promise<string> {
   const booksRef = getBooksCollection(userId);
 
+  // Filter out undefined values (Firestore doesn't accept undefined)
+  const cleanedData: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(bookData)) {
+    if (value !== undefined) {
+      cleanedData[key] = value;
+    }
+  }
+
   const docRef = await addDoc(booksRef, {
-    ...bookData,
+    ...cleanedData,
     deletedAt: null,
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),

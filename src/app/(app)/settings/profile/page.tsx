@@ -4,7 +4,8 @@
  */
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -21,6 +22,9 @@ import {
   MailWarning,
   Send,
   Loader2,
+  Camera,
+  Upload,
+  X,
 } from 'lucide-react';
 import {
   EmailAuthProvider,
@@ -31,7 +35,14 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { useAuthContext } from '@/components/providers/auth-provider';
-import { checkPasswordStrength } from '@/lib/utils';
+import { useToast } from '@/components/ui/toast';
+import { checkPasswordStrength, getGravatarUrl } from '@/lib/utils';
+import {
+  getProfileData,
+  uploadProfilePhoto,
+  removeProfilePhoto,
+  type ProfileData,
+} from '@/lib/utils/profile-photo';
 
 /**
  * Delete all user data from Firestore
@@ -284,6 +295,180 @@ function ChangePasswordModal({
 }
 
 /**
+ * Photo upload modal
+ */
+function PhotoModal({
+  isOpen,
+  onClose,
+  userId,
+  currentPhotoUrl,
+  onPhotoChange,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+  currentPhotoUrl: string | null;
+  onPhotoChange: (url: string | null) => void;
+}) {
+  const { showToast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadProgress(0);
+    try {
+      const result = await uploadProfilePhoto(file, userId, (progress) => {
+        setUploadProgress(progress);
+      });
+      onPhotoChange(result.url);
+      showToast('Photo uploaded', { type: 'success' });
+      onClose();
+    } catch (err) {
+      console.error('Failed to upload photo:', err);
+      showToast('Failed to upload photo', { type: 'error' });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemove = async () => {
+    setRemoving(true);
+    try {
+      await removeProfilePhoto(userId);
+      onPhotoChange(null);
+      showToast('Photo removed', { type: 'success' });
+      onClose();
+    } catch (err) {
+      console.error('Failed to remove photo:', err);
+      showToast('Failed to remove photo', { type: 'error' });
+    } finally {
+      setRemoving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bottom-sheet-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Update profile photo"
+    >
+      <div
+        className="bottom-sheet-content bg-white w-full md:max-w-sm p-6 md:mx-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="bottom-sheet-handle" />
+
+        <h3 className="text-lg font-semibold mb-4">Profile Photo</h3>
+
+        {/* Current photo preview */}
+        {currentPhotoUrl && (
+          <div className="flex justify-center mb-4">
+            <Image
+              src={currentPhotoUrl}
+              alt="Current profile photo"
+              width={128}
+              height={128}
+              className="w-32 h-32 rounded-full object-cover"
+            />
+          </div>
+        )}
+
+        {/* Upload progress */}
+        {uploading && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm text-gray-600">Uploading...</span>
+              <span className="text-sm text-gray-600">{uploadProgress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-primary h-2 rounded-full transition-all"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {/* Upload button */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || removing}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-5 h-5" aria-hidden="true" />
+                <span>Upload Photo</span>
+              </>
+            )}
+          </button>
+
+          {/* Remove button (if photo exists) */}
+          {currentPhotoUrl && (
+            <button
+              onClick={handleRemove}
+              disabled={uploading || removing}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-red-300 text-red-600 hover:bg-red-50 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+            >
+              {removing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                  <span>Removing...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-5 h-5" aria-hidden="true" />
+                  <span>Remove Photo</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Cancel button */}
+          <button
+            onClick={onClose}
+            disabled={uploading || removing}
+            className="w-full px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+          >
+            Cancel
+          </button>
+        </div>
+
+        <p className="text-xs text-gray-500 text-center mt-4">
+          JPG, PNG or WebP. Max 2MB. Photos are cropped to a square.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Delete account modal
  */
 function DeleteAccountModal({
@@ -422,12 +607,43 @@ export default function ProfileSettingsPage() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [sendingVerification, setSendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
 
   // Lock body scroll when any modal is open
-  useBodyScrollLock(showPasswordModal || showDeleteModal);
+  useBodyScrollLock(showPasswordModal || showDeleteModal || showPhotoModal);
+
+  // Load profile data
+  useEffect(() => {
+    if (!user) return;
+
+    getProfileData(user.uid).then(setProfileData).catch(console.error);
+  }, [user]);
+
+  // Check for Gravatar
+  useEffect(() => {
+    if (!user?.email || profileData?.photoUrl) {
+      setGravatarUrl(null);
+      return;
+    }
+
+    const email = user.email.toLowerCase().trim();
+    const url = getGravatarUrl(email, 160);
+    const img = new window.Image();
+
+    img.onload = () => setGravatarUrl(url);
+    img.onerror = () => setGravatarUrl(null);
+    img.src = url;
+  }, [user?.email, profileData?.photoUrl]);
+
+  // Handle photo change
+  const handlePhotoChange = useCallback((url: string | null) => {
+    setProfileData((prev) => ({ ...prev, photoUrl: url }));
+  }, []);
 
   /**
    * Resend email verification
@@ -522,17 +738,42 @@ export default function ProfileSettingsPage() {
         {user && (
           <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
             <div className="flex items-center gap-4">
-              <div
-                id="profile-avatar"
-                className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold"
-              >
-                {user.email?.[0].toUpperCase() || 'U'}
+              {/* Avatar with edit button */}
+              <div className="relative">
+                {profileData?.photoUrl ? (
+                  <Image
+                    src={profileData.photoUrl}
+                    alt="Profile photo"
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                ) : gravatarUrl ? (
+                  <Image
+                    src={gravatarUrl}
+                    alt="Profile photo"
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                    {user.email?.[0].toUpperCase() || 'U'}
+                  </div>
+                )}
+                <button
+                  onClick={() => setShowPhotoModal(true)}
+                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+                  aria-label="Edit profile photo"
+                >
+                  <Camera className="w-4 h-4 text-gray-600" aria-hidden="true" />
+                </button>
               </div>
               <div>
-                <p id="profile-email" className="text-gray-900 font-medium">{user.email}</p>
+                <p className="text-gray-900 font-medium">{user.email}</p>
                 <p className="text-gray-500 text-sm">
                   Member since{' '}
-                  <span id="profile-created">
+                  <span>
                     {user.metadata.creationTime
                       ? new Date(user.metadata.creationTime).toLocaleDateString('en-GB', {
                           month: 'short',
@@ -678,6 +919,16 @@ export default function ProfileSettingsPage() {
         onConfirm={handleDeleteAccount}
         loading={deleting}
       />
+
+      {user && (
+        <PhotoModal
+          isOpen={showPhotoModal}
+          onClose={() => setShowPhotoModal(false)}
+          userId={user.uid}
+          currentPhotoUrl={profileData?.photoUrl || null}
+          onPhotoChange={handlePhotoChange}
+        />
+      )}
     </>
   );
 }

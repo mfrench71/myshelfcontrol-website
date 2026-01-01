@@ -306,27 +306,32 @@ export default function EditBookPage({ params }: PageProps) {
   // Handle started date change
   const handleStartedDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    const newTimestamp = value ? new Date(value).getTime() : null;
     setReadingDateError(null);
 
     setReads((prev) => {
-      const newReads = [...prev];
-      if (newReads.length === 0) {
-        if (value) {
-          newReads.push({ startedAt: new Date(value).getTime(), finishedAt: null });
-        }
-      } else {
-        const lastRead = { ...newReads[newReads.length - 1] };
-        lastRead.startedAt = value ? new Date(value).getTime() : null;
-
-        // Validate: finished can't be before started
-        const finishedTime = typeof lastRead.finishedAt === 'number' ? lastRead.finishedAt : null;
-        const startedTime = typeof lastRead.startedAt === 'number' ? lastRead.startedAt : null;
-        if (finishedTime && startedTime && finishedTime < startedTime) {
-          setReadingDateError('Finished date cannot be before started date');
-        }
-
-        newReads[newReads.length - 1] = lastRead;
+      // Check if value actually changed
+      if (prev.length === 0) {
+        if (!value) return prev; // No change - was empty, still empty
+        return [{ startedAt: newTimestamp, finishedAt: null }];
       }
+
+      const lastRead = prev[prev.length - 1];
+      const currentTimestamp = typeof lastRead.startedAt === 'number' ? lastRead.startedAt : null;
+
+      // Compare timestamps (both null or same value means no change)
+      if (currentTimestamp === newTimestamp) return prev;
+
+      const updatedRead = { ...lastRead, startedAt: newTimestamp };
+
+      // Validate: finished can't be before started
+      const finishedTime = typeof updatedRead.finishedAt === 'number' ? updatedRead.finishedAt : null;
+      if (finishedTime && newTimestamp && finishedTime < newTimestamp) {
+        setReadingDateError('Finished date cannot be before started date');
+      }
+
+      const newReads = [...prev];
+      newReads[newReads.length - 1] = updatedRead;
       return newReads;
     });
   }, []);
@@ -334,11 +339,11 @@ export default function EditBookPage({ params }: PageProps) {
   // Handle finished date change
   const handleFinishedDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    const newTimestamp = value ? new Date(value).getTime() : null;
     setReadingDateError(null);
 
     setReads((prev) => {
-      const newReads = [...prev];
-      if (newReads.length === 0) {
+      if (prev.length === 0) {
         // Can't set finished without started
         if (value) {
           setReadingDateError('Please set a start date first');
@@ -346,7 +351,11 @@ export default function EditBookPage({ params }: PageProps) {
         return prev;
       }
 
-      const lastRead = { ...newReads[newReads.length - 1] };
+      const lastRead = prev[prev.length - 1];
+      const currentTimestamp = typeof lastRead.finishedAt === 'number' ? lastRead.finishedAt : null;
+
+      // Check if value actually changed
+      if (currentTimestamp === newTimestamp) return prev;
 
       // Validate: need started date first
       if (value && !lastRead.startedAt) {
@@ -354,16 +363,16 @@ export default function EditBookPage({ params }: PageProps) {
         return prev;
       }
 
-      lastRead.finishedAt = value ? new Date(value).getTime() : null;
+      const updatedRead = { ...lastRead, finishedAt: newTimestamp };
 
       // Validate: finished can't be before started
-      const finishedTime = typeof lastRead.finishedAt === 'number' ? lastRead.finishedAt : null;
-      const startedTime = typeof lastRead.startedAt === 'number' ? lastRead.startedAt : null;
-      if (finishedTime && startedTime && finishedTime < startedTime) {
+      const startedTime = typeof updatedRead.startedAt === 'number' ? updatedRead.startedAt : null;
+      if (newTimestamp && startedTime && newTimestamp < startedTime) {
         setReadingDateError('Finished date cannot be before started date');
       }
 
-      newReads[newReads.length - 1] = lastRead;
+      const newReads = [...prev];
+      newReads[newReads.length - 1] = updatedRead;
       return newReads;
     });
   }, []);
@@ -803,7 +812,7 @@ export default function EditBookPage({ params }: PageProps) {
           {/* Reading Dates */}
           <div>
             <span className="block font-semibold text-gray-700 mb-2">Reading Dates</span>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="started-date" className="block text-sm text-gray-500 mb-1">
                   Started

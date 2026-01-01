@@ -1084,7 +1084,7 @@ export default function AddBookPage() {
               {/* Reading Dates */}
               <div>
                 <label className="block font-semibold text-gray-700 mb-2">Reading Dates</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="startedAt" className="block text-sm text-gray-600 mb-1">
                       Started

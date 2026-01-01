@@ -6,9 +6,9 @@
 'use client';
 
 import { useState, useId, useRef, useEffect } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import type { Genre, Series, BookFilters } from '@/lib/types';
-import { useBodyScrollLock } from '@/lib/hooks/use-body-scroll-lock';
+import { BottomSheet } from '@/components/ui/modal';
 
 export type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc' | 'seriesPosition-asc';
 
@@ -576,9 +576,6 @@ export function FilterBottomSheet({
     !!(filters.seriesIds && filters.seriesIds.length > 0)
   );
 
-  // Lock body scroll when filter sheet is open
-  useBodyScrollLock(isOpen);
-
   const handleStatusChange = (status: string, checked: boolean) => {
     const currentStatuses = filters.statuses || [];
     const newStatuses = checked
@@ -629,41 +626,23 @@ export function FilterBottomSheet({
     });
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 bg-black/50 z-50 md:hidden"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="filter-sheet-title"
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Filters"
+      swipeToDismiss={true}
+      className="md:hidden"
     >
-      <div
-        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] flex flex-col animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Handle */}
-        <div className="flex justify-center py-3">
-          <div className="w-10 h-1 bg-gray-300 rounded-full" />
-        </div>
+      {/* Header */}
+      <div className="px-4 pb-3 border-b border-gray-200">
+        <h2 id="filter-sheet-title" className="text-lg font-semibold">
+          Filters
+        </h2>
+      </div>
 
-        {/* Header */}
-        <div className="px-4 pb-3 border-b border-gray-200 flex items-center justify-between">
-          <h2 id="filter-sheet-title" className="text-lg font-semibold">
-            Filters
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
-            aria-label="Close filters"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Content */}
+      <div className="p-4 space-y-4">
           {/* Status */}
           <div>
             <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
@@ -832,17 +811,16 @@ export function FilterBottomSheet({
           </button>
         </div>
 
-        {/* Apply Button */}
-        <div className="p-4 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors"
-          >
-            Apply Filters
-          </button>
-        </div>
+      {/* Apply Button */}
+      <div className="p-4 border-t border-gray-200">
+        <button
+          onClick={onClose}
+          className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors"
+        >
+          Apply Filters
+        </button>
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 

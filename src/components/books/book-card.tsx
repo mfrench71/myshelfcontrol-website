@@ -270,15 +270,15 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
  */
 export function BookCardSkeleton() {
   return (
-    <div className="flex gap-4 p-3 bg-white border border-gray-200 rounded-xl animate-pulse">
+    <div className="skeleton-card">
       {/* Cover skeleton */}
-      <div className="flex-shrink-0 w-16 h-24 rounded-lg bg-gray-200" />
+      <div className="skeleton skeleton-cover" />
 
       {/* Content skeleton */}
-      <div className="flex-1 min-w-0 py-1">
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-3 bg-gray-200 rounded w-1/2 mt-2" />
-        <div className="h-3 bg-gray-200 rounded w-1/4 mt-2" />
+      <div className="flex-1 min-w-0 py-1 space-y-2">
+        <div className="skeleton h-4 w-3/4" />
+        <div className="skeleton h-3 w-1/2" />
+        <div className="skeleton h-3 w-1/4" />
       </div>
     </div>
   );

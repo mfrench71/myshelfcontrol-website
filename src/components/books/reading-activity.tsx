@@ -611,7 +611,7 @@ export function NotesSection({
         <span className="font-semibold text-gray-700 flex items-center gap-2 text-base">
           Notes
           {notes && (
-            <MessageSquare className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" title="Has notes" />
+            <MessageSquare className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" />
           )}
         </span>
         <ChevronDown

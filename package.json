@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:unused": "knip",
+    "check:circular": "madge --circular --extensions ts,tsx src/",
+    "analyze": "ANALYZE=true next build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -24,6 +27,7 @@
     "zod": "^4.3.2"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.1",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
@@ -38,7 +42,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "jsdom": "^27.4.0",
-    "prettier": "^3.7.4",
+    "knip": "^5.79.0",
+    "madge": "^8.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.16"

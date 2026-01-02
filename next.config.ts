@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 // Generate build date version (DD.MM.YYYY format - UK style)
 const buildDate = new Date();
@@ -34,4 +39,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

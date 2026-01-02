@@ -14,6 +14,16 @@ const mockCollection = vi.fn();
 const mockDoc = vi.fn();
 const mockQuery = vi.fn();
 const mockOrderBy = vi.fn();
+const mockWhere = vi.fn();
+const mockBatchUpdate = vi.fn();
+const mockBatchDelete = vi.fn();
+const mockBatchCommit = vi.fn();
+const mockWriteBatch = vi.fn(() => ({
+  update: mockBatchUpdate,
+  delete: mockBatchDelete,
+  commit: mockBatchCommit,
+}));
+const mockArrayRemove = vi.fn((value) => ({ __arrayRemove: value }));
 
 vi.mock('@/lib/firebase/client', () => ({
   db: {},
@@ -29,6 +39,9 @@ vi.mock('firebase/firestore', () => ({
   deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   orderBy: (...args: unknown[]) => mockOrderBy(...args),
+  where: (...args: unknown[]) => mockWhere(...args),
+  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
+  arrayRemove: (...args: unknown[]) => mockArrayRemove(...args),
   Timestamp: {
     now: () => ({ seconds: 1234567890, nanoseconds: 0 }),
   },
@@ -176,10 +189,36 @@ describe('genres repository', () => {
   });
 
   describe('deleteGenre', () => {
-    it('deletes genre', async () => {
+    it('deletes genre and removes it from books', async () => {
+      // Mock books that have this genre
+      const mockBookDocs = [
+        { id: 'book-1', ref: 'bookRef1', data: () => ({ genres: ['genre-1', 'genre-2'] }) },
+        { id: 'book-2', ref: 'bookRef2', data: () => ({ genres: ['genre-1'] }) },
+      ];
+      mockGetDocs.mockResolvedValue({ docs: mockBookDocs });
+
       await deleteGenre('user-123', 'genre-1');
 
-      expect(mockDeleteDoc).toHaveBeenCalledWith('docRef');
+      // Should query for books with this genre
+      expect(mockWhere).toHaveBeenCalledWith('genres', 'array-contains', 'genre-1');
+      // Should create a batch and commit
+      expect(mockWriteBatch).toHaveBeenCalled();
+      expect(mockBatchCommit).toHaveBeenCalled();
+      // Should update each book to remove the genre
+      expect(mockBatchUpdate).toHaveBeenCalledTimes(2);
+      // Should delete the genre
+      expect(mockBatchDelete).toHaveBeenCalled();
+    });
+
+    it('deletes genre when no books reference it', async () => {
+      mockGetDocs.mockResolvedValue({ docs: [] });
+
+      await deleteGenre('user-123', 'genre-1');
+
+      expect(mockWriteBatch).toHaveBeenCalled();
+      expect(mockBatchUpdate).not.toHaveBeenCalled();
+      expect(mockBatchDelete).toHaveBeenCalled();
+      expect(mockBatchCommit).toHaveBeenCalled();
     });
   });
 

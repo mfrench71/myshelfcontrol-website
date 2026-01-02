@@ -10,9 +10,10 @@ import {
   getDoc,
   addDoc,
   updateDoc,
-  deleteDoc,
   query,
   orderBy,
+  where,
+  writeBatch,
   Timestamp,
   type DocumentData,
   type QueryDocumentSnapshot,
@@ -113,11 +114,30 @@ export async function updateSeries(
 }
 
 /**
- * Delete a series
+ * Delete a series and remove it from all books that reference it
  */
 export async function deleteSeries(userId: string, seriesId: string): Promise<void> {
+  const batch = writeBatch(db);
+
+  // Find all books that have this series
+  const booksRef = collection(db, 'users', userId, 'books');
+  const booksQuery = query(booksRef, where('seriesId', '==', seriesId));
+  const booksSnapshot = await getDocs(booksQuery);
+
+  // Remove the series reference from each book
+  booksSnapshot.docs.forEach((bookDoc) => {
+    batch.update(bookDoc.ref, {
+      seriesId: null,
+      seriesPosition: null,
+      updatedAt: Timestamp.now(),
+    });
+  });
+
+  // Delete the series
   const seriesRef = doc(db, 'users', userId, 'series', seriesId);
-  await deleteDoc(seriesRef);
+  batch.delete(seriesRef);
+
+  await batch.commit();
 }
 
 /**

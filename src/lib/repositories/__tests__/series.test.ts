@@ -14,6 +14,15 @@ const mockCollection = vi.fn();
 const mockDoc = vi.fn();
 const mockQuery = vi.fn();
 const mockOrderBy = vi.fn();
+const mockWhere = vi.fn();
+const mockBatchUpdate = vi.fn();
+const mockBatchDelete = vi.fn();
+const mockBatchCommit = vi.fn();
+const mockWriteBatch = vi.fn(() => ({
+  update: mockBatchUpdate,
+  delete: mockBatchDelete,
+  commit: mockBatchCommit,
+}));
 
 vi.mock('@/lib/firebase/client', () => ({
   db: {},
@@ -29,6 +38,8 @@ vi.mock('firebase/firestore', () => ({
   deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
   query: (...args: unknown[]) => mockQuery(...args),
   orderBy: (...args: unknown[]) => mockOrderBy(...args),
+  where: (...args: unknown[]) => mockWhere(...args),
+  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
   Timestamp: {
     now: () => ({ seconds: 1234567890, nanoseconds: 0 }),
   },
@@ -205,10 +216,36 @@ describe('series repository', () => {
   });
 
   describe('deleteSeries', () => {
-    it('deletes series', async () => {
+    it('deletes series and removes it from books', async () => {
+      // Mock books that have this series
+      const mockBookDocs = [
+        { id: 'book-1', ref: 'bookRef1', data: () => ({ seriesId: 'series-1', seriesPosition: 1 }) },
+        { id: 'book-2', ref: 'bookRef2', data: () => ({ seriesId: 'series-1', seriesPosition: 2 }) },
+      ];
+      mockGetDocs.mockResolvedValue({ docs: mockBookDocs });
+
       await deleteSeries('user-123', 'series-1');
 
-      expect(mockDeleteDoc).toHaveBeenCalledWith('docRef');
+      // Should query for books with this series
+      expect(mockWhere).toHaveBeenCalledWith('seriesId', '==', 'series-1');
+      // Should create a batch and commit
+      expect(mockWriteBatch).toHaveBeenCalled();
+      expect(mockBatchCommit).toHaveBeenCalled();
+      // Should update each book to remove the series
+      expect(mockBatchUpdate).toHaveBeenCalledTimes(2);
+      // Should delete the series
+      expect(mockBatchDelete).toHaveBeenCalled();
+    });
+
+    it('deletes series when no books reference it', async () => {
+      mockGetDocs.mockResolvedValue({ docs: [] });
+
+      await deleteSeries('user-123', 'series-1');
+
+      expect(mockWriteBatch).toHaveBeenCalled();
+      expect(mockBatchUpdate).not.toHaveBeenCalled();
+      expect(mockBatchDelete).toHaveBeenCalled();
+      expect(mockBatchCommit).toHaveBeenCalled();
     });
   });
 

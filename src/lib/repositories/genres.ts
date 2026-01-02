@@ -10,9 +10,11 @@ import {
   getDoc,
   addDoc,
   updateDoc,
-  deleteDoc,
   query,
   orderBy,
+  where,
+  writeBatch,
+  arrayRemove,
   Timestamp,
   type DocumentData,
   type QueryDocumentSnapshot,
@@ -104,11 +106,29 @@ export async function updateGenre(
 }
 
 /**
- * Delete a genre
+ * Delete a genre and remove it from all books that reference it
  */
 export async function deleteGenre(userId: string, genreId: string): Promise<void> {
+  const batch = writeBatch(db);
+
+  // Find all books that have this genre
+  const booksRef = collection(db, 'users', userId, 'books');
+  const booksQuery = query(booksRef, where('genres', 'array-contains', genreId));
+  const booksSnapshot = await getDocs(booksQuery);
+
+  // Remove the genre from each book
+  booksSnapshot.docs.forEach((bookDoc) => {
+    batch.update(bookDoc.ref, {
+      genres: arrayRemove(genreId),
+      updatedAt: Timestamp.now(),
+    });
+  });
+
+  // Delete the genre
   const genreRef = doc(db, 'users', userId, 'genres', genreId);
-  await deleteDoc(genreRef);
+  batch.delete(genreRef);
+
+  await batch.commit();
 }
 
 /**

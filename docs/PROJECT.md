@@ -548,6 +548,8 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - [ ] Assign books to multiple lists
 - [ ] List CRUD (create, read, update, delete)
 - [ ] Drag and drop reordering within lists
+- [ ] Manual TBR priority sorting (drag-drop to reorder want-to-read)
+- [ ] Smart tags (auto-populate based on rules)
 
 ### Future Series Enhancements
 - [ ] Remove book from series (without deleting book) - button on view page
@@ -557,11 +559,19 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - [ ] Auto-populate totalBooks from external source
 - [ ] Series detail page with drag-drop reordering
 
+### Reading Progress Tracking
+- [ ] Track current page (add `currentPage` field to book schema)
+- [ ] Daily progress logging (page reached per day)
+- [ ] Visual progress bar on book cards
+- [ ] Reading calendar with book covers (GitHub-style heatmap)
+- [ ] Multi-device reading position sync
+
 ### Reading Timer & Sessions
 - [ ] Built-in reading timer with start/pause/stop
 - [ ] Log reading sessions with duration and pages read
 - [ ] Calculate reading speed (pages per minute/hour)
 - [ ] Estimate time to finish book based on pace
+- [ ] Audiobook hours:minutes tracking (separate from page count)
 
 ### Advanced Statistics
 - [ ] Visual reading stats dashboard
@@ -586,6 +596,8 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - [ ] Save favourite quotes manually
 - [ ] OCR quote capture (photograph text, transcribe)
 - [ ] Reading journal with progress update notes
+- [ ] Markdown formatting support in notes/reviews
+- [ ] Spoiler tags in reviews (hide/reveal sections)
 
 ### Library Health Dashboard
 - [ ] Books missing cover image
@@ -627,6 +639,12 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - [ ] Explicit reread tracking with dates
 - [ ] Reread count displayed on book card
 - [ ] Rereads count toward reading challenges
+
+### Book Metadata Enhancements
+- [ ] Purchase price tracking (what you paid)
+- [ ] Purchase date and location
+- [ ] Start/end page specification (for anthologies, partial reads)
+- [ ] Bluetooth barcode scanner support (bulk scanning)
 
 ### New Release Notifications
 - [ ] Follow authors from author page
@@ -1078,13 +1096,17 @@ StoryGraph implementation:
 ### Feature Inspiration Summary
 
 - **Reading Timer**: Track sessions, calculate reading speed, ambient sounds, reading speed prediction
+- **Reading Progress**: Daily page tracking, visual progress bars, reading calendar with covers, multi-device sync
 - **Mood Tracking**: Tag by mood, pacing, content warnings with severity levels, emotion journaling per session
 - **Gamification**: Streaks, badges, annual challenges, progress bars, Year in Review/Reading Wrapped
-- **Quote Capture**: OCR from photos, reading journal, highlight capture, Kindle sync
-- **Advanced Stats**: Year-over-year comparison, custom charts, reading speed trends, sub-ratings
-- **Privacy**: Per-book visibility, anonymous browsing mode, anonymous social profiles
+- **Quote Capture**: OCR from photos, reading journal, highlight capture, Kindle sync, markdown formatting
+- **Advanced Stats**: Year-over-year comparison, custom charts, reading speed trends, sub-ratings, ratings histogram
+- **Privacy**: Per-book visibility, anonymous browsing mode, anonymous social profiles, spoiler tags in reviews
 - **Social**: Buddy reads, readalongs, direct messaging, per-book discussion forums, match percentage
 - **Book Management**: Paused status, DNF with page tracking, edition handling, reread tracking, character tracker
+- **TBR Management**: Manual drag-drop sorting, smart tags, priority queue
+- **Book Metadata**: Purchase price/date, start/end pages, Bluetooth bulk scanning
+- **Wishlist**: Price drop alerts, library availability (Libby/OverDrive)
 - **Notifications**: New release alerts for followed authors, wishlist release notifications
 - **AI Features**: Book chat assistant, summaries without spoilers (emerging 2025 trend)
 
@@ -1102,6 +1124,11 @@ StoryGraph implementation:
 - [Goodreads Help](https://help.goodreads.com/)
 - [Book Riot Comparison](https://bookriot.com/best-book-tracking-app/)
 - [BookTriggerWarnings](https://booktriggerwarnings.com/)
+- [Bookmory](https://play.google.com/store/apps/details?id=net.tonysoft.bookmory)
+- [BookBuddy](https://apps.apple.com/us/app/bookbuddy-book-tracker/id395150347)
+- [Libby/OverDrive](https://www.overdrive.com/apps/libby)
+- [Jelu (self-hosted)](https://github.com/bayang/jelu)
+- [Keepa Price Tracker](https://keepa.com/)
 
 ---
 
@@ -1240,6 +1267,7 @@ Based on competitor analysis (Goodreads, StoryGraph, BookBuddy):
 8. **Custom Tags** - Flexible organisation beyond priority
 9. **Library Availability** - Check Libby/OverDrive availability
 10. **Shareable Wishlists** - Public link for gift coordination
+11. **Price Drop Alerts** - Notify when wishlisted books go on sale (integration with price trackers)
 
 ---
 
@@ -1690,4 +1718,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-02* (Book notes architecture decision, reading activity UI improvements)
+*Last updated: 2026-01-02* (Competitor analysis: added reading progress tracking, TBR management, book metadata enhancements, spoiler tags, price alerts to roadmap)

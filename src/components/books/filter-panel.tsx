@@ -386,7 +386,7 @@ export function FilterSidebar({
       {/* Status */}
       <div>
         <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
-        <div className="space-y-3">
+        <div className="space-y-3 pr-4">
           {STATUS_OPTIONS.map((option) => {
             const count = bookCounts?.statuses?.[option.value as 'reading' | 'finished'] ?? 0;
             return (
@@ -460,7 +460,7 @@ export function FilterSidebar({
       {genres.length > 0 && (
         <div>
           <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
-          <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-2 pb-4">
+          <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
             {genres.map((genre) => {
             const count = bookCounts?.genres?.[genre.id] ?? 0;
             const isSelected = filters.genreIds?.includes(genre.id) || false;
@@ -506,7 +506,7 @@ export function FilterSidebar({
           {showMoreFilters && (
             <div>
               <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-              <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-2 pb-4">
+              <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
                 {series.map((s) => {
                   const count = bookCounts?.series?.[s.id] ?? 0;
                   const isSelected = filters.seriesIds?.includes(s.id) || false;
@@ -695,7 +695,7 @@ export function FilterBottomSheet({
           {/* Status */}
           <div>
             <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
-            <div className="space-y-3">
+            <div className="space-y-3 pr-4">
               {STATUS_OPTIONS.map((option) => {
                 const count = bookCounts?.statuses?.[option.value as 'reading' | 'finished'] ?? 0;
                 return (
@@ -772,7 +772,7 @@ export function FilterBottomSheet({
           {genres.length > 0 && (
             <div>
               <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
-              <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-3 pb-4">
+              <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
                 {genres.map((genre) => {
                   const count = bookCounts?.genres?.[genre.id] ?? 0;
                   const isSelected = filters.genreIds?.includes(genre.id) || false;
@@ -818,7 +818,7 @@ export function FilterBottomSheet({
               {showMoreFilters && (
                 <div>
                   <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-                  <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-3 pb-4">
+                  <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
                     {series.map((s) => {
                       const count = bookCounts?.series?.[s.id] ?? 0;
                       const isSelected = filters.seriesIds?.includes(s.id) || false;

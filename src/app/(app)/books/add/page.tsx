@@ -804,7 +804,7 @@ export default function AddBookPage() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Search Section */}
         {!showForm && (
-          <div id="search-section">
+          <div id="search-section" className="animate-fade-in">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Find Your Book</h2>
 
             {/* Search Input */}
@@ -986,7 +986,7 @@ export default function AddBookPage() {
 
         {/* Book Form Section */}
         {showForm && (
-          <div id="form-section">
+          <div id="form-section" className="animate-fade-in">
             {/* Data Source Header */}
             <div className="flex items-center justify-between mb-4">
               <button

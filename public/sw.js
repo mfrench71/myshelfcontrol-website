@@ -1,5 +1,5 @@
 // Service Worker for MyShelfControl PWA
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const STATIC_CACHE = `myshelfcontrol-static-${CACHE_VERSION}`;
 const IMAGE_CACHE = `myshelfcontrol-images-${CACHE_VERSION}`;
 const API_CACHE = `myshelfcontrol-api-${CACHE_VERSION}`;
@@ -12,6 +12,7 @@ const APP_SHELL = [
   '/books',
   '/wishlist',
   '/settings',
+  '/settings/profile',
   '/settings/library',
   '/settings/preferences',
   '/settings/maintenance',

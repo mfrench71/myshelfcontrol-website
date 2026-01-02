@@ -121,6 +121,11 @@ function ChangePasswordModal({
       return;
     }
 
+    if (newPassword === currentPassword) {
+      setError('New password must be different from current password');
+      return;
+    }
+
     const user = auth.currentUser;
     if (!user || !user.email) {
       setError('Not authenticated');
@@ -247,6 +252,10 @@ function ChangePasswordModal({
                   1 number
                 </span>
               </div>
+              {/* Same password validation */}
+              {newPassword && currentPassword && newPassword === currentPassword && (
+                <p className="mt-2 text-sm text-red-500">New password must be different from current password</p>
+              )}
             </div>
 
             <div>
@@ -262,6 +271,10 @@ function ChangePasswordModal({
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               />
+              {/* Inline validation feedback */}
+              {confirmPassword && newPassword && confirmPassword !== newPassword && (
+                <p className="mt-1 text-sm text-red-500">Passwords do not match</p>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -275,7 +288,15 @@ function ChangePasswordModal({
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={
+                  loading ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !confirmPassword ||
+                  newPassword !== confirmPassword ||
+                  newPassword.length < 8 ||
+                  newPassword === currentPassword
+                }
                 className="flex-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark min-h-[44px] whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Updating...' : 'Update Password'}

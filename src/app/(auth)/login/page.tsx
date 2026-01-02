@@ -36,7 +36,13 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  // Track form field values for disabled state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
 
   const loginFormRef = useRef<HTMLFormElement>(null);
   const registerFormRef = useRef<HTMLFormElement>(null);
@@ -149,7 +155,11 @@ function LoginForm() {
     setError(null);
     setFieldErrors({});
     setShowPassword(false);
+    setLoginEmail('');
+    setLoginPassword('');
+    setRegisterEmail('');
     setRegisterPassword('');
+    setRegisterConfirmPassword('');
     loginFormRef.current?.reset();
     registerFormRef.current?.reset();
   };
@@ -215,6 +225,8 @@ function LoginForm() {
                 type="email"
                 autoComplete="email"
                 disabled={loading}
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
                 className={getInputClass(!!fieldErrors.email)}
                 placeholder="you@example.com"
               />
@@ -236,6 +248,8 @@ function LoginForm() {
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 disabled={loading}
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
                 className={getPasswordInputClass(!!fieldErrors.password)}
                 placeholder="••••••••"
               />
@@ -257,7 +271,7 @@ function LoginForm() {
           <button
             id="login-btn"
             type="submit"
-            disabled={loading}
+            disabled={loading || !loginEmail.trim() || !loginPassword}
             className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed btn-press"
           >
             {loading ? (
@@ -291,6 +305,8 @@ function LoginForm() {
                 type="email"
                 autoComplete="email"
                 disabled={loading}
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
                 className={getInputClass(!!fieldErrors.email)}
                 placeholder="you@example.com"
               />
@@ -378,6 +394,8 @@ function LoginForm() {
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 disabled={loading}
+                value={registerConfirmPassword}
+                onChange={(e) => setRegisterConfirmPassword(e.target.value)}
                 className={getInputClass(!!fieldErrors.confirmPassword)}
                 placeholder="••••••••"
               />
@@ -385,12 +403,23 @@ function LoginForm() {
             {fieldErrors.confirmPassword && (
               <p className="mt-1 text-sm text-red-500">{fieldErrors.confirmPassword}</p>
             )}
+            {/* Inline validation feedback */}
+            {registerConfirmPassword && registerPassword && registerConfirmPassword !== registerPassword && (
+              <p className="mt-1 text-sm text-red-500">Passwords do not match</p>
+            )}
           </div>
 
           <button
             id="register-btn"
             type="submit"
-            disabled={loading}
+            disabled={
+              loading ||
+              !registerEmail.trim() ||
+              !registerPassword ||
+              !registerConfirmPassword ||
+              registerPassword.length < 8 ||
+              registerPassword !== registerConfirmPassword
+            }
             className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed btn-press"
           >
             {loading ? (

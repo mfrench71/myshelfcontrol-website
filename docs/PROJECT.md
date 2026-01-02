@@ -1474,6 +1474,30 @@ See `/Users/matthewfrench/.claude/plans/sleepy-rolling-haven.md` for detailed im
 | **CSRF protection** | Token-based for mutations | ✓ Active |
 | **Rate limiting** | Firebase security rules throttling | ✓ Active |
 
+#### Login Methods
+
+**Current:**
+| Method | Status | Notes |
+|--------|--------|-------|
+| **Email/Password** | ✓ Active | Primary login method |
+| **Email Verification** | ✓ Active | Optional, prompted after registration |
+
+**Future Options (Firebase Auth supported):**
+| Method | Priority | Notes |
+|--------|----------|-------|
+| **Google Sign-In** | High | Most common, reduces friction |
+| **Apple Sign-In** | High | Required for iOS App Store |
+| **Magic Link (Email)** | Medium | Passwordless option |
+| **GitHub** | Low | Developer-focused audience |
+| **Twitter/X** | Low | Social sharing tie-in |
+| **Facebook** | Low | Privacy concerns, declining usage |
+
+**Implementation Notes:**
+- Social logins require additional Firebase console configuration
+- Apple Sign-In requires Apple Developer account
+- All methods use same Firebase UID, allowing account linking
+- Consider "Link accounts" feature for users who sign up with different methods
+
 ### Data Protection
 
 | Measure | Implementation | Status |

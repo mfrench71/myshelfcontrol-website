@@ -77,6 +77,15 @@ export function SettingsHubCard({
   );
 }
 
+type SubLink = {
+  label: string;
+  href: string;
+};
+
+type SettingsSidebarLinkProps = Omit<SettingsHubCardProps, 'description'> & {
+  subLinks?: SubLink[];
+};
+
 /**
  * Sidebar link for desktop settings navigation
  */
@@ -87,27 +96,44 @@ export function SettingsSidebarLink({
   badge,
   badgeVariant = 'danger',
   isActive = false,
-}: Omit<SettingsHubCardProps, 'description'>) {
+  subLinks,
+}: SettingsSidebarLinkProps) {
   const badgeClasses = badgeVariant === 'warning'
     ? 'bg-amber-500 text-white'
     : 'bg-red-500 text-white';
 
   return (
-    <Link
-      href={href}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-        isActive
-          ? 'bg-primary/10 text-primary font-medium'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-      }`}
-    >
-      <Icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-      <span className="flex-1">{title}</span>
-      {badge !== undefined && badge > 0 && (
-        <span className={`min-w-[1.25rem] h-5 px-1.5 text-xs font-medium rounded-full flex items-center justify-center ${badgeClasses}`}>
-          {badge}
-        </span>
+    <div>
+      <Link
+        href={href}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+          isActive
+            ? 'bg-primary/10 text-primary font-medium'
+            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        }`}
+      >
+        <Icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+        <span className="flex-1">{title}</span>
+        {badge !== undefined && badge > 0 && (
+          <span className={`min-w-[1.25rem] h-5 px-1.5 text-xs font-medium rounded-full flex items-center justify-center ${badgeClasses}`}>
+            {badge}
+          </span>
+        )}
+      </Link>
+      {/* Sub-links shown only when section is active */}
+      {isActive && subLinks && subLinks.length > 0 && (
+        <nav className="ml-8 mt-1 space-y-0.5" aria-label={`${title} sections`}>
+          {subLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="block px-3 py-1.5 text-sm text-gray-500 hover:text-primary rounded transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
       )}
-    </Link>
+    </div>
   );
 }

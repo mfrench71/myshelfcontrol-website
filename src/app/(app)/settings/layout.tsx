@@ -15,13 +15,38 @@ import {
   Wrench,
   Trash2,
   Info,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks, getBinBooks } from '@/lib/repositories/books';
 import { analyzeLibraryHealth, getBooksWithIssues } from '@/lib/utils/library-health';
 import { SettingsSidebarLink } from '@/components/ui/settings-hub-card';
+
+// Sub-links for each settings section (shown when section is active)
+type SubLink = { label: string; href: string };
+
+const SECTION_SUB_LINKS: Record<string, SubLink[]> = {
+  profile: [
+    { label: 'Email Verification', href: '/settings/profile#email-verification' },
+    { label: 'Password', href: '/settings/profile#password' },
+    { label: 'Privacy', href: '/settings/profile#privacy' },
+    { label: 'Delete Account', href: '/settings/profile#delete-account' },
+  ],
+  library: [
+    { label: 'Genres', href: '/settings/library#genres' },
+    { label: 'Series', href: '/settings/library#series' },
+    { label: 'Backup & Restore', href: '/settings/library#backup' },
+  ],
+  preferences: [
+    { label: 'Sync', href: '/settings/preferences#sync' },
+    { label: 'Dashboard Widgets', href: '/settings/preferences#widgets' },
+    { label: 'Browser', href: '/settings/preferences#browser' },
+  ],
+  maintenance: [
+    { label: 'Library Health', href: '/settings/maintenance#library-health' },
+    { label: 'Genre Counts', href: '/settings/maintenance#genre-counts' },
+    { label: 'Orphaned Images', href: '/settings/maintenance#orphaned-images' },
+  ],
+};
 
 // Settings sections configuration
 const SETTINGS_SECTIONS = [
@@ -105,25 +130,27 @@ export default function SettingsLayout({ children }: Props) {
 
   return (
     <div className="min-h-[calc(100vh-56px)]">
-      {/* Mobile: Breadcrumb/Back Navigation (hidden on desktop) */}
+      {/* Mobile: Breadcrumb Navigation (hidden on desktop) */}
       {isSubPage && (
         <div className="md:hidden bg-white border-b border-gray-200 sticky top-14 z-30">
           <div className="max-w-6xl mx-auto px-4 py-2 flex items-center min-h-[52px]">
-            <Link
-              href="/settings"
-              className="flex items-center gap-1 text-sm text-primary hover:underline"
-            >
-              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-              <span>Settings</span>
-            </Link>
-            {activeSectionInfo && (
-              <>
-                <ChevronRight className="w-4 h-4 text-gray-400 mx-1" aria-hidden="true" />
-                <span className="text-sm text-gray-900 font-medium">
-                  {activeSectionInfo.label}
-                </span>
-              </>
-            )}
+            <nav aria-label="Breadcrumb">
+              <ol className="flex items-center text-sm">
+                <li>
+                  <Link href="/settings" className="text-gray-500 hover:text-primary hover:underline">
+                    Settings
+                  </Link>
+                </li>
+                {activeSectionInfo && (
+                  <>
+                    <li className="mx-2 text-gray-400">/</li>
+                    <li className="text-gray-900 font-medium">
+                      {activeSectionInfo.label}
+                    </li>
+                  </>
+                )}
+              </ol>
+            </nav>
           </div>
         </div>
       )}
@@ -144,6 +171,7 @@ export default function SettingsLayout({ children }: Props) {
                   badge={getBadgeCount(section.id)}
                   badgeVariant={section.badgeVariant}
                   isActive={activeSection === section.id}
+                  subLinks={SECTION_SUB_LINKS[section.id]}
                 />
               ))}
             </nav>

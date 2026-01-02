@@ -304,10 +304,34 @@ export default function MaintenanceSettingsPage() {
   return (
     <>
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Maintenance</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Maintenance</h1>
+
+        {/* Mobile Section Navigation (Pills) */}
+        <nav className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
+          <div className="flex gap-2">
+            <a
+              href="#library-health"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Health
+            </a>
+            <a
+              href="#genre-counts"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Genres
+            </a>
+            <a
+              href="#orphaned-images"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Images
+            </a>
+          </div>
+        </nav>
 
         {/* Library Health */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+        <section id="library-health" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6 mb-4">
           <h3 className="font-medium text-gray-900 mb-2">Library Health</h3>
           <p className="text-gray-600 text-sm mb-4">
             Analyse your library for missing data and fix issues from book APIs.
@@ -426,10 +450,10 @@ export default function MaintenanceSettingsPage() {
               )}
             </div>
           ) : null}
-        </div>
+        </section>
 
         {/* Recalculate Genre Counts */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+        <section id="genre-counts" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6 mb-4">
           <h3 className="font-medium text-gray-900 mb-2">Recalculate Genre Counts</h3>
           <p className="text-gray-600 text-sm mb-4">
             If genre book counts appear incorrect, this will scan all books and recalculate the
@@ -459,10 +483,10 @@ export default function MaintenanceSettingsPage() {
               </>
             )}
           </button>
-        </div>
+        </section>
 
         {/* Orphaned Images */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <section id="orphaned-images" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="font-medium text-gray-900 mb-2">Orphaned Images</h3>
           <p className="text-gray-600 text-sm mb-4">
             Find and delete images in storage that are not linked to any book. This can happen if
@@ -533,7 +557,7 @@ export default function MaintenanceSettingsPage() {
               </>
             )}
           </button>
-        </div>
+        </section>
       </div>
     </>
   );

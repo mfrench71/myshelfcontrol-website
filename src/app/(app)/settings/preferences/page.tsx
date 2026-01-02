@@ -354,70 +354,34 @@ export default function PreferencesSettingsPage() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="lg:flex lg:gap-8">
-          {/* Sidebar Navigation (Desktop Only) */}
-          <aside className="hidden lg:block w-48 flex-shrink-0">
-            <nav className="sticky top-36" aria-label="In this section">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">In this section</h2>
-              <ul className="space-y-1">
-                <li>
-                  <a
-                    href="#sync"
-                    className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
-                  >
-                    Sync
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#widgets"
-                    className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
-                  >
-                    Widgets
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#browser"
-                    className="block py-1.5 px-2 text-sm text-gray-600 hover:text-primary hover:bg-gray-50 rounded-md"
-                  >
-                    Browser
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </aside>
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Preferences</h1>
 
-          {/* Main Content */}
-          <div className="flex-1 min-w-0 max-w-2xl mx-auto lg:mx-0">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Preferences</h1>
+        {/* Mobile Section Navigation (Pills) */}
+        <nav className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
+          <div className="flex gap-2">
+            <a
+              href="#sync"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Sync
+            </a>
+            <a
+              href="#widgets"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Widgets
+            </a>
+            <a
+              href="#browser"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Browser
+            </a>
+          </div>
+        </nav>
 
-            {/* Mobile Section Navigation (Pills) */}
-            <nav className="lg:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
-              <div className="flex gap-2">
-                <a
-                  href="#sync"
-                  className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
-                >
-                  Sync
-                </a>
-                <a
-                  href="#widgets"
-                  className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
-                >
-                  Widgets
-                </a>
-                <a
-                  href="#browser"
-                  className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
-                >
-                  Browser
-                </a>
-              </div>
-            </nav>
-
-            <div className="space-y-6">
+        <div className="space-y-6">
               {/* Sync Section */}
               <section id="sync" className="scroll-mt-36 space-y-4">
                 <h2 className="text-lg font-semibold text-gray-900">Sync</h2>
@@ -676,8 +640,6 @@ export default function PreferencesSettingsPage() {
                   </button>
                 </div>
               </section>
-            </div>
-          </div>
         </div>
       </div>
 

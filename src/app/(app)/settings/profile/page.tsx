@@ -712,7 +712,37 @@ export default function ProfileSettingsPage() {
   return (
     <>
       <div id="profile-content" className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Profile</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Profile</h1>
+
+        {/* Mobile Section Navigation (Pills) */}
+        <nav className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
+          <div className="flex gap-2">
+            <a
+              href="#email-verification"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Email
+            </a>
+            <a
+              href="#password"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Password
+            </a>
+            <a
+              href="#privacy"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Privacy
+            </a>
+            <a
+              href="#delete-account"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Delete
+            </a>
+          </div>
+        </nav>
 
         {/* User Info */}
         {user && (
@@ -770,7 +800,7 @@ export default function ProfileSettingsPage() {
         <div className="space-y-4">
           {/* Email Verification Status */}
           {user && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <section id="email-verification" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   {user.emailVerified ? (
@@ -810,11 +840,11 @@ export default function ProfileSettingsPage() {
                   </button>
                 )}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Change Password */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <section id="password" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <h3 className="font-medium text-gray-900">Password</h3>
@@ -829,10 +859,10 @@ export default function ProfileSettingsPage() {
                 <span>Change</span>
               </button>
             </div>
-          </div>
+          </section>
 
           {/* Privacy & Data */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <section id="privacy" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h3 className="font-medium text-gray-900">Privacy & Data</h3>
               <p className="text-gray-500 text-sm mt-1">Manage your data and privacy preferences</p>
@@ -865,10 +895,10 @@ export default function ProfileSettingsPage() {
               </div>
               <ArrowRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
             </Link>
-          </div>
+          </section>
 
           {/* Delete Account */}
-          <div className="bg-red-50 rounded-xl border border-red-200 p-6">
+          <section id="delete-account" className="scroll-mt-36 bg-red-50 rounded-xl border border-red-200 p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <h3 className="font-medium text-red-900">Delete Account</h3>
@@ -883,7 +913,7 @@ export default function ProfileSettingsPage() {
                 <span>Delete</span>
               </button>
             </div>
-          </div>
+          </section>
         </div>
       </div>
 

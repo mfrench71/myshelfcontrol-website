@@ -28,7 +28,7 @@ import { useToast } from '@/components/ui/toast';
 import { BottomSheet } from '@/components/ui/modal';
 import { getGenres, createGenre, updateGenre, deleteGenre } from '@/lib/repositories/genres';
 import { getSeries, createSeries, updateSeries, deleteSeries } from '@/lib/repositories/series';
-import { getBooks, getBinBooks, addBook } from '@/lib/repositories/books';
+import { getBooks, getBinBooks, addBook, batchMergeGenre, batchMergeSeries } from '@/lib/repositories/books';
 import { getWishlist, addWishlistItem } from '@/lib/repositories/wishlist';
 import { getContrastColor, getNextAvailableColor, GENRE_COLORS } from '@/lib/utils';
 import type { Genre, Series, Book } from '@/lib/types';
@@ -70,8 +70,8 @@ export default function LibrarySettingsPage() {
   const { user, loading: authLoading } = useAuthContext();
   const { showToast } = useToast();
 
-  // Books data (for counting)
-  const [books, setBooks] = useState<Book[]>([]);
+  // Books data (used in loadData for counting - state stored for future features)
+  const [_books, setBooks] = useState<Book[]>([]);
 
   // Genre state
   const [genres, setGenres] = useState<GenreWithCount[]>([]);
@@ -307,16 +307,13 @@ export default function LibrarySettingsPage() {
     setGenreSaving(true);
     try {
       // Update all books with the source genre to have the target genre instead
-      const booksToUpdate = books.filter((b) => b.genres?.includes(mergingGenre.id));
-      // TODO: Implement batch update in repository
-      // For now, this is a placeholder - merge logic would need to update books
-      console.log('Would update', booksToUpdate.length, 'books');
+      const updatedCount = await batchMergeGenre(user.uid, mergingGenre.id, mergeTargetId);
 
       // Delete the source genre
       await deleteGenre(user.uid, mergingGenre.id);
       closeMergeGenreModal();
       const targetGenre = genres.find((g) => g.id === mergeTargetId);
-      showToast(`Merged ${booksToUpdate.length} books into "${targetGenre?.name}"`, { type: 'success' });
+      showToast(`Merged ${updatedCount} books into "${targetGenre?.name}"`, { type: 'success' });
       await loadData();
     } catch (error) {
       console.error('Failed to merge genre:', error);
@@ -412,16 +409,13 @@ export default function LibrarySettingsPage() {
     setSeriesSaving(true);
     try {
       // Update all books with the source series to have the target series instead
-      const booksToUpdate = books.filter((b) => b.seriesId === mergingSeries.id);
-      // TODO: Implement batch update in repository
-      // For now, this is a placeholder - merge logic would need to update books
-      console.log('Would update', booksToUpdate.length, 'books');
+      const updatedCount = await batchMergeSeries(user.uid, mergingSeries.id, mergeSeriesTargetId);
 
       // Delete the source series
       await deleteSeries(user.uid, mergingSeries.id);
       closeMergeSeriesModal();
       const targetSeries = seriesList.find((s) => s.id === mergeSeriesTargetId);
-      showToast(`Merged ${booksToUpdate.length} books into "${targetSeries?.name}"`, { type: 'success' });
+      showToast(`Merged ${updatedCount} books into "${targetSeries?.name}"`, { type: 'success' });
       await loadData();
     } catch (error) {
       console.error('Failed to merge series:', error);
@@ -697,7 +691,7 @@ export default function LibrarySettingsPage() {
       }
     } catch (err) {
       console.error('Import failed:', err);
-      showToast(err instanceof Error ? err.message : 'Import failed', { type: 'error' });
+      showToast('Import failed. Please check the file format and try again.', { type: 'error' });
       setImportStatus(null);
     } finally {
       setImporting(false);

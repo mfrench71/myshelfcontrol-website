@@ -15,6 +15,7 @@ import {
   where,
   orderBy,
   limit,
+  writeBatch,
   Timestamp,
   type DocumentData,
   type QueryDocumentSnapshot,
@@ -253,4 +254,74 @@ export async function getBookCount(userId: string): Promise<number> {
 
   // Count only non-deleted books
   return books.filter((book) => !book.deletedAt).length;
+}
+
+/**
+ * Batch update books to merge a genre into another
+ * Replaces sourceGenreId with targetGenreId in all books' genres arrays
+ */
+export async function batchMergeGenre(
+  userId: string,
+  sourceGenreId: string,
+  targetGenreId: string
+): Promise<number> {
+  const booksRef = getBooksCollection(userId);
+  const q = query(booksRef, where('genres', 'array-contains', sourceGenreId));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) return 0;
+
+  const batch = writeBatch(db);
+  let updateCount = 0;
+
+  snapshot.docs.forEach((bookDoc) => {
+    const data = bookDoc.data();
+    const genres = (data.genres || []) as string[];
+
+    // Remove source, add target if not already present
+    const newGenres = genres.filter((g) => g !== sourceGenreId);
+    if (!newGenres.includes(targetGenreId)) {
+      newGenres.push(targetGenreId);
+    }
+
+    batch.update(bookDoc.ref, {
+      genres: newGenres,
+      updatedAt: Timestamp.now(),
+    });
+    updateCount++;
+  });
+
+  await batch.commit();
+  return updateCount;
+}
+
+/**
+ * Batch update books to merge a series into another
+ * Updates seriesId from source to target for all books in the source series
+ */
+export async function batchMergeSeries(
+  userId: string,
+  sourceSeriesId: string,
+  targetSeriesId: string
+): Promise<number> {
+  const booksRef = getBooksCollection(userId);
+  const q = query(booksRef, where('seriesId', '==', sourceSeriesId));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) return 0;
+
+  const batch = writeBatch(db);
+  let updateCount = 0;
+
+  snapshot.docs.forEach((bookDoc) => {
+    batch.update(bookDoc.ref, {
+      seriesId: targetSeriesId,
+      // Keep the series position - user can reorder later if needed
+      updatedAt: Timestamp.now(),
+    });
+    updateCount++;
+  });
+
+  await batch.commit();
+  return updateCount;
 }

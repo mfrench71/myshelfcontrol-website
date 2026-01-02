@@ -1,0 +1,113 @@
+/**
+ * Settings Hub Card Component
+ * Card for the settings hub page with icon, title, description, and optional badge
+ */
+'use client';
+
+import Link from 'next/link';
+import { ChevronRight, type LucideIcon } from 'lucide-react';
+
+type BadgeVariant = 'danger' | 'warning';
+
+type SettingsHubCardProps = {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  href: string;
+  badge?: number;
+  badgeVariant?: BadgeVariant;
+  isActive?: boolean;
+};
+
+/**
+ * Hub card for settings navigation
+ */
+export function SettingsHubCard({
+  icon: Icon,
+  title,
+  description,
+  href,
+  badge,
+  badgeVariant = 'danger',
+  isActive = false,
+}: SettingsHubCardProps) {
+  const badgeClasses = badgeVariant === 'warning'
+    ? 'bg-amber-500 text-white'
+    : 'bg-red-500 text-white';
+
+  return (
+    <Link
+      href={href}
+      className={`settings-hub-card group flex items-center gap-4 p-4 bg-white rounded-xl border transition-all ${
+        isActive
+          ? 'border-primary ring-2 ring-primary/20'
+          : 'border-gray-200 hover:border-primary hover:shadow-md'
+      }`}
+    >
+      {/* Icon */}
+      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+        isActive
+          ? 'bg-primary text-white'
+          : 'bg-gray-100 text-gray-600 group-hover:bg-primary/10 group-hover:text-primary'
+      }`}>
+        <Icon className="w-5 h-5" aria-hidden="true" />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium text-gray-900">{title}</h3>
+          {badge !== undefined && badge > 0 && (
+            <span className={`min-w-[1.25rem] h-5 px-1.5 text-xs font-medium rounded-full flex items-center justify-center ${badgeClasses}`}>
+              {badge}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-500 truncate">{description}</p>
+      </div>
+
+      {/* Chevron */}
+      <ChevronRight
+        className={`flex-shrink-0 w-5 h-5 transition-transform ${
+          isActive ? 'text-primary' : 'text-gray-400 group-hover:text-primary group-hover:translate-x-0.5'
+        }`}
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
+/**
+ * Sidebar link for desktop settings navigation
+ */
+export function SettingsSidebarLink({
+  icon: Icon,
+  title,
+  href,
+  badge,
+  badgeVariant = 'danger',
+  isActive = false,
+}: Omit<SettingsHubCardProps, 'description'>) {
+  const badgeClasses = badgeVariant === 'warning'
+    ? 'bg-amber-500 text-white'
+    : 'bg-red-500 text-white';
+
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+        isActive
+          ? 'bg-primary/10 text-primary font-medium'
+          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+      }`}
+    >
+      <Icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+      <span className="flex-1">{title}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className={`min-w-[1.25rem] h-5 px-1.5 text-xs font-medium rounded-full flex items-center justify-center ${badgeClasses}`}>
+          {badge}
+        </span>
+      )}
+    </Link>
+  );
+}

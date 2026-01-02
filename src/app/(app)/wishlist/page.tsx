@@ -15,7 +15,9 @@ import {
   Trash2,
   MessageSquare,
   Search,
+  Calendar,
 } from 'lucide-react';
+import { Timestamp } from 'firebase/firestore';
 import { BookCover } from '@/components/ui/book-cover';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getWishlist, deleteWishlistItem, updateWishlistItem } from '@/lib/repositories/wishlist';
@@ -46,6 +48,30 @@ function getAuthorSurname(author: string | undefined): string {
   if (!author) return '';
   const parts = author.trim().split(/\s+/);
   return parts[parts.length - 1].toLowerCase();
+}
+
+/**
+ * Format timestamp as short date (e.g., "2 Jan 2025")
+ */
+function formatShortDate(timestamp: Timestamp | Date | number | undefined): string | null {
+  if (!timestamp) return null;
+
+  let date: Date;
+  if (timestamp instanceof Timestamp) {
+    date = timestamp.toDate();
+  } else if (timestamp instanceof Date) {
+    date = timestamp;
+  } else if (typeof timestamp === 'number') {
+    date = new Date(timestamp);
+  } else {
+    return null;
+  }
+
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 /**
@@ -116,6 +142,13 @@ function WishlistItemCard({
       <div className="flex-1 min-w-0">
         <h3 className="font-medium text-gray-900 truncate text-sm">{item.title}</h3>
         <p className="text-sm text-gray-500 truncate">{item.author || 'Unknown'}</p>
+        {/* Date Added */}
+        {item.createdAt && (
+          <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+            <Calendar className="w-3 h-3" aria-hidden="true" />
+            <span>Added {formatShortDate(item.createdAt)}</span>
+          </p>
+        )}
         <div className="flex items-center gap-1.5 mt-1">
           {item.priority && (
             <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${PRIORITY_COLOURS[item.priority]}`}>
@@ -272,6 +305,8 @@ export default function WishlistPage() {
       await deleteWishlistItem(user.uid, selectedItem.id);
       setItems((prev) => prev.filter((i) => i.id !== selectedItem.id));
       closeModals();
+      // Notify header to update wishlist count
+      window.dispatchEvent(new CustomEvent('wishlist-updated'));
       showToast(`"${selectedItem.title}" added to your library!`, { type: 'success' });
     } catch (err) {
       console.error('Failed to move to library:', err);
@@ -317,6 +352,8 @@ export default function WishlistPage() {
       await deleteWishlistItem(user.uid, selectedItem.id);
       setItems((prev) => prev.filter((i) => i.id !== selectedItem.id));
       closeModals();
+      // Notify header to update wishlist count
+      window.dispatchEvent(new CustomEvent('wishlist-updated'));
       showToast('Removed from wishlist', { type: 'success' });
     } catch (err) {
       console.error('Failed to delete item:', err);

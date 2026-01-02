@@ -18,11 +18,14 @@ import {
   ChevronLeft,
   Loader2,
   AlertCircle,
+  Heart,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
 import { addBook } from '@/lib/repositories/books';
-import { lookupISBN, searchBooks as searchBooksAPI } from '@/lib/utils/book-api';
+import { getWishlist, addWishlistItem } from '@/lib/repositories/wishlist';
+import { lookupISBN, searchBooks as searchBooksAPI, type BookSearchResult } from '@/lib/utils/book-api';
+import type { WishlistItem, PhysicalFormat, BookCovers } from '@/lib/types';
 import { isISBN, cleanISBN, checkForDuplicate } from '@/lib/utils/duplicate-checker';
 import { ImageGallery, type GalleryImage } from '@/components/image-gallery';
 import {
@@ -36,7 +39,6 @@ import {
 } from '@/components/pickers';
 import { RatingInput } from '@/components/books/rating-input';
 import { FORMAT_OPTIONS } from '@/lib/utils/book-filters';
-import type { PhysicalFormat, BookCovers } from '@/lib/types';
 
 // Quagga types - use library types
 import type { QuaggaJSResultObject } from '@ericblade/quagga2';
@@ -113,6 +115,10 @@ export default function AddBookPage() {
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [duplicateBypassed, setDuplicateBypassed] = useState(false);
 
+  // Wishlist state
+  const [wishlistLookup, setWishlistLookup] = useState<Map<string, WishlistItem>>(new Map());
+  const [addingToWishlist, setAddingToWishlist] = useState<string | null>(null);
+
   /**
    * Check if form has content that would be lost
    */
@@ -147,6 +153,30 @@ export default function AddBookPage() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasFormContent]);
+
+  /**
+   * Load wishlist for pre-checking search results
+   */
+  useEffect(() => {
+    async function loadWishlist() {
+      if (!user) return;
+      try {
+        const items = await getWishlist(user.uid);
+        const lookup = new Map<string, WishlistItem>();
+        for (const item of items) {
+          // Index by ISBN if available, otherwise by title-author combo
+          if (item.isbn) {
+            lookup.set(item.isbn, item);
+          }
+          lookup.set(`${item.title.toLowerCase()}|${(item.author || '').toLowerCase()}`, item);
+        }
+        setWishlistLookup(lookup);
+      } catch (error) {
+        console.warn('Failed to load wishlist:', error);
+      }
+    }
+    loadWishlist();
+  }, [user]);
 
   /**
    * Handle ISBN lookup directly
@@ -228,11 +258,11 @@ export default function AddBookPage() {
       const startIndex = append ? searchStartIndex : 0;
       const result = await searchBooksAPI(query, { startIndex, maxResults: SEARCH_PAGE_SIZE });
 
-      const mappedResults: SearchResult[] = result.books.map((book, idx) => ({
-        id: `${startIndex}-${idx}`,
+      const mappedResults: SearchResult[] = result.books.map((book) => ({
+        id: book.id, // Use Google Books volume ID - guaranteed unique
         title: book.title,
         author: book.author,
-        isbn: undefined, // Will be fetched on selection
+        isbn: book.isbn,
         coverUrl: book.coverImageUrl,
         publisher: book.publisher,
         publishedDate: book.publishedDate,
@@ -257,6 +287,12 @@ export default function AddBookPage() {
       setLoadingMore(false);
     }
   }, [searchStartIndex, handleISBNLookup]);
+
+  // Store latest handleSearch in a ref to avoid re-triggering debounced search effect
+  const handleSearchRef = useRef(handleSearch);
+  useEffect(() => {
+    handleSearchRef.current = handleSearch;
+  }, [handleSearch]);
 
   /**
    * Infinite scroll observer for search results
@@ -301,11 +337,12 @@ export default function AddBookPage() {
 
     // Debounce search by 400ms
     const timer = setTimeout(() => {
-      handleSearch(searchQuery);
+      handleSearchRef.current(searchQuery);
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, handleSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]); // Only re-run when searchQuery changes, not when handleSearch changes
 
   /**
    * Handle search input keypress
@@ -451,6 +488,71 @@ export default function AddBookPage() {
     setSearchStartIndex(0);
     setHasMoreResults(false);
     searchInputRef.current?.focus();
+  };
+
+  /**
+   * Check if a search result is already in wishlist
+   */
+  const isInWishlist = (result: SearchResult): boolean => {
+    if (result.isbn && wishlistLookup.has(result.isbn)) return true;
+    const key = `${result.title.toLowerCase()}|${(result.author || '').toLowerCase()}`;
+    return wishlistLookup.has(key);
+  };
+
+  /**
+   * Add book to wishlist from search results
+   */
+  const handleAddToWishlist = async (result: SearchResult, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent selecting the result
+
+    if (!user) {
+      showToast('Please sign in first', { type: 'error' });
+      return;
+    }
+
+    if (isInWishlist(result)) {
+      showToast(`"${result.title}" is already in your wishlist`, { type: 'info' });
+      return;
+    }
+
+    setAddingToWishlist(result.id);
+
+    try {
+      await addWishlistItem(user.uid, {
+        title: result.title,
+        author: result.author || '',
+        isbn: result.isbn || null,
+        coverImageUrl: result.coverUrl || null,
+        covers: result.coverUrl ? { googleBooks: result.coverUrl } : null,
+        publisher: result.publisher || null,
+        publishedDate: result.publishedDate || null,
+        pageCount: result.pageCount || null,
+      });
+
+      // Update local lookup
+      const newLookup = new Map(wishlistLookup);
+      const item = {
+        id: '', // Will be set by Firestore
+        title: result.title,
+        author: result.author || null,
+        isbn: result.isbn || null,
+      } as WishlistItem;
+      if (result.isbn) {
+        newLookup.set(result.isbn, item);
+      }
+      newLookup.set(`${result.title.toLowerCase()}|${(result.author || '').toLowerCase()}`, item);
+      setWishlistLookup(newLookup);
+
+      // Notify header to update wishlist count
+      window.dispatchEvent(new CustomEvent('wishlist-updated'));
+
+      showToast(`"${result.title}" added to wishlist`, { type: 'success' });
+    } catch (error) {
+      console.error('Failed to add to wishlist:', error);
+      showToast('Failed to add to wishlist. Please try again.', { type: 'error' });
+    } finally {
+      setAddingToWishlist(null);
+    }
   };
 
   /**
@@ -776,43 +878,74 @@ export default function AddBookPage() {
                   ref={resultsContainerRef}
                   className="divide-y divide-gray-100 max-h-80 overflow-y-auto"
                 >
-                  {searchResults.map((result) => (
-                    <button
-                      key={result.id}
-                      type="button"
-                      onClick={() => selectResult(result)}
-                      disabled={selectingResult === result.id}
-                      className="w-full p-3 flex gap-3 hover:bg-gray-50 text-left relative disabled:opacity-50"
-                    >
-                      <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                        {result.coverUrl ? (
-                          <Image
-                            src={result.coverUrl}
-                            alt=""
-                            width={48}
-                            height={64}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <BookOpen className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                  {searchResults.map((result) => {
+                    const wishlisted = isInWishlist(result);
+                    return (
+                      <div
+                        key={result.id}
+                        className="flex items-center gap-2 hover:bg-gray-50"
+                      >
+                        {/* Main clickable area - select result */}
+                        <button
+                          type="button"
+                          onClick={() => selectResult(result)}
+                          disabled={selectingResult === result.id}
+                          className="flex-1 p-3 flex gap-3 text-left relative disabled:opacity-50"
+                        >
+                          <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                            {result.coverUrl ? (
+                              <Image
+                                src={result.coverUrl}
+                                alt=""
+                                width={48}
+                                height={64}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <BookOpen className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                              </div>
+                            )}
                           </div>
-                        )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 truncate">{result.title}</p>
+                            <p className="text-sm text-gray-500 truncate">{result.author}</p>
+                            {result.publishedDate && (
+                              <p className="text-xs text-gray-400">{result.publishedDate}</p>
+                            )}
+                          </div>
+                          {selectingResult === result.id ? (
+                            <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0 self-center" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 self-center" aria-hidden="true" />
+                          )}
+                        </button>
+
+                        {/* Wishlist button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleAddToWishlist(result, e)}
+                          disabled={wishlisted || addingToWishlist === result.id}
+                          className={`p-2 mr-2 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors ${
+                            wishlisted
+                              ? 'text-pink-500 cursor-default'
+                              : 'text-gray-400 hover:text-pink-500 hover:bg-pink-50'
+                          }`}
+                          title={wishlisted ? 'Already in wishlist' : 'Add to wishlist'}
+                          aria-label={wishlisted ? 'Already in wishlist' : 'Add to wishlist'}
+                        >
+                          {addingToWishlist === result.id ? (
+                            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                          ) : (
+                            <Heart
+                              className={`w-5 h-5 ${wishlisted ? 'fill-current' : ''}`}
+                              aria-hidden="true"
+                            />
+                          )}
+                        </button>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{result.title}</p>
-                        <p className="text-sm text-gray-500 truncate">{result.author}</p>
-                        {result.publishedDate && (
-                          <p className="text-xs text-gray-400">{result.publishedDate}</p>
-                        )}
-                      </div>
-                      {selectingResult === result.id ? (
-                        <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0 self-center" />
-                      ) : (
-                        <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 self-center" aria-hidden="true" />
-                      )}
-                    </button>
-                  ))}
+                    );
+                  })}
                   {/* Sentinel for infinite scroll */}
                   {hasMoreResults && (
                     <div ref={sentinelRef} className="py-3 text-center text-xs text-gray-400">

@@ -338,25 +338,25 @@ export default function EditBookPage({ params }: PageProps) {
   if (authLoading || loading) {
     return (
       <>
-        <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
           <div className="max-w-6xl mx-auto px-4 py-2 min-h-[52px]">
-            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           </div>
         </div>
         <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 animate-pulse">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4 animate-pulse">
             <div className="flex gap-4">
-              <div className="w-24 h-36 bg-gray-200 rounded" />
+              <div className="w-24 h-36 bg-gray-200 dark:bg-gray-700 rounded" />
               <div className="flex-1 space-y-2">
-                <div className="h-6 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
               </div>
             </div>
-            <div className="h-10 bg-gray-200 rounded" />
-            <div className="h-10 bg-gray-200 rounded" />
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
             <div className="grid grid-cols-2 gap-4">
-              <div className="h-10 bg-gray-200 rounded" />
-              <div className="h-10 bg-gray-200 rounded" />
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
             </div>
           </div>
         </div>
@@ -368,30 +368,30 @@ export default function EditBookPage({ params }: PageProps) {
   if (error && !book) {
     return (
       <>
-        <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
           <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3 min-h-[52px]">
             <nav aria-label="Breadcrumb">
               <ol className="flex items-center text-sm">
                 <li>
-                  <Link href="/books" className="text-gray-500 hover:text-gray-700">
+                  <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                     Books
                   </Link>
                 </li>
-                <li className="mx-2 text-gray-400">/</li>
-                <li className="text-gray-900 font-medium">Edit Book</li>
+                <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+                <li className="text-gray-900 dark:text-gray-100 font-medium">Edit Book</li>
               </ol>
             </nav>
           </div>
         </div>
         <div className="max-w-2xl mx-auto px-4 py-6">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+          <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 rounded-xl p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div>
-              <p className="text-red-700 font-medium">Error</p>
-              <p className="text-red-600 text-sm mt-1">{error}</p>
+              <p className="text-red-700 dark:text-red-400 font-medium">Error</p>
+              <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
               <Link
                 href="/books"
-                className="mt-2 text-sm text-red-700 underline hover:no-underline inline-block"
+                className="mt-2 text-sm text-red-700 dark:text-red-400 underline hover:no-underline inline-block"
               >
                 Back to books
               </Link>
@@ -405,26 +405,26 @@ export default function EditBookPage({ params }: PageProps) {
   return (
     <>
       {/* Sub-navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-3 min-h-[52px]">
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center text-sm">
               <li>
-                <Link href="/books" className="text-gray-500 hover:text-gray-700">
+                <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                   Books
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400">/</li>
+              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
               <li>
                 <Link
                   href={`/books/${id}`}
-                  className="text-gray-500 hover:text-gray-700 max-w-[100px] sm:max-w-[200px] md:max-w-[300px] lg:max-w-none truncate inline-block align-middle"
+                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 max-w-[100px] sm:max-w-[200px] md:max-w-[300px] lg:max-w-none truncate inline-block align-middle"
                 >
                   {title || 'Book'}
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium">Edit</li>
+              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="text-gray-900 dark:text-gray-100 font-medium">Edit</li>
             </ol>
           </nav>
           <div className="flex items-center gap-2">
@@ -432,7 +432,7 @@ export default function EditBookPage({ params }: PageProps) {
               type="button"
               onClick={handleRefreshData}
               disabled={refreshing || (!isbn && !title)}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50"
               aria-label="Refresh data from API"
             >
               {refreshing ? (
@@ -449,9 +449,9 @@ export default function EditBookPage({ params }: PageProps) {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Error banner */}
         {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+          <div className="mb-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 rounded-lg p-3 flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <p className="text-red-700 text-sm">{error}</p>
+            <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
           </div>
         )}
 
@@ -459,12 +459,12 @@ export default function EditBookPage({ params }: PageProps) {
         <form
           id="edit-form"
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-gray-200 p-4 space-y-4"
+          className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4"
           noValidate
         >
           {/* Title */}
           <div>
-            <label htmlFor="title" className="block font-semibold text-gray-700 mb-1">
+            <label htmlFor="title" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Title <span className="text-red-500">*</span>
             </label>
             <input
@@ -528,7 +528,7 @@ export default function EditBookPage({ params }: PageProps) {
           {/* Publisher and Year Published */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="publisher" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="publisher" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Publisher
               </label>
               <input
@@ -541,7 +541,7 @@ export default function EditBookPage({ params }: PageProps) {
               />
             </div>
             <div>
-              <label htmlFor="publishedDate" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="publishedDate" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Year Published
               </label>
               <input
@@ -562,7 +562,7 @@ export default function EditBookPage({ params }: PageProps) {
           {/* Format and Page Count */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Format
               </label>
               <select
@@ -570,7 +570,7 @@ export default function EditBookPage({ params }: PageProps) {
                 name="physicalFormat"
                 value={physicalFormat}
                 onChange={(e) => setPhysicalFormat(e.target.value as PhysicalFormat)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >
                 {FORMAT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -580,7 +580,7 @@ export default function EditBookPage({ params }: PageProps) {
               </select>
             </div>
             <div>
-              <label htmlFor="pageCount" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="pageCount" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Pages
               </label>
               <input
@@ -599,7 +599,7 @@ export default function EditBookPage({ params }: PageProps) {
 
           {/* Rating */}
           <div>
-            <label className="block font-semibold text-gray-700 mb-2">Rating</label>
+            <label className="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Rating</label>
             <RatingInput value={rating} onChange={setRating} />
           </div>
 
@@ -607,7 +607,7 @@ export default function EditBookPage({ params }: PageProps) {
           <div className="flex gap-3 pt-2">
             <Link
               href={`/books/${id}`}
-              className="flex-1 py-3 px-4 text-center text-gray-700 bg-gray-100 hover:bg-gray-200 font-medium rounded-lg transition-colors"
+              className="flex-1 py-3 px-4 text-center text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 font-medium rounded-lg transition-colors"
             >
               Cancel
             </Link>

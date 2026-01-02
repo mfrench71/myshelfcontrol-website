@@ -356,7 +356,7 @@ export function Header() {
                 router.push('/wishlist');
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
-                pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
+                pathname.startsWith('/wishlist') ? 'text-primary dark:text-blue-400 font-medium' : 'text-gray-900 dark:text-gray-100'
               }`}
             >
               <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
@@ -375,7 +375,7 @@ export function Header() {
                 router.push('/settings');
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
-                pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
+                pathname.startsWith('/settings') ? 'text-primary dark:text-blue-400 font-medium' : 'text-gray-900 dark:text-gray-100'
               }`}
             >
               <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
@@ -390,7 +390,7 @@ export function Header() {
               >
                 {loggingOut ? (
                   <>
-                    <span className="w-5 h-5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                    <span className="w-5 h-5 border-2 border-red-300 dark:border-red-700 border-t-red-600 dark:border-t-red-400 rounded-full animate-spin" />
                     <span>Signing out...</span>
                   </>
                 ) : (
@@ -450,7 +450,7 @@ export function Header() {
                   router.push('/wishlist');
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
-                  pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
+                  pathname.startsWith('/wishlist') ? 'text-primary dark:text-blue-400 font-medium' : 'text-gray-900 dark:text-gray-100'
                 }`}
               >
                 <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
@@ -469,7 +469,7 @@ export function Header() {
                   router.push('/settings');
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
-                  pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
+                  pathname.startsWith('/settings') ? 'text-primary dark:text-blue-400 font-medium' : 'text-gray-900 dark:text-gray-100'
                 }`}
               >
                 <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
@@ -486,7 +486,7 @@ export function Header() {
                 >
                   {loggingOut ? (
                     <>
-                      <span className="w-5 h-5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                      <span className="w-5 h-5 border-2 border-red-300 dark:border-red-700 border-t-red-600 dark:border-t-red-400 rounded-full animate-spin" />
                       <span>Signing out...</span>
                     </>
                   ) : (

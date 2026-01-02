@@ -107,7 +107,7 @@ function WidgetContainer({
         {seeAllHref && !isEmpty && (
           <Link
             href={seeAllHref}
-            className="flex items-center gap-1 text-sm text-primary hover:underline"
+            className="flex items-center gap-1 text-sm text-primary dark:text-blue-400 hover:underline"
           >
             See all <ChevronRight className="w-4 h-4" />
           </Link>

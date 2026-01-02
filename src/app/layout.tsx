@@ -7,17 +7,28 @@ import { ToastProvider } from '@/components/ui/toast';
 import { ServiceWorkerRegister } from '@/components/service-worker-register';
 
 // Anti-flash script to set theme before React hydrates
+// Forces light mode on public/auth pages and when not authenticated
 const themeScript = `
   (function() {
-    const stored = localStorage.getItem('theme');
-    const theme = stored || 'system';
-    let resolved = theme;
+    var path = window.location.pathname;
+    var isPublicPage = path.startsWith('/login') || path.startsWith('/privacy');
+    var isAuthenticated = document.cookie.indexOf('auth=') !== -1;
+
+    // Force light mode for public pages or unauthenticated users on home
+    if (isPublicPage || (path === '/' && !isAuthenticated)) {
+      document.documentElement.classList.add('light');
+      return;
+    }
+
+    var stored = localStorage.getItem('theme');
+    var theme = stored || 'system';
+    var resolved = theme;
     if (theme === 'system') {
       resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     document.documentElement.classList.add(resolved);
-    const themeColor = resolved === 'dark' ? '#111827' : '#ffffff';
-    const meta = document.querySelector('meta[name="theme-color"]');
+    var themeColor = resolved === 'dark' ? '#111827' : '#ffffff';
+    var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', themeColor);
   })();
 `;

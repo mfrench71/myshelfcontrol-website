@@ -141,10 +141,10 @@ export default function BinPage() {
   if (authLoading || loading) {
     return (
       <div id="loading-state" className="max-w-2xl mx-auto px-4 py-6">
-        <div className="h-8 bg-gray-200 rounded w-32 mb-6 animate-pulse" />
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-6 animate-pulse" />
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-gray-200 rounded-xl animate-pulse" />
+            <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -155,11 +155,11 @@ export default function BinPage() {
     <>
       <div id="bin-content" className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Bin</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Bin</h1>
           <div className="flex items-center gap-3">
             {books.length > 0 && (
               <>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {books.length} book{books.length !== 1 ? 's' : ''}
                 </p>
                 <button
@@ -175,17 +175,17 @@ export default function BinPage() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
-            <p className="text-sm text-red-700">{error}</p>
+            <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {books.length === 0 ? (
           <div id="empty-state" className="text-center py-12">
-            <Trash2 className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-            <p className="text-gray-500 mt-3">Bin is empty</p>
-            <p className="text-gray-400 text-sm mt-1">
+            <Trash2 className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+            <p className="text-gray-500 dark:text-gray-400 mt-3">Bin is empty</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
               Deleted books will appear here for 30 days before being permanently removed.
             </p>
           </div>
@@ -195,13 +195,13 @@ export default function BinPage() {
               const daysRemaining = getDaysRemaining(book.deletedAt);
               const isUrgent = daysRemaining <= 7;
               const badgeClass = isUrgent
-                ? 'bg-amber-100 text-amber-700'
-                : 'bg-gray-100 text-gray-600';
+                ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
 
               return (
                 <div
                   key={book.id}
-                  className="flex gap-4 p-4 bg-white rounded-xl border border-gray-200"
+                  className="flex gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"
                 >
                   {/* Cover */}
                   <BookCover
@@ -215,8 +215,8 @@ export default function BinPage() {
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 truncate">{book.title}</h3>
-                    <p className="text-sm text-gray-500 truncate">{book.author || 'Unknown author'}</p>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">{book.title}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{book.author || 'Unknown author'}</p>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${badgeClass} mt-2`}>
                       <Clock className="w-3 h-3" aria-hidden="true" />
                       <span>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} left</span>
@@ -227,14 +227,14 @@ export default function BinPage() {
                   <div className="flex gap-1 items-center">
                     <button
                       onClick={() => openRestoreModal(book)}
-                      className="p-2 hover:bg-green-50 rounded text-gray-400 hover:text-green-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center transition-colors"
+                      className="p-2 hover:bg-green-50 dark:hover:bg-green-900/30 rounded text-gray-400 hover:text-green-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center transition-colors"
                       aria-label={`Restore ${book.title}`}
                     >
                       <RotateCcw className="w-4 h-4" aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => openDeleteModal(book)}
-                      className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center transition-colors"
+                      className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center transition-colors"
                       aria-label={`Permanently delete ${book.title}`}
                     >
                       <Trash2 className="w-4 h-4" aria-hidden="true" />

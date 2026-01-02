@@ -173,24 +173,24 @@ function ChangePasswordModal({
       className="md:max-w-xl"
     >
       <div className="p-4 sm:p-6">
-        <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Change Password</h3>
 
         {success ? (
-          <div className="flex items-center gap-3 text-green-600 py-4">
+          <div className="flex items-center gap-3 text-green-600 dark:text-green-400 py-4">
             <CheckCircle className="w-6 h-6" />
             <span>Password changed successfully!</span>
           </div>
         ) : (
           <form id="password-form" onSubmit={handleSubmit} noValidate className="space-y-4">
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
               </div>
             )}
 
             <div>
-              <label htmlFor="current-password" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="current-password" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Current Password <span className="text-red-500">*</span>
               </label>
               <input
@@ -200,12 +200,12 @@ function ChangePasswordModal({
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               />
             </div>
 
             <div>
-              <label htmlFor="new-password" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="new-password" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 New Password <span className="text-red-500">*</span>
               </label>
               <input
@@ -216,7 +216,7 @@ function ChangePasswordModal({
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               />
               {/* Password Strength Indicator */}
               {passwordStrength && (
@@ -228,7 +228,7 @@ function ChangePasswordModal({
                         className={`h-1 flex-1 rounded-full ${
                           index < passwordStrength.score
                             ? strengthColors[Math.min(passwordStrength.score - 1, 3)]
-                            : 'bg-gray-200'
+                            : 'bg-gray-200 dark:bg-gray-700'
                         }`}
                       />
                     ))}
@@ -242,24 +242,24 @@ function ChangePasswordModal({
               )}
               {/* Password Requirements */}
               <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                <span className={passwordStrength?.checks.length ? 'text-green-500' : 'text-gray-500'}>
+                <span className={passwordStrength?.checks.length ? 'text-green-500' : 'text-gray-500 dark:text-gray-400'}>
                   8+ chars
                 </span>
-                <span className={passwordStrength?.checks.uppercase ? 'text-green-500' : 'text-gray-500'}>
+                <span className={passwordStrength?.checks.uppercase ? 'text-green-500' : 'text-gray-500 dark:text-gray-400'}>
                   1 uppercase
                 </span>
-                <span className={passwordStrength?.checks.number ? 'text-green-500' : 'text-gray-500'}>
+                <span className={passwordStrength?.checks.number ? 'text-green-500' : 'text-gray-500 dark:text-gray-400'}>
                   1 number
                 </span>
               </div>
               {/* Same password validation */}
               {newPassword && currentPassword && newPassword === currentPassword && (
-                <p className="mt-2 text-sm text-red-500">New password must be different from current password</p>
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400">New password must be different from current password</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="confirm-password" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Confirm New Password <span className="text-red-500">*</span>
               </label>
               <input
@@ -269,11 +269,11 @@ function ChangePasswordModal({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               />
               {/* Inline validation feedback */}
               {confirmPassword && newPassword && confirmPassword !== newPassword && (
-                <p className="mt-1 text-sm text-red-500">Passwords do not match</p>
+                <p className="mt-1 text-sm text-red-500 dark:text-red-400">Passwords do not match</p>
               )}
             </div>
 
@@ -282,7 +282,7 @@ function ChangePasswordModal({
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 min-h-[44px] whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
@@ -382,7 +382,7 @@ function PhotoModal({
       className="md:max-w-sm"
     >
       <div className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Profile Photo</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Profile Photo</h3>
 
         {/* Current photo preview */}
         {(currentPhotoUrl || gravatarUrl) && (
@@ -401,10 +401,10 @@ function PhotoModal({
         {uploading && (
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-gray-600">Uploading...</span>
-              <span className="text-sm text-gray-600">{uploadProgress}%</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Uploading...</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{uploadProgress}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
                 className="bg-primary h-2 rounded-full transition-all"
                 style={{ width: `${uploadProgress}%` }}
@@ -445,7 +445,7 @@ function PhotoModal({
             <button
               onClick={handleRemove}
               disabled={uploading || removing}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-red-300 text-red-600 hover:bg-red-50 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
             >
               {removing ? (
                 <>
@@ -465,30 +465,30 @@ function PhotoModal({
           <button
             onClick={onClose}
             disabled={uploading || removing}
-            className="w-full px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
           >
             Cancel
           </button>
         </div>
 
-        <p className="text-xs text-gray-500 text-center mt-4">
+        <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
           JPG, PNG or WebP. Max 2MB. Photos are cropped to a square.
         </p>
 
         {/* Gravatar fallback note */}
         {!currentPhotoUrl && gravatarUrl && (
-          <p className="text-xs text-gray-400 text-center mt-2">
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">
             Using your Gravatar as fallback. Upload a photo to override.
           </p>
         )}
         {!currentPhotoUrl && !gravatarUrl && (
-          <p className="text-xs text-gray-400 text-center mt-2">
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">
             No photo set. You can also use{' '}
             <a
               href="https://gravatar.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary dark:text-blue-400 hover:underline"
             >
               Gravatar
             </a>{' '}
@@ -561,21 +561,21 @@ function DeleteAccountModal({
       closeOnEscape={!loading}
     >
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-red-600 mb-2">Delete Account</h3>
-        <p className="text-gray-500 mb-4">
+        <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">Delete Account</h3>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">
           This action is permanent and cannot be undone. All your books, genres, series, and settings will be deleted.
         </p>
 
         <form id="delete-form" onSubmit={handleSubmit} noValidate className="space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
             </div>
           )}
 
           <div>
-            <label htmlFor="delete-password" className="block font-semibold text-gray-700 mb-1">
+            <label htmlFor="delete-password" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Password <span className="text-red-500">*</span>
             </label>
             <input
@@ -584,12 +584,12 @@ function DeleteAccountModal({
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="delete-confirm-text" className="block font-semibold text-gray-700 mb-1">
+            <label htmlFor="delete-confirm-text" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Type &quot;DELETE&quot; to confirm <span className="text-red-500">*</span>
             </label>
             <input
@@ -599,7 +599,7 @@ function DeleteAccountModal({
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder="DELETE"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             />
           </div>
 
@@ -608,7 +608,7 @@ function DeleteAccountModal({
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-2 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
@@ -733,32 +733,32 @@ export default function ProfileSettingsPage() {
   return (
     <>
       <div id="profile-content" className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Profile</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Profile</h1>
 
         {/* Mobile Section Navigation (Pills) */}
         <nav className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
           <div className="flex gap-2">
             <a
               href="#email-verification"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Email
             </a>
             <a
               href="#password"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Password
             </a>
             <a
               href="#privacy"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Privacy
             </a>
             <a
               href="#delete-account"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Delete
             </a>
@@ -767,7 +767,7 @@ export default function ProfileSettingsPage() {
 
         {/* User Info */}
         {user && (
-          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6 mb-6">
             <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
               {/* Avatar with edit button */}
               <div className="relative">
@@ -794,15 +794,15 @@ export default function ProfileSettingsPage() {
                 )}
                 <button
                   onClick={() => setShowPhotoModal(true)}
-                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm"
                   aria-label="Edit profile photo"
                 >
                   <Camera className="w-4 h-4 text-gray-600" aria-hidden="true" />
                 </button>
               </div>
               <div className="text-center sm:text-left">
-                <p className="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-full">{user.email}</p>
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-900 dark:text-gray-100 font-medium truncate max-w-[200px] sm:max-w-full">{user.email}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
                   Member since{' '}
                   <span>
                     {user.metadata.creationTime
@@ -821,7 +821,7 @@ export default function ProfileSettingsPage() {
         <div className="space-y-4">
           {/* Email Verification Status */}
           {user && (
-            <section id="email-verification" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
+            <section id="email-verification" className="scroll-mt-36 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   {user.emailVerified ? (
@@ -830,7 +830,7 @@ export default function ProfileSettingsPage() {
                     <MailWarning className="w-5 h-5 text-amber-600 flex-shrink-0" aria-hidden="true" />
                   )}
                   <div>
-                    <h3 className="font-medium text-gray-900">Email Verification</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Email Verification</h3>
                     <p className={`text-sm mt-0.5 ${user.emailVerified ? 'text-green-600' : 'text-amber-600'}`}>
                       {user.emailVerified ? 'Verified' : 'Not verified'}
                     </p>
@@ -840,7 +840,7 @@ export default function ProfileSettingsPage() {
                   <button
                     onClick={handleResendVerification}
                     disabled={sendingVerification || verificationSent}
-                    className="flex-shrink-0 flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 text-sm rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-shrink-0 flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sendingVerification ? (
                       <>
@@ -865,11 +865,11 @@ export default function ProfileSettingsPage() {
           )}
 
           {/* Change Password */}
-          <section id="password" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
+          <section id="password" className="scroll-mt-36 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <h3 className="font-medium text-gray-900">Password</h3>
-                <p className="text-gray-500 text-sm mt-1">Update your account password</p>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">Password</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Update your account password</p>
               </div>
               <button
                 id="change-password-btn"
@@ -883,21 +883,21 @@ export default function ProfileSettingsPage() {
           </section>
 
           {/* Privacy & Data */}
-          <section id="privacy" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="font-medium text-gray-900">Privacy & Data</h3>
-              <p className="text-gray-500 text-sm mt-1">Manage your data and privacy preferences</p>
+          <section id="privacy" className="scroll-mt-36 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+              <h3 className="font-medium text-gray-900 dark:text-gray-100">Privacy & Data</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage your data and privacy preferences</p>
             </div>
 
             <Link
               href="/privacy"
-              className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors border-b border-gray-100"
+              className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
             >
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5 text-gray-400" aria-hidden="true" />
                 <div>
-                  <p className="font-medium text-gray-900">Privacy Policy</p>
-                  <p className="text-gray-500 text-sm">Learn how your data is collected and used</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Privacy Policy</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Learn how your data is collected and used</p>
                 </div>
               </div>
               <ExternalLink className="w-4 h-4 text-gray-400" aria-hidden="true" />
@@ -905,13 +905,13 @@ export default function ProfileSettingsPage() {
 
             <Link
               href="/settings/library#backup"
-              className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <Download className="w-5 h-5 text-gray-400" aria-hidden="true" />
                 <div>
-                  <p className="font-medium text-gray-900">Export My Data</p>
-                  <p className="text-gray-500 text-sm">Download all your books, genres, and settings</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Export My Data</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Download all your books, genres, and settings</p>
                 </div>
               </div>
               <ArrowRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
@@ -919,11 +919,11 @@ export default function ProfileSettingsPage() {
           </section>
 
           {/* Delete Account */}
-          <section id="delete-account" className="scroll-mt-36 bg-red-50 rounded-xl border border-red-200 p-6">
+          <section id="delete-account" className="scroll-mt-36 bg-red-50 dark:bg-red-950 rounded-xl border border-red-200 dark:border-red-900 p-6">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <h3 className="font-medium text-red-900">Delete Account</h3>
-                <p className="text-red-700 text-sm mt-1">Permanently delete your account and all data</p>
+                <h3 className="font-medium text-red-900 dark:text-red-200">Delete Account</h3>
+                <p className="text-red-700 dark:text-red-400 text-sm mt-1">Permanently delete your account and all data</p>
               </div>
               <button
                 id="delete-account-btn"

@@ -784,17 +784,17 @@ export default function AddBookPage() {
   return (
     <>
       {/* Sub-navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3 min-h-[52px]">
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center text-sm">
               <li>
-                <Link href="/books" className="text-gray-500 hover:text-gray-700">
+                <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                   Books
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium">Add Book</li>
+              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="text-gray-900 dark:text-gray-100 font-medium">Add Book</li>
             </ol>
           </nav>
         </div>
@@ -804,10 +804,10 @@ export default function AddBookPage() {
         {/* Search Section */}
         {!showForm && (
           <div id="search-section" className="animate-fade-in">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Find Your Book</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Find Your Book</h2>
 
             {/* Search Input */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-4">
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -857,11 +857,11 @@ export default function AddBookPage() {
                   {searching ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Go'}
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-2">Type an ISBN or search by title/author</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Type an ISBN or search by title/author</p>
 
               {/* Search status message */}
               {searchMessage && (
-                <p className={`text-sm mt-2 ${searchMessage.type === 'error' ? 'text-red-600' : 'text-gray-500'}`}>
+                <p className={`text-sm mt-2 ${searchMessage.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
                   {searchMessage.text}
                 </p>
               )}
@@ -869,29 +869,29 @@ export default function AddBookPage() {
 
             {/* Search Results */}
             {searchResults.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 mb-4">
-                <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{searchResults.length} results</span>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mb-4">
+                <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{searchResults.length} results</span>
                 </div>
                 <div
                   ref={resultsContainerRef}
-                  className="divide-y divide-gray-100 max-h-80 overflow-y-auto"
+                  className="divide-y divide-gray-100 dark:divide-gray-700 max-h-80 overflow-y-auto overflow-x-hidden"
                 >
                   {searchResults.map((result, index) => {
                     const wishlisted = isInWishlist(result);
                     return (
                       <div
                         key={result.id}
-                        className="flex items-center gap-2 hover:bg-gray-50"
+                        className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
                         {/* Main clickable area - select result */}
                         <button
                           type="button"
                           onClick={() => selectResult(result)}
                           disabled={selectingResult === result.id}
-                          className="flex-1 p-3 flex gap-3 text-left relative disabled:opacity-50"
+                          className="flex-1 min-w-0 p-3 flex gap-3 text-left relative disabled:opacity-50"
                         >
-                          <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                          <div className="w-12 h-16 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden flex-shrink-0">
                             {result.coverUrl ? (
                               <Image
                                 src={result.coverUrl}
@@ -903,21 +903,21 @@ export default function AddBookPage() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <BookOpen className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                                <BookOpen className="w-5 h-5 text-gray-400 dark:text-gray-500" aria-hidden="true" />
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{result.title}</p>
-                            <p className="text-sm text-gray-500 truncate">{result.author}</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{result.title}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{result.author}</p>
                             {result.publishedDate && (
-                              <p className="text-xs text-gray-400">{result.publishedDate}</p>
+                              <p className="text-xs text-gray-400 dark:text-gray-500">{result.publishedDate}</p>
                             )}
                           </div>
                           {selectingResult === result.id ? (
                             <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0 self-center" />
                           ) : (
-                            <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 self-center" aria-hidden="true" />
+                            <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0 self-center" aria-hidden="true" />
                           )}
                         </button>
 
@@ -948,7 +948,7 @@ export default function AddBookPage() {
                   })}
                   {/* Sentinel for infinite scroll */}
                   {hasMoreResults && (
-                    <div ref={sentinelRef} className="py-3 text-center text-xs text-gray-400">
+                    <div ref={sentinelRef} className="py-3 text-center text-xs text-gray-400 dark:text-gray-500">
                       {loadingMore ? (
                         <Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" />
                       ) : (
@@ -962,8 +962,8 @@ export default function AddBookPage() {
 
             {/* Empty state for search results */}
             {searchResults.length === 0 && searchQuery && !searching && !searchMessage && (
-              <div className="text-center py-8 text-gray-500">
-                <BookOpen className="w-12 h-12 mx-auto text-gray-300 mb-3" aria-hidden="true" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <BookOpen className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" aria-hidden="true" />
                 <p>No results found</p>
                 <p className="text-sm mt-1">Try a different search or add manually</p>
               </div>
@@ -975,7 +975,7 @@ export default function AddBookPage() {
                 type="button"
                 id="add-manually-btn"
                 onClick={handleAddManually}
-                className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                className="text-sm text-primary dark:text-blue-400 hover:underline inline-flex items-center gap-1"
               >
                 <Edit3 className="w-4 h-4" aria-hidden="true" />
                 <span>Can&apos;t find it? Add manually</span>
@@ -992,7 +992,7 @@ export default function AddBookPage() {
               <button
                 type="button"
                 onClick={handleStartOver}
-                className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                className="text-sm text-primary dark:text-blue-400 hover:underline inline-flex items-center gap-1"
               >
                 <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                 <span>Back to search</span>
@@ -1000,23 +1000,23 @@ export default function AddBookPage() {
               {dataSource && (
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle className="w-4 h-4 text-green-500" aria-hidden="true" />
-                  <span className="text-gray-600">Found via {dataSource}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Found via {dataSource}</span>
                 </div>
               )}
             </div>
 
             {/* Duplicate Warning */}
             {duplicateWarning && (
-              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+              <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-lg flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-800">{duplicateWarning}</p>
+                <p className="text-sm text-amber-800 dark:text-amber-400">{duplicateWarning}</p>
               </div>
             )}
 
             {/* Book Form */}
-            <form id="book-form" onSubmit={handleSubmit} noValidate className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
+            <form id="book-form" onSubmit={handleSubmit} noValidate className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4">
               <div>
-                <label htmlFor="title" className="block font-semibold text-gray-700 mb-1">
+                <label htmlFor="title" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -1081,7 +1081,7 @@ export default function AddBookPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="publisher" className="block font-semibold text-gray-700 mb-1">
+                  <label htmlFor="publisher" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Publisher
                   </label>
                   <input
@@ -1094,7 +1094,7 @@ export default function AddBookPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="publishedDate" className="block font-semibold text-gray-700 mb-1">
+                  <label htmlFor="publishedDate" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Year Published
                   </label>
                   <input
@@ -1114,7 +1114,7 @@ export default function AddBookPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="pageCount" className="block font-semibold text-gray-700 mb-1">
+                  <label htmlFor="pageCount" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Pages
                   </label>
                   <input
@@ -1130,7 +1130,7 @@ export default function AddBookPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 mb-1">
+                  <label htmlFor="physicalFormat" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Format
                   </label>
                   <select
@@ -1138,7 +1138,7 @@ export default function AddBookPage() {
                     name="physicalFormat"
                     value={physicalFormat}
                     onChange={(e) => setPhysicalFormat(e.target.value as PhysicalFormat)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   >
                     {FORMAT_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -1150,7 +1150,7 @@ export default function AddBookPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-2">Rating</label>
+                <label className="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Rating</label>
                 <RatingInput value={rating} onChange={setRating} />
               </div>
 

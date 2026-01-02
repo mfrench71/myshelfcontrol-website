@@ -283,14 +283,14 @@ export function SeriesPicker({
     return {
       jsx: (
         <div key="suggestion">
-          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-50">
+          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
             Suggested from book
           </div>
           <button
             type="button"
             data-picker-item
-            className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
-              isFocused ? 'bg-gray-100' : ''
+            className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+              isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
             }`}
             onClick={handleAddSuggestion}
           >
@@ -298,7 +298,7 @@ export function SeriesPicker({
             <span>
               {suggestedName}
               {suggestedPosition && (
-                <span className="text-gray-400 ml-1">#{suggestedPosition}</span>
+                <span className="text-gray-400 dark:text-gray-500 ml-1">#{suggestedPosition}</span>
               )}
             </span>
           </button>
@@ -320,12 +320,12 @@ export function SeriesPicker({
           key={series.id}
           type="button"
           data-picker-item
-          className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
-            isFocused ? 'bg-gray-100' : ''
+          className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+            isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
           }`}
           onClick={() => handleSelectSeries(series)}
         >
-          <Library className="w-4 h-4 text-gray-400" aria-hidden="true" />
+          <Library className="w-4 h-4 text-gray-400 dark:text-gray-500" aria-hidden="true" />
           <span className="flex-1">{series.name}</span>
         </button>
       );
@@ -334,7 +334,7 @@ export function SeriesPicker({
     return {
       jsx: (
         <div key="user-series">
-          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-50">Your series</div>
+          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">Your series</div>
           {items}
         </div>
       ),
@@ -346,15 +346,15 @@ export function SeriesPicker({
   if (selectedSeries) {
     return (
       <div ref={containerRef} className="series-picker">
-        <label className="block font-semibold text-gray-700 mb-1">{label}</label>
+        <label className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">{label}</label>
 
         {/* Selected series display */}
-        <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
           <Library className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
-          <span className="flex-1 font-medium text-gray-900">{selectedSeries.name}</span>
+          <span className="flex-1 font-medium text-gray-900 dark:text-gray-100">{selectedSeries.name}</span>
           <button
             type="button"
-            className="p-2 hover:bg-gray-200 rounded text-gray-500"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-500 dark:text-gray-400"
             onClick={handleClear}
             aria-label="Remove from series"
             disabled={disabled}
@@ -365,14 +365,14 @@ export function SeriesPicker({
 
         {/* Position input */}
         <div className="mt-2">
-          <label htmlFor="series-position" className="block text-sm text-gray-500 mb-1">
+          <label htmlFor="series-position" className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
             Position in series
           </label>
           <input
             type="number"
             inputMode="numeric"
             id="series-position"
-            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             placeholder="#"
             min={1}
             value={localPosition || ''}
@@ -389,7 +389,7 @@ export function SeriesPicker({
 
   return (
     <div ref={containerRef} className="series-picker">
-      <label id="series-picker-label" className="block font-semibold text-gray-700 mb-1">
+      <label id="series-picker-label" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
         {label}
       </label>
 
@@ -399,7 +399,7 @@ export function SeriesPicker({
           ref={inputRef}
           type="text"
           role="combobox"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           placeholder={isLoading ? 'Loading...' : 'Search or add series...'}
           value={searchQuery}
           onChange={(e) => {
@@ -421,16 +421,16 @@ export function SeriesPicker({
         {isOpen && (
           <div
             id="series-picker-listbox"
-            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto"
             role="listbox"
             aria-label="Series options"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center justify-between">
-              <span className="text-xs text-gray-500">Select series</span>
+            <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center justify-between">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Select series</span>
               <button
                 type="button"
-                className="p-1 hover:bg-gray-200 rounded"
+                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                 onClick={() => {
                   setIsOpen(false);
                   setSearchQuery('');
@@ -438,7 +438,7 @@ export function SeriesPicker({
                 }}
                 aria-label="Close dropdown"
               >
-                <X className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                <X className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
               </button>
             </div>
 
@@ -455,7 +455,7 @@ export function SeriesPicker({
                 const seriesResult = renderUserSeries(currentIndex);
                 if (seriesResult.jsx) {
                   if (sections.length > 0) {
-                    sections.push(<div key="divider-1" className="border-t border-gray-100" />);
+                    sections.push(<div key="divider-1" className="border-t border-gray-100 dark:border-gray-700" />);
                   }
                   sections.push(seriesResult.jsx);
                 }
@@ -468,7 +468,7 @@ export function SeriesPicker({
                 const suggestionResult = renderSuggestion(currentIndex);
                 if (suggestionResult.jsx) {
                   if (sections.length > 0) {
-                    sections.push(<div key="divider-2" className="border-t border-gray-100" />);
+                    sections.push(<div key="divider-2" className="border-t border-gray-100 dark:border-gray-700" />);
                   }
                   sections.push(suggestionResult.jsx);
                 }
@@ -480,12 +480,12 @@ export function SeriesPicker({
                 const isFocused = focusedIndex === currentIndex;
                 sections.push(
                   <div key="create">
-                    <div className="border-t border-gray-100" />
+                    <div className="border-t border-gray-100 dark:border-gray-700" />
                     <button
                       type="button"
                       data-picker-item
-                      className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-primary ${
-                        isFocused ? 'bg-gray-100' : ''
+                      className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-primary ${
+                        isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
                       }`}
                       onClick={handleCreateSeries}
                     >
@@ -500,13 +500,13 @@ export function SeriesPicker({
               if (sections.length === 0 && !showCreateOption) {
                 if (seriesList.length === 0) {
                   sections.push(
-                    <div key="empty" className="px-3 py-4 text-center text-gray-500">
+                    <div key="empty" className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
                       No series yet. Type to create one.
                     </div>
                   );
                 } else {
                   sections.push(
-                    <div key="no-match" className="px-3 py-4 text-center text-gray-500">
+                    <div key="no-match" className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
                       No matches found
                     </div>
                   );

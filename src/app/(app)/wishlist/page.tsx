@@ -29,9 +29,9 @@ import type { WishlistItem, WishlistPriority } from '@/lib/types';
 type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'priority-high' | 'title-asc' | 'author-asc';
 
 const PRIORITY_COLOURS: Record<string, string> = {
-  high: 'bg-red-100 text-red-700',
-  medium: 'bg-amber-100 text-amber-700',
-  low: 'bg-blue-100 text-blue-700',
+  high: 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300',
+  medium: 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300',
+  low: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
 };
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -129,7 +129,7 @@ function WishlistItemCard({
   priority?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3 flex gap-4 relative">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 flex gap-4 relative">
       {/* Cover - matches book card size */}
       <div className="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden shadow-cover">
         <BookCover
@@ -143,11 +143,11 @@ function WishlistItemCard({
 
       {/* Content - matches book card styling */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-gray-900 truncate">{item.title}</h3>
-        <p className="text-sm text-gray-500 truncate">{item.author || 'Unknown author'}</p>
+        <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">{item.title}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{item.author || 'Unknown author'}</p>
         {/* Date Added */}
         {item.createdAt && (
-          <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+          <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 mt-0.5">
             <Calendar className="w-3 h-3" aria-hidden="true" />
             <span>Added {formatShortDate(item.createdAt)}</span>
           </p>
@@ -173,21 +173,21 @@ function WishlistItemCard({
       <div className="absolute bottom-2 right-2 flex gap-1">
         <button
           onClick={onMove}
-          className="p-2 hover:bg-green-50 rounded text-gray-400 hover:text-green-600 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
+          className="p-2 hover:bg-green-50 dark:hover:bg-green-900/30 rounded text-gray-400 hover:text-green-600 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
           aria-label="Add to library"
         >
           <ShoppingBag className="w-4 h-4" aria-hidden="true" />
         </button>
         <button
           onClick={onEdit}
-          className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
           aria-label="Edit item"
         >
           <Pencil className="w-4 h-4" aria-hidden="true" />
         </button>
         <button
           onClick={onDelete}
-          className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
+          className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-gray-400 hover:text-red-500 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
           aria-label="Remove from wishlist"
         >
           <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -370,13 +370,13 @@ export default function WishlistPage() {
   if (authLoading || loading) {
     return (
       <>
-        <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
           <div className="max-w-6xl mx-auto px-4 py-2 min-h-[52px]">
-            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           </div>
         </div>
         <div className="max-w-2xl mx-auto px-4 py-6">
-          <div className="h-8 bg-gray-200 rounded w-32 mb-6 animate-pulse" />
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-6 animate-pulse" />
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <WishlistItemSkeleton key={i} />
@@ -390,17 +390,17 @@ export default function WishlistPage() {
   return (
     <>
       {/* Sub-navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between min-h-[52px]">
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center text-sm">
               <li className="flex items-center min-w-0">
-                <Link href="/" className="text-gray-500 hover:text-primary hover:underline">
+                <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-blue-400 hover:underline">
                   Home
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium" aria-current="page">
+              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="text-gray-900 dark:text-gray-100 font-medium" aria-current="page">
                 Wishlist
               </li>
             </ol>
@@ -412,7 +412,7 @@ export default function WishlistPage() {
                 id="sort-select"
                 value={sortValue}
                 onChange={(e) => setSortValue(e.target.value as SortOption)}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 min-h-[44px] bg-white"
+                className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 min-h-[44px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value="createdAt-desc">Date Added (Newest)</option>
                 <option value="createdAt-asc">Date Added (Oldest)</option>
@@ -427,9 +427,9 @@ export default function WishlistPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Wishlist</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Wishlist</h1>
           {items.length > 0 && (
-            <p className="text-sm text-gray-500" aria-live="polite">
+            <p className="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
               {items.length} book{items.length !== 1 ? 's' : ''}
             </p>
           )}
@@ -438,9 +438,9 @@ export default function WishlistPage() {
         {/* Empty state */}
         {items.length === 0 ? (
           <div className="text-center py-12 empty-state-animate">
-            <Heart className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-            <p className="text-gray-500 mt-3">Your wishlist is empty</p>
-            <p className="text-gray-400 text-sm mt-1">Books you want to buy will appear here.</p>
+            <Heart className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+            <p className="text-gray-500 dark:text-gray-400 mt-3">Your wishlist is empty</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Books you want to buy will appear here.</p>
             <Link
               href="/books/add"
               className="inline-flex items-center gap-2 px-4 py-2 mt-4 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"
@@ -477,13 +477,13 @@ export default function WishlistPage() {
         className="md:max-w-sm"
       >
         <div className="p-4 md:p-6">
-          <h3 className="text-lg font-semibold mb-2">Add to Library?</h3>
-          <p className="text-gray-500 mb-6">&ldquo;{selectedItem?.title}&rdquo; will be added to your library.</p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Add to Library?</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">&ldquo;{selectedItem?.title}&rdquo; will be added to your library.</p>
           <div className="flex gap-3">
             <button
               onClick={closeModals}
               disabled={isProcessing}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+              className="flex-1 py-2 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 min-h-[44px] disabled:opacity-50"
             >
               Cancel
             </button>
@@ -514,7 +514,7 @@ export default function WishlistPage() {
         closeOnEscape={!isProcessing}
       >
         <div className="p-4 md:p-6">
-          <h3 className="text-lg font-semibold mb-4">Edit Wishlist Item</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Edit Wishlist Item</h3>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -523,14 +523,14 @@ export default function WishlistPage() {
             className="space-y-4"
           >
             <div>
-              <label htmlFor="edit-priority" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="edit-priority" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Priority
               </label>
               <select
                 id="edit-priority"
                 value={editPriority}
                 onChange={(e) => setEditPriority(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none min-h-[44px]"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none min-h-[44px]"
               >
                 <option value="">No priority</option>
                 <option value="high">High</option>
@@ -539,7 +539,7 @@ export default function WishlistPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="edit-notes" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="edit-notes" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Notes
               </label>
               <textarea
@@ -548,7 +548,7 @@ export default function WishlistPage() {
                 onChange={(e) => setEditNotes(e.target.value)}
                 rows={3}
                 placeholder=""
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
               />
             </div>
             <div className="flex gap-3 pt-2">
@@ -556,7 +556,7 @@ export default function WishlistPage() {
                 type="button"
                 onClick={closeModals}
                 disabled={isProcessing}
-                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+                className="flex-1 py-2 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 min-h-[44px] disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -589,13 +589,13 @@ export default function WishlistPage() {
         className="md:max-w-sm"
       >
         <div className="p-4 md:p-6">
-          <h3 className="text-lg font-semibold text-red-600 mb-2">Remove from Wishlist?</h3>
-          <p className="text-gray-500 mb-6">&ldquo;{selectedItem?.title}&rdquo; will be removed from your wishlist.</p>
+          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">Remove from Wishlist?</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">&ldquo;{selectedItem?.title}&rdquo; will be removed from your wishlist.</p>
           <div className="flex gap-3">
             <button
               onClick={closeModals}
               disabled={isProcessing}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+              className="flex-1 py-2 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 min-h-[44px] disabled:opacity-50"
             >
               Cancel
             </button>

@@ -723,26 +723,26 @@ export default function LibrarySettingsPage() {
   return (
     <>
       <div id="library-content" className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Library</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Library</h1>
 
         {/* Mobile Section Navigation (Pills) */}
         <nav className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
           <div className="flex gap-2">
             <a
               href="#genres"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Genres
             </a>
             <a
               href="#series"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Series
             </a>
             <a
               href="#backup"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Backup
             </a>
@@ -754,8 +754,8 @@ export default function LibrarySettingsPage() {
           <section id="genres" className="scroll-mt-36">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Tag className="w-5 h-5 text-gray-600" aria-hidden="true" />
-                <h2 className="text-lg font-semibold text-gray-900">Genres</h2>
+                <Tag className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Genres</h2>
               </div>
               <button
                 onClick={openAddGenreModal}
@@ -768,22 +768,22 @@ export default function LibrarySettingsPage() {
 
             {/* Genre List (Table) */}
             {genresLoading ? (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table className="w-full">
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {[1, 2, 3, 4].map((i) => (
                       <tr key={i}>
                         <td className="py-1.5 px-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-gray-200 rounded-full animate-pulse" />
-                            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                            <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+                            <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                           </div>
                         </td>
                         <td className="py-1.5 px-3 text-right">
-                          <div className="h-4 w-4 bg-gray-200 rounded animate-pulse ml-auto" />
+                          <div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse ml-auto" />
                         </td>
                         <td className="py-1.5 px-1">
-                          <div className="h-5 w-28 bg-gray-200 rounded animate-pulse ml-auto" />
+                          <div className="h-5 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse ml-auto" />
                         </td>
                       </tr>
                     ))}
@@ -791,17 +791,17 @@ export default function LibrarySettingsPage() {
                 </table>
               </div>
             ) : genres.length === 0 ? (
-              <div className="py-8 text-center bg-white rounded-xl border border-gray-200">
-                <Tag className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-                <p className="text-gray-500 mt-3">No genres yet</p>
-                <p className="text-gray-400 text-sm mt-1">Create your first genre to organise books</p>
+              <div className="py-8 text-center bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                <Tag className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+                <p className="text-gray-500 dark:text-gray-400 mt-3">No genres yet</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Create your first genre to organise books</p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table className="w-full">
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {genres.map((genre) => (
-                      <tr key={genre.id} className="hover:bg-gray-50">
+                      <tr key={genre.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="py-1.5 px-3">
                           <div className="flex items-center gap-2">
                             <span
@@ -809,30 +809,30 @@ export default function LibrarySettingsPage() {
                               style={{ backgroundColor: genre.color }}
                               title={genre.name}
                             />
-                            <span className="text-sm text-gray-900">{genre.name}</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100">{genre.name}</span>
                           </div>
                         </td>
-                        <td className="py-1.5 px-3 text-xs text-gray-500 whitespace-nowrap text-right">
+                        <td className="py-1.5 px-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap text-right">
                           {genre.bookCount}
                         </td>
                         <td className="py-0 px-0 text-right whitespace-nowrap">
                           <button
                             onClick={() => openEditGenreModal(genre)}
-                            className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Edit ${genre.name}`}
                           >
                             <Pencil className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => openMergeGenreModal(genre)}
-                            className="p-2 hover:bg-blue-50 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Merge ${genre.name}`}
                           >
                             <Combine className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => setGenreDeleteConfirm(genre)}
-                            className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Delete ${genre.name}`}
                           >
                             <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -846,11 +846,11 @@ export default function LibrarySettingsPage() {
             )}
 
             {/* Genre Picker Setting */}
-            <div className="mt-4 bg-gray-50 rounded-xl border border-gray-200 p-4">
+            <div className="mt-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
               <label className="flex items-center justify-between cursor-pointer">
                 <div>
-                  <span className="text-gray-700 text-sm">Show suggestions first in picker</span>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">Show suggestions first in picker</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Genre suggestions from public sources appear before your genres
                   </p>
                 </div>
@@ -861,7 +861,7 @@ export default function LibrarySettingsPage() {
                     onChange={(e) => handleGenreSuggestionsFirstChange(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
                 </div>
               </label>
             </div>
@@ -871,8 +871,8 @@ export default function LibrarySettingsPage() {
           <section id="series" className="scroll-mt-36">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Layers className="w-5 h-5 text-gray-600" aria-hidden="true" />
-                <h2 className="text-lg font-semibold text-gray-900">Series</h2>
+                <Layers className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Series</h2>
               </div>
               <button
                 onClick={openAddSeriesModal}
@@ -885,19 +885,19 @@ export default function LibrarySettingsPage() {
 
             {/* Series List (Table) */}
             {seriesLoading ? (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table className="w-full">
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {[1, 2, 3, 4].map((i) => (
                       <tr key={i}>
                         <td className="py-1.5 px-3">
-                          <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                         </td>
                         <td className="py-1.5 px-3 text-right">
-                          <div className="h-4 w-6 bg-gray-200 rounded animate-pulse ml-auto" />
+                          <div className="h-4 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse ml-auto" />
                         </td>
                         <td className="py-1.5 px-1">
-                          <div className="h-5 w-20 bg-gray-200 rounded animate-pulse ml-auto" />
+                          <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse ml-auto" />
                         </td>
                       </tr>
                     ))}
@@ -905,21 +905,21 @@ export default function LibrarySettingsPage() {
                 </table>
               </div>
             ) : seriesList.length === 0 ? (
-              <div className="py-8 text-center bg-white rounded-xl border border-gray-200">
-                <Library className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-                <p className="text-gray-500 mt-3">No series yet</p>
-                <p className="text-gray-400 text-sm mt-1">Add series to track book collections</p>
+              <div className="py-8 text-center bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                <Library className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+                <p className="text-gray-500 dark:text-gray-400 mt-3">No series yet</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Add series to track book collections</p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table className="w-full">
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {seriesList.map((series) => (
-                      <tr key={series.id} className="hover:bg-gray-50">
+                      <tr key={series.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="py-1.5 px-3">
-                          <span className="text-sm text-gray-900">{series.name}</span>
+                          <span className="text-sm text-gray-900 dark:text-gray-100">{series.name}</span>
                         </td>
-                        <td className="py-1.5 px-3 text-xs text-gray-500 whitespace-nowrap text-right">
+                        <td className="py-1.5 px-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap text-right">
                           {series.totalBooks
                             ? `${series.bookCount}/${series.totalBooks}`
                             : series.bookCount}
@@ -927,21 +927,21 @@ export default function LibrarySettingsPage() {
                         <td className="py-0 px-0 text-right whitespace-nowrap">
                           <button
                             onClick={() => openEditSeriesModal(series)}
-                            className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Edit ${series.name}`}
                           >
                             <Pencil className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => openMergeSeriesModal(series)}
-                            className="p-2 hover:bg-blue-50 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded text-gray-400 hover:text-blue-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Merge ${series.name}`}
                           >
                             <Combine className="w-4 h-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => setSeriesDeleteConfirm(series)}
-                            className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label={`Delete ${series.name}`}
                           >
                             <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -955,11 +955,11 @@ export default function LibrarySettingsPage() {
             )}
 
             {/* Series Picker Setting */}
-            <div className="mt-4 bg-gray-50 rounded-xl border border-gray-200 p-4">
+            <div className="mt-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
               <label className="flex items-center justify-between cursor-pointer">
                 <div>
-                  <span className="text-gray-700 text-sm">Show suggestions first in picker</span>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">Show suggestions first in picker</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     Series suggestions from public sources appear before your series
                   </p>
                 </div>
@@ -970,7 +970,7 @@ export default function LibrarySettingsPage() {
                     onChange={(e) => handleSeriesSuggestionsFirstChange(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
                 </div>
               </label>
             </div>
@@ -978,15 +978,15 @@ export default function LibrarySettingsPage() {
 
           {/* Backup & Restore Section */}
           <section id="backup" className="scroll-mt-36">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Backup & Restore</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Backup & Restore</h2>
 
             {/* Export */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
               <div className="flex items-center gap-3 mb-2">
-                <Download className="w-5 h-5 text-gray-600" aria-hidden="true" />
-                <h3 className="font-medium text-gray-900">Export Backup</h3>
+                <Download className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">Export Backup</h3>
               </div>
-              <p className="text-gray-600 text-sm mb-4">Download all your books, genres, series, and wishlist as a JSON file.</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">Download all your books, genres, series, and wishlist as a JSON file.</p>
               <button
                 onClick={handleExport}
                 disabled={exporting}
@@ -1007,12 +1007,12 @@ export default function LibrarySettingsPage() {
             </div>
 
             {/* Import */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center gap-3 mb-2">
-                <Upload className="w-5 h-5 text-gray-600" aria-hidden="true" />
-                <h3 className="font-medium text-gray-900">Import Backup</h3>
+                <Upload className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">Import Backup</h3>
               </div>
-              <p className="text-gray-600 text-sm mb-4">
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                 Restore books, genres, series, and wishlist from a backup file. Duplicates will be skipped.
               </p>
               <input
@@ -1025,7 +1025,7 @@ export default function LibrarySettingsPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {importing ? (
                   <>
@@ -1042,7 +1042,7 @@ export default function LibrarySettingsPage() {
 
               {/* Import Progress */}
               {importStatus && (
-                <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+                <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                   <span>{importStatus}</span>
                 </div>
@@ -1054,17 +1054,17 @@ export default function LibrarySettingsPage() {
                   {importSummary.map((line, i) => {
                     const [type, text] = line.split(':');
                     let icon = <BookOpen className="w-4 h-4 text-green-600" />;
-                    let textClass = 'text-gray-700';
+                    let textClass = 'text-gray-700 dark:text-gray-300';
 
                     if (type === 'genres') icon = <Tag className="w-4 h-4 text-green-600" />;
                     else if (type === 'series') icon = <Library className="w-4 h-4 text-green-600" />;
                     else if (type === 'wishlist') icon = <Heart className="w-4 h-4 text-green-600" />;
                     else if (type.includes('-skip')) {
                       icon = <MinusCircle className="w-4 h-4 text-gray-400" />;
-                      textClass = 'text-gray-500';
+                      textClass = 'text-gray-500 dark:text-gray-400';
                     } else if (type === 'wishlist-owned') {
                       icon = <CheckCircle className="w-4 h-4 text-blue-500" />;
-                      textClass = 'text-blue-600';
+                      textClass = 'text-blue-600 dark:text-blue-400';
                     }
 
                     return (
@@ -1090,13 +1090,13 @@ export default function LibrarySettingsPage() {
         closeOnEscape={!genreSaving}
       >
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             {editingGenre ? 'Edit Genre' : 'Add Genre'}
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="genre-name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="genre-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Genre Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -1105,15 +1105,15 @@ export default function LibrarySettingsPage() {
                 value={genreName}
                 onChange={(e) => setGenreName(e.target.value)}
                 placeholder="e.g., Science Fiction"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
             {/* Show color picker only when editing */}
             {editingGenre && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Colour</label>
-                <div className="max-h-32 overflow-y-auto rounded-lg border border-gray-100 p-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Colour</label>
+                <div className="max-h-32 overflow-y-auto rounded-lg border border-gray-100 dark:border-gray-700 p-2">
                   <div className="flex flex-wrap gap-2">
                     {availableColors.map((color) => {
                       const isSelected = color.toLowerCase() === genreColor.toLowerCase();
@@ -1145,7 +1145,7 @@ export default function LibrarySettingsPage() {
           <div className="flex gap-3 mt-6">
             <button
               onClick={closeGenreModal}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors min-h-[44px]"
             >
               Cancel
             </button>
@@ -1169,12 +1169,12 @@ export default function LibrarySettingsPage() {
         closeOnEscape={!genreSaving}
       >
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Genre</h3>
-          <p className="text-gray-600 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Delete Genre</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             {genreDeleteConfirm && genreDeleteConfirm.bookCount > 0 ? (
               <>
                 This will remove &quot;{genreDeleteConfirm.name}&quot; from{' '}
-                <span className="text-amber-600 font-medium">
+                <span className="text-amber-600 dark:text-amber-400 font-medium">
                   {genreDeleteConfirm.bookCount} book
                   {genreDeleteConfirm.bookCount !== 1 ? 's' : ''}
                 </span>
@@ -1187,7 +1187,7 @@ export default function LibrarySettingsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setGenreDeleteConfirm(null)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors min-h-[44px]"
             >
               Cancel
             </button>
@@ -1211,21 +1211,21 @@ export default function LibrarySettingsPage() {
         closeOnEscape={!genreSaving}
       >
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Genre</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Merge Genre</h3>
 
-          <p className="text-gray-600 text-sm mb-4">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
             Merge &quot;<span className="font-medium">{mergingGenre?.name}</span>&quot; into another genre. Books will be moved and the source genre will be deleted.
           </p>
 
           <div>
-            <label htmlFor="merge-target" className="block font-semibold text-gray-700 mb-1">
+            <label htmlFor="merge-target" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Target Genre
             </label>
             <select
               id="merge-target"
               value={mergeTargetId}
               onChange={(e) => setMergeTargetId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="">Select a genre...</option>
               {genres
@@ -1241,7 +1241,7 @@ export default function LibrarySettingsPage() {
           <div className="flex gap-3 mt-6">
             <button
               onClick={closeMergeGenreModal}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors min-h-[44px]"
             >
               Cancel
             </button>
@@ -1265,13 +1265,13 @@ export default function LibrarySettingsPage() {
         closeOnEscape={!seriesSaving}
       >
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
             {editingSeries ? 'Edit Series' : 'Add Series'}
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="series-name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="series-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Series Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -1280,12 +1280,12 @@ export default function LibrarySettingsPage() {
                 value={seriesName}
                 onChange={(e) => setSeriesName(e.target.value)}
                 placeholder="e.g., Harry Potter"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
             <div>
-              <label htmlFor="series-total" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="series-total" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Total Books in Series
               </label>
               <input
@@ -1296,9 +1296,9 @@ export default function LibrarySettingsPage() {
                 onChange={(e) => setSeriesTotalBooks(e.target.value)}
                 placeholder="e.g., 7"
                 min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Optional. Shows completion progress (e.g., 3/7). You can have more books than this total.
               </p>
             </div>
@@ -1307,7 +1307,7 @@ export default function LibrarySettingsPage() {
           <div className="flex gap-3 mt-6">
             <button
               onClick={closeSeriesModal}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors min-h-[44px]"
             >
               Cancel
             </button>
@@ -1331,12 +1331,12 @@ export default function LibrarySettingsPage() {
         closeOnEscape={!seriesSaving}
       >
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Delete Series</h3>
-          <p className="text-gray-600 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Delete Series</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             {seriesDeleteConfirm && seriesDeleteConfirm.bookCount > 0 ? (
               <>
                 This will remove &quot;{seriesDeleteConfirm.name}&quot; from{' '}
-                <span className="text-amber-600 font-medium">
+                <span className="text-amber-600 dark:text-amber-400 font-medium">
                   {seriesDeleteConfirm.bookCount} book
                   {seriesDeleteConfirm.bookCount !== 1 ? 's' : ''}
                 </span>
@@ -1349,7 +1349,7 @@ export default function LibrarySettingsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setSeriesDeleteConfirm(null)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors min-h-[44px]"
             >
               Cancel
             </button>
@@ -1373,21 +1373,21 @@ export default function LibrarySettingsPage() {
         closeOnEscape={!seriesSaving}
       >
         <div className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Merge Series</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Merge Series</h3>
 
-          <p className="text-gray-600 text-sm mb-4">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
             Merge &quot;<span className="font-medium">{mergingSeries?.name}</span>&quot; into another series. Books will be moved and the source series will be deleted.
           </p>
 
           <div>
-            <label htmlFor="merge-series-target" className="block font-semibold text-gray-700 mb-1">
+            <label htmlFor="merge-series-target" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Target Series
             </label>
             <select
               id="merge-series-target"
               value={mergeSeriesTargetId}
               onChange={(e) => setMergeSeriesTargetId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="">Select a series...</option>
               {seriesList
@@ -1403,7 +1403,7 @@ export default function LibrarySettingsPage() {
           <div className="flex gap-3 mt-6">
             <button
               onClick={closeMergeSeriesModal}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors min-h-[44px]"
             >
               Cancel
             </button>

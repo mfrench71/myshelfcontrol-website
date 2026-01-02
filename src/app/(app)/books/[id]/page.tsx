@@ -131,24 +131,24 @@ function DeleteModal({
       closeOnEscape={!loading}
     >
       <div className="p-6">
-        <h3 className="text-lg font-semibold mb-2">Move to Bin?</h3>
-        <p className="text-gray-500 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Move to Bin?</h3>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">
           This book will be moved to the bin and automatically deleted after 30 days. You can restore it from Settings.
         </p>
 
         {/* Series deletion option - shown when last book in series */}
         {isLastBookInSeries && seriesName && (
-          <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+          <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={deleteSeriesChecked}
                 onChange={(e) => onDeleteSeriesChange(e.target.checked)}
-                className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                className="mt-1 w-4 h-4 text-purple-600 border-gray-300 dark:border-gray-600 rounded focus:ring-purple-500"
               />
               <div>
-                <span className="font-medium text-purple-900">Also delete the empty series</span>
-                <p className="text-purple-700 text-sm mt-0.5">
+                <span className="font-medium text-purple-900 dark:text-purple-200">Also delete the empty series</span>
+                <p className="text-purple-700 dark:text-purple-300 text-sm mt-0.5">
                   &ldquo;{seriesName}&rdquo; will become empty
                 </p>
               </div>
@@ -160,7 +160,7 @@ function DeleteModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-2 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
@@ -445,24 +445,24 @@ export default function BookDetailPage() {
       <div id="loading-state" className="max-w-6xl mx-auto px-4 py-6">
         {/* Breadcrumb skeleton */}
         <div className="mb-6">
-          <div className="h-4 bg-gray-200 rounded w-48 animate-pulse" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-48 animate-pulse" />
         </div>
 
         <div className="flex flex-col md:flex-row md:gap-8">
           {/* Cover skeleton */}
           <div className="md:w-72 flex-shrink-0 mb-6 md:mb-0">
-            <div className="aspect-[2/3] bg-gray-200 rounded-lg animate-pulse" />
+            <div className="aspect-[2/3] bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
           </div>
 
           {/* Details skeleton */}
           <div className="flex-1 space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-3/4 animate-pulse" />
-            <div className="h-5 bg-gray-200 rounded w-1/2 animate-pulse" />
-            <div className="h-5 bg-gray-200 rounded w-24 animate-pulse" />
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse" />
+            <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
+            <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse" />
             <div className="space-y-2 pt-4">
-              <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
-              <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
-              <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse" />
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse" />
             </div>
           </div>
         </div>
@@ -474,12 +474,12 @@ export default function BookDetailPage() {
   if (error) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 rounded-xl p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
           <div>
-            <p className="text-red-700 font-medium">Error</p>
-            <p className="text-red-600 text-sm mt-1">{error}</p>
-            <Link href="/books" className="mt-2 text-sm text-red-700 underline hover:no-underline inline-block">
+            <p className="text-red-700 dark:text-red-400 font-medium">Error</p>
+            <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
+            <Link href="/books" className="mt-2 text-sm text-red-700 dark:text-red-400 underline hover:no-underline inline-block">
               Back to books
             </Link>
           </div>
@@ -493,18 +493,18 @@ export default function BookDetailPage() {
   return (
     <>
       {/* Sub-navigation */}
-      <div className="bg-white border-b border-gray-200 sticky top-14 z-30">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center text-sm">
               <li>
-                <Link href="/books" className="text-gray-500 hover:text-gray-700">
+                <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                   My Books
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400">/</li>
-              <li className="text-gray-900 font-medium truncate max-w-[150px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-none">
+              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="text-gray-900 dark:text-gray-100 font-medium truncate max-w-[150px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-none">
                 {book.title}
               </li>
             </ol>
@@ -514,7 +514,7 @@ export default function BookDetailPage() {
           <div className="flex items-center gap-1">
             <Link
               href={`/books/${bookId}/edit`}
-              className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 flex items-center justify-center sm:justify-start gap-1 min-h-[44px] min-w-[44px]"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400 flex items-center justify-center sm:justify-start gap-1 min-h-[44px] min-w-[44px]"
               aria-label="Edit book"
             >
               <Pencil className="w-5 h-5" aria-hidden="true" />
@@ -522,7 +522,7 @@ export default function BookDetailPage() {
             </Link>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="p-2 hover:bg-red-50 rounded-lg text-red-600 flex items-center justify-center sm:justify-start gap-1 min-h-[44px] min-w-[44px]"
+              className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-red-600 flex items-center justify-center sm:justify-start gap-1 min-h-[44px] min-w-[44px]"
               aria-label="Delete book"
             >
               <Trash2 className="w-5 h-5" aria-hidden="true" />
@@ -541,7 +541,7 @@ export default function BookDetailPage() {
             <button
               type="button"
               onClick={() => allImages.length > 0 && openLightbox(0)}
-              className={`aspect-[2/3] w-full bg-gray-100 rounded-lg overflow-hidden shadow-lg ${
+              className={`aspect-[2/3] w-full bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden shadow-lg ${
                 allImages.length > 0 ? 'cursor-zoom-in hover:shadow-xl transition-shadow' : ''
               }`}
               disabled={allImages.length === 0}
@@ -559,7 +559,7 @@ export default function BookDetailPage() {
             {/* Additional Images Gallery */}
             {book.images && book.images.length > 0 && (
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <h3 className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <Images className="w-4 h-4" aria-hidden="true" />
                   Gallery ({book.images.length} image{book.images.length !== 1 ? 's' : ''})
                 </h3>
@@ -572,7 +572,7 @@ export default function BookDetailPage() {
                         key={img.id}
                         type="button"
                         onClick={() => openLightbox(lightboxIdx)}
-                        className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-zoom-in hover:ring-2 hover:ring-primary transition-all group"
+                        className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden cursor-zoom-in hover:ring-2 hover:ring-primary transition-all group"
                         aria-label={`View image ${index + 1}`}
                       >
                         <Image
@@ -596,12 +596,12 @@ export default function BookDetailPage() {
             {/* Title & Author */}
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{book.title}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">{book.title}</h1>
                 <StatusPill status={status} />
               </div>
               <Link
                 href={`/books?author=${encodeURIComponent(book.author)}`}
-                className="inline-flex items-center gap-1 text-lg text-primary mt-1 hover:underline"
+                className="inline-flex items-center gap-1 text-lg text-primary dark:text-blue-400 mt-1 hover:underline"
               >
                 <span>{book.author || 'Unknown author'}</span>
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -637,7 +637,7 @@ export default function BookDetailPage() {
             {/* Series */}
             {series && (
               <div>
-                <h2 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-base">
+                <h2 className="font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2 text-base">
                   <Library className="w-4 h-4" aria-hidden="true" />
                   {series.name}
                   {book.seriesPosition && ` #${book.seriesPosition}`}
@@ -654,11 +654,11 @@ export default function BookDetailPage() {
                         return (
                           <div
                             key={seriesBook.id}
-                            className="flex items-center gap-2 text-sm py-1 text-primary font-medium"
+                            className="flex items-center gap-2 text-sm py-1 text-primary dark:text-blue-400 font-medium"
                           >
                             <BookOpen className="w-4 h-4" aria-hidden="true" />
                             <span>{displayText}</span>
-                            <span className="text-xs text-gray-400">(viewing)</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">(viewing)</span>
                           </div>
                         );
                       }
@@ -667,16 +667,16 @@ export default function BookDetailPage() {
                         <Link
                           key={seriesBook.id}
                           href={`/books/${seriesBook.id}`}
-                          className="flex items-center gap-2 text-sm py-1 text-gray-700 hover:text-primary"
+                          className="flex items-center gap-2 text-sm py-1 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400"
                         >
-                          <BookIcon className="w-4 h-4 text-gray-400" aria-hidden="true" />
+                          <BookIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" aria-hidden="true" />
                           <span>{displayText}</span>
                         </Link>
                       );
                     })}
                     <Link
                       href={`/books?series=${series.id}`}
-                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
+                      className="inline-flex items-center gap-1 text-sm text-primary dark:text-blue-400 hover:underline mt-2"
                     >
                       View all in series
                       <ArrowRight className="w-3 h-3" aria-hidden="true" />
@@ -691,51 +691,51 @@ export default function BookDetailPage() {
               <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                 {book.isbn && (
                   <div>
-                    <dt className="text-gray-500">ISBN</dt>
-                    <dd className="font-medium text-gray-900">{book.isbn}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">ISBN</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100">{book.isbn}</dd>
                   </div>
                 )}
                 {book.pageCount != null && book.pageCount > 0 && (
                   <div>
-                    <dt className="text-gray-500">Pages</dt>
-                    <dd className="font-medium text-gray-900">{book.pageCount}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Pages</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100">{book.pageCount}</dd>
                   </div>
                 )}
                 {book.physicalFormat && (
                   <div>
-                    <dt className="text-gray-500">Format</dt>
-                    <dd className="font-medium text-gray-900 capitalize">{book.physicalFormat}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Format</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100 capitalize">{book.physicalFormat}</dd>
                   </div>
                 )}
                 {book.publisher && (
                   <div>
-                    <dt className="text-gray-500">Publisher</dt>
-                    <dd className="font-medium text-gray-900">{book.publisher}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Publisher</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100">{book.publisher}</dd>
                   </div>
                 )}
                 {book.publishedDate && (
                   <div>
-                    <dt className="text-gray-500">Published</dt>
-                    <dd className="font-medium text-gray-900">{book.publishedDate}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Published</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100">{book.publishedDate}</dd>
                   </div>
                 )}
                 {book.createdAt && (
                   <div>
-                    <dt className="text-gray-500">Added</dt>
-                    <dd className="font-medium text-gray-900">{formatDate(book.createdAt)}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Added</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100">{formatDate(book.createdAt)}</dd>
                   </div>
                 )}
                 {book.updatedAt && (
                   <div>
-                    <dt className="text-gray-500">Modified</dt>
-                    <dd className="font-medium text-gray-900">{formatDate(book.updatedAt)}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Modified</dt>
+                    <dd className="font-medium text-gray-900 dark:text-gray-100">{formatDate(book.updatedAt)}</dd>
                   </div>
                 )}
               </dl>
             </div>
 
             {/* Reading Activity & Notes Accordion */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-200">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden divide-y divide-gray-200 dark:divide-gray-700">
               <ReadingActivitySection
                 status={status}
                 reads={book.reads || []}

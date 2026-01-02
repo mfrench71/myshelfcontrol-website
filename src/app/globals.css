@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Enable class-based dark mode (.dark class on html element) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Primary Brand Colours - blue-600 for WCAG AA contrast (4.56:1 with white) */
   --color-primary: #2563eb;
@@ -1377,6 +1380,35 @@ button, a {
 
 .dark {
   color-scheme: dark;
+}
+
+/* Force light mode for auth pages */
+.light-mode-only,
+.light-mode-only * {
+  color-scheme: light !important;
+}
+
+/* Override dark mode styles within light-mode-only container */
+.dark .light-mode-only input[type='text'],
+.dark .light-mode-only input[type='email'],
+.dark .light-mode-only input[type='password'],
+.dark .light-mode-only input[type='number'],
+.dark .light-mode-only input[type='date'],
+.dark .light-mode-only input[type='search'],
+.dark .light-mode-only textarea,
+.dark .light-mode-only select {
+  background-color: white;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.dark .light-mode-only input::placeholder,
+.dark .light-mode-only textarea::placeholder {
+  color: #9ca3af;
+}
+
+.dark .light-mode-only select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
 /* Form Elements - Dark Mode */

@@ -304,26 +304,26 @@ export default function MaintenanceSettingsPage() {
   return (
     <>
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Maintenance</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Maintenance</h1>
 
         {/* Mobile Section Navigation (Pills) */}
         <nav className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
           <div className="flex gap-2">
             <a
               href="#library-health"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Health
             </a>
             <a
               href="#genre-counts"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Genres
             </a>
             <a
               href="#orphaned-images"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Images
             </a>
@@ -331,9 +331,9 @@ export default function MaintenanceSettingsPage() {
         </nav>
 
         {/* Library Health */}
-        <section id="library-health" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6 mb-4">
-          <h3 className="font-medium text-gray-900 mb-2">Library Health</h3>
-          <p className="text-gray-600 text-sm mb-4">
+        <section id="library-health" className="scroll-mt-36 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Library Health</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
             Analyse your library for missing data and fix issues from book APIs.
           </p>
 
@@ -349,38 +349,38 @@ export default function MaintenanceSettingsPage() {
               {/* Progress Bar */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700">Library Completeness</span>
-                  <span className="text-sm font-medium">{healthReport.completenessScore}%</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Library Completeness</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{healthReport.completenessScore}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                   <div
                     className={`h-3 rounded-full transition-all ${progressBarColour}`}
                     style={{ width: `${healthReport.completenessScore}%` }}
                   />
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{rating?.label}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{rating?.label}</p>
               </div>
 
               {/* Stats Row */}
               <div className="flex flex-wrap gap-4 mb-4 text-sm">
-                <div className="text-gray-600">
-                  <span className="font-medium">{healthReport.totalBooks}</span> books
+                <div className="text-gray-600 dark:text-gray-400">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{healthReport.totalBooks}</span> books
                 </div>
-                <div className="text-gray-600">
-                  <span className="font-medium">{uniqueBooksWithIssues}</span> books with missing
+                <div className="text-gray-600 dark:text-gray-400">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{uniqueBooksWithIssues}</span> books with missing
                   information
                 </div>
               </div>
 
               {/* Complete State */}
               {uniqueBooksWithIssues === 0 ? (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-900 rounded-lg text-center">
                   <CheckCircle
                     className="w-8 h-8 text-green-500 mx-auto mb-2"
                     aria-hidden="true"
                   />
-                  <p className="text-green-700 font-medium">Your library is 100% complete!</p>
-                  <p className="text-green-600 text-sm">
+                  <p className="text-green-700 dark:text-green-300 font-medium">Your library is 100% complete!</p>
+                  <p className="text-green-600 dark:text-green-400 text-sm">
                     All books have cover images, genres, and metadata.
                   </p>
                 </div>
@@ -391,7 +391,7 @@ export default function MaintenanceSettingsPage() {
                     {booksWithIssues.map(({ book, missing }, index) => (
                       <div
                         key={book.id}
-                        className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200"
+                        className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
                       >
                         <BookCover
                           src={book.coverImageUrl}
@@ -402,17 +402,17 @@ export default function MaintenanceSettingsPage() {
                           priority={index < 6}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-gray-900 truncate">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                             {book.title || 'Untitled'}
                           </div>
-                          <div className="text-xs text-gray-500">by {book.author || 'Unknown'}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">by {book.author || 'Unknown'}</div>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {missing.map((m, i) => {
                               const IconComponent = ISSUE_ICONS[m.icon] || BookOpen;
                               return (
                                 <span
                                   key={i}
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded"
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded"
                                 >
                                   <IconComponent className="w-3 h-3" aria-hidden="true" />
                                   {m.label}
@@ -423,7 +423,7 @@ export default function MaintenanceSettingsPage() {
                         </div>
                         <Link
                           href={`/books/${book.id}/edit`}
-                          className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                          className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                           aria-label="Edit book"
                         >
                           <Pencil className="w-4 h-4" aria-hidden="true" />
@@ -437,7 +437,7 @@ export default function MaintenanceSettingsPage() {
                     <button
                       onClick={loadLibraryHealth}
                       disabled={healthLoading}
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors min-h-[44px] disabled:opacity-50"
                     >
                       {healthLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -454,16 +454,16 @@ export default function MaintenanceSettingsPage() {
         </section>
 
         {/* Recalculate Genre Counts */}
-        <section id="genre-counts" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6 mb-4">
-          <h3 className="font-medium text-gray-900 mb-2">Recalculate Genre Counts</h3>
-          <p className="text-gray-600 text-sm mb-4">
+        <section id="genre-counts" className="scroll-mt-36 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Recalculate Genre Counts</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
             If genre book counts appear incorrect, this will scan all books and recalculate the
             count for each genre.
           </p>
 
           {recountResults && (
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-700">{recountResults}</p>
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-300">{recountResults}</p>
             </div>
           )}
 
@@ -487,30 +487,30 @@ export default function MaintenanceSettingsPage() {
         </section>
 
         {/* Orphaned Images */}
-        <section id="orphaned-images" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="font-medium text-gray-900 mb-2">Orphaned Images</h3>
-          <p className="text-gray-600 text-sm mb-4">
+        <section id="orphaned-images" className="scroll-mt-36 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Orphaned Images</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
             Find and delete images in storage that are not linked to any book. This can happen if
             you upload images but don&apos;t save the book.
           </p>
 
           {/* Scan Results */}
           {(orphanScanning || orphanResults) && (
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
               {orphanScanning && (
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-amber-500" aria-hidden="true" />
-                  <span className="text-sm text-gray-600">Scanning for orphaned images...</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Scanning for orphaned images...</span>
                 </div>
               )}
 
               {orphanResults === 'found' && (
                 <div>
-                  <div className="flex items-center gap-2 text-amber-600 mb-2">
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-2">
                     <AlertTriangle className="w-5 h-5" aria-hidden="true" />
                     <span className="font-medium">{orphanedFiles.length} orphaned images found</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">Total size: {formatBytes(orphanTotalSize)}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Total size: {formatBytes(orphanTotalSize)}</p>
                   <button
                     onClick={handleDeleteOrphans}
                     disabled={orphanDeleting}
@@ -532,11 +532,11 @@ export default function MaintenanceSettingsPage() {
               )}
 
               {orphanResults === 'none' && (
-                <p className="text-sm text-gray-700">No orphaned images found.</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">No orphaned images found.</p>
               )}
 
               {orphanResults === 'deleted' && (
-                <p className="text-sm text-gray-700">{orphanDeletedCount} orphaned images deleted.</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">{orphanDeletedCount} orphaned images deleted.</p>
               )}
             </div>
           )}

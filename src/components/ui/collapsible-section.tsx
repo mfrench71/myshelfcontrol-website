@@ -52,15 +52,15 @@ export function CollapsibleSection({
           }}
           className={`flex items-center py-1 text-left min-h-[44px] ${actions ? 'flex-1' : 'w-full'}`}
         >
-          <span className="font-semibold text-gray-700 flex items-center gap-2 text-base">
+          <span className="font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 text-base">
             <ChevronDown
-              className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
               aria-hidden="true"
             />
             {Icon && <Icon className="w-4 h-4" aria-hidden="true" />}
             {title}
             {count !== undefined && count > 0 && (
-              <span className="text-gray-400 font-normal">({count})</span>
+              <span className="text-gray-400 dark:text-gray-500 font-normal">({count})</span>
             )}
           </span>
         </button>

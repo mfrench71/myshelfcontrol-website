@@ -233,8 +233,8 @@ export function GenrePicker({
           role="option"
           aria-selected={isSelected}
           data-picker-item
-          className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
-            isFocused ? 'bg-gray-100' : ''
+          className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+            isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
           }`}
           onClick={() => handleToggleGenre(genre.id)}
         >
@@ -251,7 +251,7 @@ export function GenrePicker({
     return {
       jsx: (
         <div key="user-genres">
-          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-50">Your genres</div>
+          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">Your genres</div>
           {items}
         </div>
       ),
@@ -273,8 +273,8 @@ export function GenrePicker({
           role="option"
           aria-selected={false}
           data-picker-item
-          className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
-            isFocused ? 'bg-gray-100' : ''
+          className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+            isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
           }`}
           onClick={() => handleAddSuggestion(name)}
         >
@@ -287,8 +287,8 @@ export function GenrePicker({
     return {
       jsx: (
         <div key="suggestions">
-          <div className="border-t border-gray-100" />
-          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-50">
+          <div className="border-t border-gray-100 dark:border-gray-700" />
+          <div className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
             Suggested from book
           </div>
           {items}
@@ -300,7 +300,7 @@ export function GenrePicker({
 
   return (
     <div ref={containerRef} className="genre-picker">
-      <label id="genre-picker-label" className="block font-semibold text-gray-700 mb-1">
+      <label id="genre-picker-label" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
         {label}
       </label>
 
@@ -334,7 +334,7 @@ export function GenrePicker({
           ref={inputRef}
           type="text"
           role="combobox"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           placeholder={isLoading ? 'Loading genres...' : 'Add genre...'}
           value={searchQuery}
           onChange={(e) => {
@@ -356,16 +356,16 @@ export function GenrePicker({
         {isOpen && (
           <div
             id="genre-picker-listbox"
-            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto"
             role="listbox"
             aria-label="Genre options"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center justify-between">
-              <span className="text-xs text-gray-500">Select genres</span>
+            <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center justify-between">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Select genres</span>
               <button
                 type="button"
-                className="p-1 hover:bg-gray-200 rounded"
+                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                 onClick={() => {
                   setIsOpen(false);
                   setSearchQuery('');
@@ -373,7 +373,7 @@ export function GenrePicker({
                 }}
                 aria-label="Close dropdown"
               >
-                <X className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                <X className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
               </button>
             </div>
 
@@ -405,12 +405,12 @@ export function GenrePicker({
                 const isFocused = focusedIndex === currentIndex;
                 sections.push(
                   <div key="create">
-                    <div className="border-t border-gray-100" />
+                    <div className="border-t border-gray-100 dark:border-gray-700" />
                     <button
                       type="button"
                       data-picker-item
-                      className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-primary ${
-                        isFocused ? 'bg-gray-100' : ''
+                      className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-primary ${
+                        isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
                       }`}
                       onClick={handleCreateGenre}
                     >
@@ -424,7 +424,7 @@ export function GenrePicker({
               // Hint if no search query
               if (!searchQuery && sections.length > 0) {
                 sections.push(
-                  <div key="hint" className="px-3 py-2 text-xs text-gray-400 border-t border-gray-100">
+                  <div key="hint" className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700">
                     Type a name to create a new genre
                   </div>
                 );
@@ -433,7 +433,7 @@ export function GenrePicker({
               // Empty state
               if (sections.length === 0 && !showCreateOption) {
                 sections.push(
-                  <div key="empty" className="px-3 py-4 text-center text-gray-500">
+                  <div key="empty" className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
                     Type to search or create a genre
                   </div>
                 );

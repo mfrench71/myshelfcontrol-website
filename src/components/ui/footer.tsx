@@ -8,14 +8,14 @@ export function Footer() {
   const version = process.env.NEXT_PUBLIC_BUILD_VERSION || 'dev';
 
   return (
-    <footer className="bg-gray-100 border-t border-gray-200 py-4 mt-auto">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-gray-500 text-sm">
+    <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 mt-auto">
+      <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-gray-500 dark:text-gray-400 text-sm">
         <span>© {currentYear} MyShelfControl</span>
         <div className="flex items-center gap-4">
-          <Link href="/privacy" className="hover:text-gray-700 transition-colors">
+          <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
             Privacy Policy
           </Link>
-          <Link href="/settings/about" className="text-gray-400 hover:text-gray-600 transition-colors">
+          <Link href="/settings/about" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
             v{version}
           </Link>
         </div>

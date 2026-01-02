@@ -102,7 +102,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   return (
     <>
       {before}
-      <mark className="bg-yellow-200 text-yellow-900 rounded px-0.5">{match}</mark>
+      <mark className="bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 rounded px-0.5">{match}</mark>
       {after}
     </>
   );
@@ -288,16 +288,16 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col animate-fade-in">
+    <div className="fixed inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm z-50 flex flex-col animate-fade-in">
       {/* Search Header */}
-      <div className="border-b border-gray-200 p-4 animate-search-header flex-shrink-0">
+      <div className="border-b border-gray-200 dark:border-gray-700 p-4 animate-search-header flex-shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={handleClose}
-            className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+            className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
             aria-label="Close search"
           >
-            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" aria-hidden="true" />
           </button>
 
           <div className="flex-1 relative">
@@ -307,12 +307,12 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search books..."
-              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-800"
             />
             {query && (
               <button
                 onClick={() => setQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 aria-label="Clear search"
               >
                 <X className="w-4 h-4" />
@@ -321,7 +321,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           </div>
 
           {results.length > 0 && (
-            <span className="text-sm text-gray-500 whitespace-nowrap">
+            <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
               {results.length} result{results.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -335,13 +335,13 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           recentSearches.length > 0 ? (
             <div className="p-4 max-w-6xl mx-auto w-full section-enter">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-gray-500">Recent searches</h3>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Recent searches</h3>
                 <button
                   onClick={() => {
                     clearRecentSearches();
                     setRecentSearches([]);
                   }}
-                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
                   Clear
                 </button>
@@ -351,10 +351,10 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   <button
                     key={search}
                     onClick={() => handleSelectRecent(search)}
-                    className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg text-left transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left transition-colors"
                   >
-                    <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
-                    <span className="text-gray-700 truncate">{search}</span>
+                    <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" aria-hidden="true" />
+                    <span className="text-gray-700 dark:text-gray-300 truncate">{search}</span>
                   </button>
                 ))}
               </div>
@@ -363,9 +363,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             /* Empty initial state */
             <div className="p-4 max-w-6xl mx-auto w-full section-enter">
               <div className="py-8 text-center">
-                <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-                <p className="text-gray-500 mt-3">Search your library</p>
-                <p className="text-gray-400 text-sm mt-1">
+                <Search className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+                <p className="text-gray-500 dark:text-gray-400 mt-3">Search your library</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
                   Find books by title, author, ISBN, series, notes or publisher
                 </p>
               </div>
@@ -375,9 +375,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           /* No Results */
           <div className="p-4 max-w-6xl mx-auto w-full section-enter">
             <div className="py-8 text-center">
-              <Search className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-              <p className="text-gray-500 mt-3">No books found for &quot;{query}&quot;</p>
-              <p className="text-gray-400 text-sm mt-1">Try a different search term</p>
+              <Search className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+              <p className="text-gray-500 dark:text-gray-400 mt-3">No books found for &quot;{query}&quot;</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Try a different search term</p>
             </div>
           </div>
         ) : (
@@ -392,7 +392,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     key={book.id}
                     href={`/books/${book.id}`}
                     onClick={handleSelectResult}
-                    className="flex gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md active:scale-[0.99] transition-all animate-fade-in"
+                    className="flex gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md active:scale-[0.99] transition-all animate-fade-in"
                     style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
                   >
                     <BookCover
@@ -403,29 +403,29 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       className="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-cover"
                     />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 truncate">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">
                         {highlightMatch(book.title || 'Untitled', query)}
                       </h3>
-                      <p className="text-sm text-gray-500 truncate">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                         {highlightMatch(book.author || 'Unknown author', query)}
                       </p>
                       {/* Status and Series badges */}
                       {(status !== 'want-to-read' || seriesData) && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {status === 'reading' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
                               <BookOpen className="w-3 h-3" aria-hidden="true" />
                               <span>Reading</span>
                             </span>
                           )}
                           {status === 'finished' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
                               <CheckCircle className="w-3 h-3" aria-hidden="true" />
                               <span>Finished</span>
                             </span>
                           )}
                           {seriesData && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-700">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
                               <Library className="w-3 h-3" aria-hidden="true" />
                               <span>
                                 {seriesData.name.length > 20
@@ -443,7 +443,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                             <Star
                               key={star}
                               className={`w-3 h-3 ${
-                                star <= book.rating! ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+                                star <= book.rating! ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'
                               }`}
                             />
                           ))}
@@ -469,7 +469,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                             );
                           })}
                           {book.genres.length > 3 && (
-                            <span className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                            <span className="px-1.5 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
                               +{book.genres.length - 3}
                             </span>
                           )}
@@ -477,7 +477,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       )}
                       {/* Date added */}
                       {book.createdAt && (
-                        <p className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                        <p className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500 mt-1">
                           <Calendar className="w-3 h-3" aria-hidden="true" />
                           Added {formatDate(book.createdAt)}
                         </p>

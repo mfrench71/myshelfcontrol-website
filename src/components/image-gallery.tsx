@@ -292,9 +292,9 @@ export function ImageGallery({
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <label className="block font-semibold text-gray-700">
+        <label className="block font-semibold text-gray-700 dark:text-gray-300">
           Book Images{' '}
-          <span className="font-normal text-gray-500">
+          <span className="font-normal text-gray-500 dark:text-gray-400">
             ({images.length}/{maxImages})
           </span>
         </label>
@@ -310,21 +310,21 @@ export function ImageGallery({
             onDragStart={() => handleDragStart(index)}
             onDragOver={(e) => handleDragOver(index, e)}
             onDragEnd={handleDragEnd}
-            className={`relative group aspect-square bg-gray-100 rounded-lg border-2 ${
+            className={`relative group aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg border-2 ${
               img.isPrimary ? 'border-primary ring-2 ring-primary/30' : 'border-transparent'
             } ${draggedIndex === index ? 'opacity-50' : ''}`}
           >
             {/* Loading skeleton */}
             {imageLoadStates[img.id] === 'loading' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-                <Loader2 className="w-6 h-6 text-gray-400 animate-spin" aria-hidden="true" />
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <Loader2 className="w-6 h-6 text-gray-400 dark:text-gray-500 animate-spin" aria-hidden="true" />
               </div>
             )}
 
             {/* Error state */}
             {imageLoadStates[img.id] === 'error' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-                <ImageOff className="w-8 h-8 text-gray-400" aria-hidden="true" />
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <ImageOff className="w-8 h-8 text-gray-400 dark:text-gray-500" aria-hidden="true" />
               </div>
             )}
 
@@ -352,11 +352,11 @@ export function ImageGallery({
             <button
               type="button"
               onClick={() => setConfirmDelete(img.id)}
-              className="absolute p-2 bg-white hover:bg-red-50 rounded-full shadow-md transition-colors z-20"
+              className="absolute p-2 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full shadow-md transition-colors z-20"
               style={{ top: '-8px', right: '-8px' }}
               aria-label="Delete image"
             >
-              <X className="w-4 h-4 text-gray-600" aria-hidden="true" />
+              <X className="w-4 h-4 text-gray-600 dark:text-gray-400" aria-hidden="true" />
             </button>
 
             {/* Set as cover overlay */}
@@ -379,13 +379,13 @@ export function ImageGallery({
         {Array.from(uploading.entries()).map(([id, progress]) => (
           <div
             key={id}
-            className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300"
+            className="relative aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600"
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <Loader2 className="w-8 h-8 text-primary animate-spin" aria-hidden="true" />
-              <span className="mt-2 text-sm text-gray-600">{progress}%</span>
+              <span className="mt-2 text-sm text-gray-600 dark:text-gray-400">{progress}%</span>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-600">
               <div
                 className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -396,9 +396,9 @@ export function ImageGallery({
 
         {/* Add button */}
         {canAdd && (
-          <label className="aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer flex flex-col items-center justify-center">
-            <ImagePlus className="w-8 h-8 text-gray-400" aria-hidden="true" />
-            <span className="mt-1 text-xs text-gray-500">Add image</span>
+          <label className="aspect-square bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer flex flex-col items-center justify-center">
+            <ImagePlus className="w-8 h-8 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+            <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">Add image</span>
             <input
               ref={fileInputRef}
               type="file"
@@ -413,7 +413,7 @@ export function ImageGallery({
 
       {/* Help text */}
       {images.length > 0 && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
           {images.length > 1 ? 'Drag to reorder. ' : ''}Tap to set as cover image.
         </p>
       )}
@@ -421,9 +421,9 @@ export function ImageGallery({
       {/* Delete confirmation modal */}
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Image</h3>
-            <p className="text-gray-600 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Delete Image</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               {images.find(img => img.id === confirmDelete)?.isPrimary
                 ? 'This is your cover image. Delete it anyway?'
                 : 'Are you sure you want to delete this image?'}
@@ -432,7 +432,7 @@ export function ImageGallery({
               <button
                 type="button"
                 onClick={() => setConfirmDelete(null)}
-                className="flex-1 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                className="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors"
               >
                 Cancel
               </button>

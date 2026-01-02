@@ -37,6 +37,7 @@ const SECTION_SUB_LINKS: Record<string, SubLink[]> = {
     { label: 'Backup & Restore', href: '/settings/library#backup' },
   ],
   preferences: [
+    { label: 'Appearance', href: '/settings/preferences#appearance' },
     { label: 'Sync', href: '/settings/preferences#sync' },
     { label: 'Dashboard Widgets', href: '/settings/preferences#widgets' },
     { label: 'Browser', href: '/settings/preferences#browser' },
@@ -132,19 +133,19 @@ export default function SettingsLayout({ children }: Props) {
     <div className="min-h-[calc(100vh-56px)]">
       {/* Mobile: Breadcrumb Navigation (hidden on desktop) */}
       {isSubPage && (
-        <div className="md:hidden bg-white border-b border-gray-200 sticky top-14 z-30">
+        <div className="md:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-30">
           <div className="max-w-6xl mx-auto px-4 py-2 flex items-center min-h-[52px]">
             <nav aria-label="Breadcrumb">
               <ol className="flex items-center text-sm">
                 <li>
-                  <Link href="/settings" className="text-gray-500 hover:text-primary hover:underline">
+                  <Link href="/settings" className="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-blue-400 hover:underline">
                     Settings
                   </Link>
                 </li>
                 {activeSectionInfo && (
                   <>
-                    <li className="mx-2 text-gray-400">/</li>
-                    <li className="text-gray-900 font-medium">
+                    <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+                    <li className="text-gray-900 dark:text-gray-100 font-medium">
                       {activeSectionInfo.label}
                     </li>
                   </>
@@ -160,7 +161,7 @@ export default function SettingsLayout({ children }: Props) {
         {/* Desktop Sidebar (hidden on mobile) */}
         <aside className="hidden md:block w-64 flex-shrink-0">
           <div className="sticky top-[120px]">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 px-3">Settings</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 px-3">Settings</h2>
             <nav className="space-y-1" aria-label="Settings navigation">
               {SETTINGS_SECTIONS.map((section) => (
                 <SettingsSidebarLink

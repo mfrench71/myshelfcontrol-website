@@ -221,7 +221,7 @@ function AuthorTypeahead({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder="Search authors..."
-          className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"
+          className="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           autoComplete="off"
           role="combobox"
           aria-expanded={isOpen}
@@ -232,10 +232,10 @@ function AuthorTypeahead({
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full"
             aria-label="Clear author filter"
           >
-            <X className="w-4 h-4 text-gray-400" aria-hidden="true" />
+            <X className="w-4 h-4 text-gray-400 dark:text-gray-500" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -244,7 +244,7 @@ function AuthorTypeahead({
         <div
           ref={dropdownRef}
           id={`${id}-listbox`}
-          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dropdown-enter"
+          className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto dropdown-enter"
           role="listbox"
         >
           {filteredAuthors.map((author, index) => {
@@ -254,14 +254,14 @@ function AuthorTypeahead({
                 key={author}
                 type="button"
                 onClick={() => handleSelect(author)}
-                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 min-h-[44px] flex items-center justify-between ${
-                  index === focusedIndex ? 'bg-gray-100' : ''
-                } ${value === author ? 'text-primary font-medium' : 'text-gray-900'}`}
+                className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 min-h-[44px] flex items-center justify-between ${
+                  index === focusedIndex ? 'bg-gray-100 dark:bg-gray-700' : ''
+                } ${value === author ? 'text-primary font-medium' : 'text-gray-900 dark:text-gray-100'}`}
                 role="option"
                 aria-selected={value === author}
               >
                 <span>{author}</span>
-                <span className="text-gray-400 text-xs">({count})</span>
+                <span className="text-gray-400 dark:text-gray-500 text-xs">({count})</span>
               </button>
             );
           })}
@@ -271,9 +271,9 @@ function AuthorTypeahead({
       {isOpen && query && filteredAuthors.length === 0 && (
         <div
           ref={dropdownRef}
-          className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg dropdown-enter"
+          className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg dropdown-enter"
         >
-          <div className="px-3 py-2 text-sm text-gray-500 italic">No authors found</div>
+          <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic">No authors found</div>
         </div>
       )}
     </div>
@@ -363,17 +363,17 @@ export function FilterSidebar({
     : BASE_SORT_OPTIONS;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4">
       {/* Sort */}
       <div>
-        <label htmlFor={`${id}-sort`} className="block text-sm font-semibold text-gray-900 mb-2">
+        <label htmlFor={`${id}-sort`} className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Sort By
         </label>
         <select
           id={`${id}-sort`}
           value={sortValue}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm cursor-pointer"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm cursor-pointer bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         >
           {sortOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -385,7 +385,7 @@ export function FilterSidebar({
 
       {/* Status */}
       <div>
-        <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
+        <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Status</span>
         <div className="space-y-3 pr-4">
           {STATUS_OPTIONS.map((option) => {
             const count = bookCounts?.statuses?.[option.value as 'reading' | 'finished'] ?? 0;
@@ -395,9 +395,9 @@ export function FilterSidebar({
                 htmlFor={`${id}-status-${option.value}`}
                 className={`flex items-center justify-between cursor-pointer ${count === 0 ? 'opacity-50' : ''}`}
               >
-                <span className="text-sm text-gray-900">{option.label}</span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">{option.label}</span>
                 <span className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500">({count})</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">({count})</span>
                   <input
                     type="checkbox"
                     id={`${id}-status-${option.value}`}
@@ -415,14 +415,14 @@ export function FilterSidebar({
 
       {/* Rating */}
       <div>
-        <label htmlFor={`${id}-rating`} className="block text-sm font-semibold text-gray-900 mb-2">
+        <label htmlFor={`${id}-rating`} className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Rating
         </label>
         <select
           id={`${id}-rating`}
           value={filters.minRating || 0}
           onChange={(e) => handleRatingChange(parseInt(e.target.value, 10))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm cursor-pointer"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm cursor-pointer bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         >
           {RATING_OPTIONS.map((option) => {
             const count = option.value === 0 ? bookCounts?.total ?? 0 : bookCounts?.ratings?.[option.value] ?? 0;
@@ -443,7 +443,7 @@ export function FilterSidebar({
       {/* Author */}
       {authors.length > 0 && (
         <div>
-          <label htmlFor={`${id}-author`} className="block text-sm font-semibold text-gray-900 mb-2">
+          <label htmlFor={`${id}-author`} className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Author
           </label>
           <AuthorTypeahead
@@ -459,7 +459,7 @@ export function FilterSidebar({
       {/* Genre */}
       {genres.length > 0 && (
         <div>
-          <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
+          <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Genre</span>
           <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
             {genres.map((genre) => {
             const count = bookCounts?.genres?.[genre.id] ?? 0;
@@ -470,9 +470,9 @@ export function FilterSidebar({
                 htmlFor={`${id}-genre-${genre.id}`}
                 className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
               >
-                <span className="text-sm text-gray-900">{genre.name}</span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">{genre.name}</span>
                 <span className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500">({count})</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">({count})</span>
                   <input
                     type="checkbox"
                     id={`${id}-genre-${genre.id}`}
@@ -494,7 +494,7 @@ export function FilterSidebar({
         <>
           <button
             onClick={() => setShowMoreFilters(!showMoreFilters)}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors py-1 min-h-[44px]"
+            className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors py-1 min-h-[44px]"
           >
             <ChevronDown
               className={`w-4 h-4 accordion-icon ${showMoreFilters ? 'open' : ''}`}
@@ -505,7 +505,7 @@ export function FilterSidebar({
 
           {showMoreFilters && (
             <div>
-              <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
+              <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Series</span>
               <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
                 {series.map((s) => {
                   const count = bookCounts?.series?.[s.id] ?? 0;
@@ -516,9 +516,9 @@ export function FilterSidebar({
                       htmlFor={`${id}-series-${s.id}`}
                       className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
                     >
-                      <span className="text-sm text-gray-900">{s.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-100">{s.name}</span>
                       <span className="flex items-center gap-3">
-                        <span className="text-sm text-gray-500">({count})</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">({count})</span>
                         <input
                           type="checkbox"
                           id={`${id}-series-${s.id}`}
@@ -541,7 +541,7 @@ export function FilterSidebar({
       <button
         onClick={onReset}
         disabled={!hasActiveFilters}
-        className="w-full py-2 px-4 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Reset Filters
       </button>
@@ -570,7 +570,7 @@ export function MobileSortDropdown({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value as SortOption)}
-      className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer"
+      className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none cursor-pointer"
       aria-label="Sort books by"
     >
       {sortOptions.map((option) => (
@@ -677,16 +677,16 @@ export function FilterBottomSheet({
       showCloseButton={false}
     >
       {/* Header - sticky */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200">
-        <h2 id="filter-sheet-title" className="text-lg font-semibold">
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <h2 id="filter-sheet-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Filters
         </h2>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2"
           aria-label="Close"
         >
-          <X className="w-5 h-5 text-gray-500" aria-hidden="true" />
+          <X className="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" />
         </button>
       </div>
 
@@ -694,7 +694,7 @@ export function FilterBottomSheet({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Status */}
           <div>
-            <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
+            <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Status</span>
             <div className="space-y-3 pr-4">
               {STATUS_OPTIONS.map((option) => {
                 const count = bookCounts?.statuses?.[option.value as 'reading' | 'finished'] ?? 0;
@@ -704,9 +704,9 @@ export function FilterBottomSheet({
                     htmlFor={`${id}-mobile-status-${option.value}`}
                     className={`flex items-center justify-between cursor-pointer ${count === 0 ? 'opacity-50' : ''}`}
                   >
-                    <span className="text-sm text-gray-900">{option.label}</span>
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{option.label}</span>
                     <span className="flex items-center gap-3">
-                      <span className="text-sm text-gray-500">({count})</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">({count})</span>
                       <input
                         type="checkbox"
                         id={`${id}-mobile-status-${option.value}`}
@@ -726,7 +726,7 @@ export function FilterBottomSheet({
           <div>
             <label
               htmlFor={`${id}-mobile-rating`}
-              className="block text-sm font-semibold text-gray-900 mb-2"
+              className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2"
             >
               Rating
             </label>
@@ -734,7 +734,7 @@ export function FilterBottomSheet({
               id={`${id}-mobile-rating`}
               value={filters.minRating || 0}
               onChange={(e) => handleRatingChange(parseInt(e.target.value, 10))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               {RATING_OPTIONS.map((option) => {
                 const count = option.value === 0 ? bookCounts?.total ?? 0 : bookCounts?.ratings?.[option.value] ?? 0;
@@ -755,7 +755,7 @@ export function FilterBottomSheet({
           {/* Author */}
           {authors.length > 0 && (
             <div>
-              <label htmlFor={`${id}-mobile-author`} className="block text-sm font-semibold text-gray-900 mb-2">
+              <label htmlFor={`${id}-mobile-author`} className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Author
               </label>
               <AuthorTypeahead
@@ -771,7 +771,7 @@ export function FilterBottomSheet({
           {/* Genre */}
           {genres.length > 0 && (
             <div>
-              <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
+              <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Genre</span>
               <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
                 {genres.map((genre) => {
                   const count = bookCounts?.genres?.[genre.id] ?? 0;
@@ -782,9 +782,9 @@ export function FilterBottomSheet({
                       htmlFor={`${id}-mobile-genre-${genre.id}`}
                       className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
                     >
-                      <span className="text-sm text-gray-900">{genre.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-100">{genre.name}</span>
                       <span className="flex items-center gap-3">
-                        <span className="text-sm text-gray-500">({count})</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">({count})</span>
                         <input
                           type="checkbox"
                           id={`${id}-mobile-genre-${genre.id}`}
@@ -806,7 +806,7 @@ export function FilterBottomSheet({
             <>
               <button
                 onClick={() => setShowMoreFilters(!showMoreFilters)}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors py-1"
+                className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors py-1"
               >
                 <ChevronDown
                   className={`w-4 h-4 accordion-icon ${showMoreFilters ? 'open' : ''}`}
@@ -817,7 +817,7 @@ export function FilterBottomSheet({
 
               {showMoreFilters && (
                 <div>
-                  <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
+                  <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Series</span>
                   <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-4 pb-4">
                     {series.map((s) => {
                       const count = bookCounts?.series?.[s.id] ?? 0;
@@ -828,9 +828,9 @@ export function FilterBottomSheet({
                           htmlFor={`${id}-mobile-series-${s.id}`}
                           className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
                         >
-                          <span className="text-sm text-gray-900">{s.name}</span>
+                          <span className="text-sm text-gray-900 dark:text-gray-100">{s.name}</span>
                           <span className="flex items-center gap-3">
-                            <span className="text-sm text-gray-500">({count})</span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">({count})</span>
                             <input
                               type="checkbox"
                               id={`${id}-mobile-series-${s.id}`}
@@ -852,11 +852,11 @@ export function FilterBottomSheet({
         </div>
 
       {/* Footer - sticky */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-200 flex gap-3">
+      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
         <button
           onClick={onReset}
           disabled={!hasActiveFilters}
-          className="flex-1 py-3 px-4 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 py-3 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Reset
         </button>
@@ -874,11 +874,11 @@ export function FilterBottomSheet({
 
 /** Chip colour styles by filter type */
 const CHIP_COLOURS: Record<string, string> = {
-  rating: 'bg-amber-100 text-amber-800 hover:bg-amber-200',
-  genre: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
-  status: 'bg-green-100 text-green-800 hover:bg-green-200',
-  series: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-  author: 'bg-rose-100 text-rose-800 hover:bg-rose-200',
+  rating: 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-900/60',
+  genre: 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 hover:bg-purple-200 dark:hover:bg-purple-900/60',
+  status: 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-900/60',
+  series: 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60',
+  author: 'bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-200 hover:bg-rose-200 dark:hover:bg-rose-900/60',
 };
 
 /**
@@ -913,24 +913,24 @@ export function ActiveFilterChip({
  */
 export function FilterSidebarSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4 animate-pulse">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4 animate-pulse">
       <div>
-        <div className="h-4 bg-gray-200 rounded w-16 mb-2" />
-        <div className="h-10 bg-gray-200 rounded" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2" />
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
       </div>
       <div>
-        <div className="h-4 bg-gray-200 rounded w-14 mb-2" />
-        <div className="h-10 bg-gray-200 rounded" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-14 mb-2" />
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
       </div>
       <div>
-        <div className="h-4 bg-gray-200 rounded w-12 mb-2" />
-        <div className="h-10 bg-gray-200 rounded" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 mb-2" />
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
       </div>
       <div>
-        <div className="h-4 bg-gray-200 rounded w-14 mb-2" />
-        <div className="h-10 bg-gray-200 rounded" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-14 mb-2" />
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
       </div>
-      <div className="h-10 bg-gray-200 rounded" />
+      <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded" />
     </div>
   );
 }

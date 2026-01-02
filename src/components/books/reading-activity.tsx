@@ -112,19 +112,19 @@ export function EditDatesModal({
       closeOnEscape={!saving}
     >
       <div className="p-6">
-        <h3 id="sheet-title" className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 id="sheet-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           {title}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="started-at" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="started-at" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Started
             </label>
             <input
@@ -133,12 +133,12 @@ export function EditDatesModal({
               value={startedAt}
               max={todayString}
               onChange={(e) => setStartedAt(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
             />
           </div>
 
           <div>
-            <label htmlFor="finished-at" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="finished-at" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Finished
             </label>
             <div className="flex gap-2">
@@ -148,13 +148,13 @@ export function EditDatesModal({
                 value={finishedAt}
                 max={todayString}
                 onChange={(e) => setFinishedAt(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
               />
               {finishedAt && (
                 <button
                   type="button"
                   onClick={() => setFinishedAt('')}
-                  className="px-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 border border-gray-300 rounded-lg min-h-[44px] flex items-center justify-center"
+                  className="px-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg min-h-[44px] flex items-center justify-center"
                   aria-label="Clear finished date"
                 >
                   <X className="w-4 h-4" aria-hidden="true" />
@@ -168,7 +168,7 @@ export function EditDatesModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               Cancel
             </button>
@@ -254,13 +254,13 @@ export function EditNotesModal({
       closeOnEscape={!saving}
     >
       <div className="p-6">
-        <h3 id="sheet-title" className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 id="sheet-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Notes
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
               {error}
             </div>
           )}
@@ -270,7 +270,7 @@ export function EditNotesModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
               placeholder="Add your notes about this book..."
             />
           </div>
@@ -280,7 +280,7 @@ export function EditNotesModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               Cancel
             </button>
@@ -320,10 +320,10 @@ export function StatusPill({ status }: StatusPillProps) {
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium ${
       status === 'reading'
-        ? 'bg-blue-100 text-blue-700'
+        ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
         : status === 'finished'
-          ? 'bg-green-100 text-green-700'
-          : 'bg-gray-100 text-gray-600'
+          ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'
+          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
     }`}>
       {status === 'reading' && <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />}
       {status === 'finished' && <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />}
@@ -403,12 +403,12 @@ export function ReadingActivitySection({
           e.stopPropagation();
           handleToggle();
         }}
-        className="w-full flex items-center justify-between p-3 text-left min-h-[44px] hover:bg-gray-50"
+        className="w-full flex items-center justify-between p-3 text-left min-h-[44px] hover:bg-gray-50 dark:hover:bg-gray-700"
       >
-        <span className="font-semibold text-gray-700 flex items-center gap-2 text-base">
+        <span className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-base">
           Reading Log
           {reads.length > 0 && (
-            <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
+            <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium px-2 py-0.5 rounded-full">
               {reads.length}
             </span>
           )}
@@ -427,19 +427,19 @@ export function ReadingActivitySection({
         <div className="overflow-hidden">
           {/* Reading History */}
           {reads.length > 0 ? (
-            <div className="bg-white border-t border-gray-100">
+            <div className="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
               <table className="w-full">
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                   {reads.map((read, index) => {
                     const startDate = formatDate(read.startedAt);
                     const endDate = formatDate(read.finishedAt);
                     const isInProgress = !read.finishedAt;
 
                     return (
-                      <tr key={`${read.startedAt}-${read.finishedAt}`} className="hover:bg-gray-50">
+                      <tr key={`${read.startedAt}-${read.finishedAt}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="py-1.5 px-3">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" aria-hidden="true" />
                             <span>
                               {startDate || 'Unknown'}
                               {endDate ? ` – ${endDate}` : ' – In progress'}
@@ -455,7 +455,7 @@ export function ReadingActivitySection({
                                 onMarkFinished();
                               }}
                               disabled={updatingStatus}
-                              className="p-2 hover:bg-green-50 rounded text-green-500 hover:text-green-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center disabled:opacity-50"
+                              className="p-2 hover:bg-green-50 dark:hover:bg-green-900/30 rounded text-green-500 hover:text-green-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center disabled:opacity-50"
                               aria-label="Mark as finished"
                             >
                               {updatingStatus ? (
@@ -471,7 +471,7 @@ export function ReadingActivitySection({
                               e.preventDefault();
                               setEditingReadIndex(index);
                             }}
-                            className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label="Edit reading dates"
                           >
                             <Pencil className="w-4 h-4" aria-hidden="true" />
@@ -482,7 +482,7 @@ export function ReadingActivitySection({
                               e.preventDefault();
                               setDeletingReadIndex(index);
                             }}
-                            className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                             aria-label="Delete reading entry"
                           >
                             <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -495,17 +495,17 @@ export function ReadingActivitySection({
               </table>
             </div>
           ) : (
-            <p className="text-sm text-gray-400 italic px-3 py-2 bg-white border-t border-gray-100">No reading history yet</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 italic px-3 py-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">No reading history yet</p>
           )}
 
           {/* Action Button - only for status changes that don't have a row */}
           {(status === 'want-to-read' || status === 'finished') && (
-            <div className="px-3 py-2 bg-white border-t border-gray-100">
+            <div className="px-3 py-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
               {status === 'want-to-read' && (
                 <button
                   onClick={onStartReading}
                   disabled={updatingStatus}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary dark:text-blue-400 hover:text-primary-dark dark:hover:text-blue-300 transition-colors disabled:opacity-50"
                 >
                   {updatingStatus ? (
                     <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -519,7 +519,7 @@ export function ReadingActivitySection({
                 <button
                   onClick={onStartReread}
                   disabled={updatingStatus}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary dark:text-blue-400 hover:text-primary-dark dark:hover:text-blue-300 transition-colors disabled:opacity-50"
                 >
                   {updatingStatus ? (
                     <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -606,9 +606,9 @@ export function NotesSection({
           e.stopPropagation();
           handleToggle();
         }}
-        className="w-full flex items-center justify-between p-3 text-left min-h-[44px] hover:bg-gray-50"
+        className="w-full flex items-center justify-between p-3 text-left min-h-[44px] hover:bg-gray-50 dark:hover:bg-gray-700"
       >
-        <span className="font-semibold text-gray-700 flex items-center gap-2 text-base">
+        <span className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 text-base">
           Notes
           {notes && (
             <MessageSquare className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" />
@@ -627,9 +627,9 @@ export function NotesSection({
       >
         <div className="overflow-hidden">
           {notes ? (
-            <div className="bg-white border-t border-gray-100">
+            <div className="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-start justify-between">
-                <div className="flex-1 text-sm text-gray-600 whitespace-pre-wrap p-3">
+                <div className="flex-1 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap p-3">
                   {notes}
                 </div>
                 <div className="flex items-center flex-shrink-0">
@@ -639,7 +639,7 @@ export function NotesSection({
                       e.preventDefault();
                       setIsEditing(true);
                     }}
-                    className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                     aria-label="Edit notes"
                   >
                     <Pencil className="w-4 h-4" aria-hidden="true" />
@@ -650,7 +650,7 @@ export function NotesSection({
                       e.preventDefault();
                       setIsDeleting(true);
                     }}
-                    className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                    className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                     aria-label="Delete notes"
                   >
                     <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -659,9 +659,9 @@ export function NotesSection({
               </div>
             </div>
           ) : (
-            <div className="bg-white border-t border-gray-100">
+            <div className="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-400 italic p-3">No notes yet</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 italic p-3">No notes yet</p>
                 <div className="flex items-center flex-shrink-0">
                   <button
                     type="button"
@@ -669,7 +669,7 @@ export function NotesSection({
                       e.preventDefault();
                       setIsEditing(true);
                     }}
-                    className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
                     aria-label="Add notes"
                   >
                     <Pencil className="w-4 h-4" aria-hidden="true" />

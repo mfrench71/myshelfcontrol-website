@@ -48,7 +48,7 @@ export function SettingsHubCard({
       <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
         isActive
           ? 'bg-primary text-white'
-          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-primary/10 group-hover:text-primary'
+          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-primary/10 group-hover:text-primary dark:group-hover:text-blue-400'
       }`}>
         <Icon className="w-5 h-5" aria-hidden="true" />
       </div>
@@ -69,7 +69,7 @@ export function SettingsHubCard({
       {/* Chevron */}
       <ChevronRight
         className={`flex-shrink-0 w-5 h-5 transition-transform ${
-          isActive ? 'text-primary' : 'text-gray-400 dark:text-gray-500 group-hover:text-primary group-hover:translate-x-0.5'
+          isActive ? 'text-primary dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-blue-400 group-hover:translate-x-0.5'
         }`}
         aria-hidden="true"
       />
@@ -108,7 +108,7 @@ export function SettingsSidebarLink({
         href={href}
         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
           isActive
-            ? 'bg-primary/10 text-primary font-medium'
+            ? 'bg-primary/10 text-primary dark:text-blue-400 font-medium'
             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
         }`}
       >
@@ -127,7 +127,7 @@ export function SettingsSidebarLink({
             <a
               key={link.href}
               href={link.href}
-              className="block px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-primary rounded transition-colors"
+              className="block px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-blue-400 rounded transition-colors"
             >
               {link.label}
             </a>

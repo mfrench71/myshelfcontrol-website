@@ -225,8 +225,8 @@ export function AuthorPicker({
           key="use-typed"
           type="button"
           data-picker-item
-          className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
-            isFocused ? 'bg-gray-100' : ''
+          className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+            isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
           }`}
           onClick={() => handleSelectAuthor(searchQuery)}
         >
@@ -240,10 +240,10 @@ export function AuthorPicker({
     // Your authors section
     if (filteredAuthors.length > 0) {
       if (sections.length > 0) {
-        sections.push(<div key="divider" className="border-t border-gray-100" />);
+        sections.push(<div key="divider" className="border-t border-gray-100 dark:border-gray-700" />);
       }
       sections.push(
-        <div key="authors-header" className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-50">
+        <div key="authors-header" className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
           Your authors
         </div>
       );
@@ -257,14 +257,14 @@ export function AuthorPicker({
             key={author.name}
             type="button"
             data-picker-item
-            className={`w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 ${
-              isFocused ? 'bg-gray-100' : ''
+            className={`w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+              isFocused ? 'bg-gray-100 dark:bg-gray-700' : ''
             }`}
             onClick={() => handleSelectAuthor(author.name)}
           >
-            <User className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+            <User className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" aria-hidden="true" />
             <span className="flex-1">{author.name}</span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 dark:text-gray-500">
               {author.count} {author.count === 1 ? 'book' : 'books'}
             </span>
           </button>
@@ -276,13 +276,13 @@ export function AuthorPicker({
     if (sections.length === 0) {
       if (authors.length === 0) {
         sections.push(
-          <div key="empty" className="px-3 py-4 text-center text-gray-500">
+          <div key="empty" className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
             No authors in your library yet
           </div>
         );
       } else {
         sections.push(
-          <div key="no-matches" className="px-3 py-4 text-center text-gray-500">
+          <div key="no-matches" className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
             No matches found
           </div>
         );
@@ -294,7 +294,7 @@ export function AuthorPicker({
 
   return (
     <div ref={containerRef} className="author-picker">
-      <label id="author-picker-label" className="block font-semibold text-gray-700 mb-1">
+      <label id="author-picker-label" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -305,7 +305,7 @@ export function AuthorPicker({
           type="text"
           name="author"
           role="combobox"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           placeholder={isLoading ? 'Loading...' : placeholder}
           value={searchQuery}
           onChange={handleInputChange}
@@ -324,23 +324,23 @@ export function AuthorPicker({
         {isOpen && (
           <div
             id="author-picker-listbox"
-            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto"
             role="listbox"
             aria-label="Author options"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center justify-between">
-              <span className="text-xs text-gray-500">Select author</span>
+            <div className="sticky top-0 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center justify-between">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Select author</span>
               <button
                 type="button"
-                className="p-1 hover:bg-gray-200 rounded"
+                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
                 onClick={() => {
                   setIsOpen(false);
                   setFocusedIndex(-1);
                 }}
                 aria-label="Close dropdown"
               >
-                <X className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                <X className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
               </button>
             </div>
 

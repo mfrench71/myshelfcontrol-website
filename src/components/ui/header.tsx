@@ -77,15 +77,25 @@ export function Header() {
     loadWishlistCount();
   }, [loadWishlistCount]);
 
-  // Reload wishlist count on visibility change
+  // Reload wishlist count on visibility change and custom wishlist-updated events
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         loadWishlistCount();
       }
     };
+
+    // Listen for custom wishlist update events from other components
+    const handleWishlistUpdate = () => {
+      loadWishlistCount();
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('wishlist-updated', handleWishlistUpdate);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+    };
   }, [loadWishlistCount]);
 
   /**

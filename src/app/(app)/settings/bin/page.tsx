@@ -84,6 +84,8 @@ export default function BinPage() {
       setBooks((prev) => prev.filter((b) => b.id !== selectedBook.id));
       setShowRestoreModal(false);
       setSelectedBook(null);
+      // Notify settings layout to update bin count
+      window.dispatchEvent(new CustomEvent('bin-updated'));
       showToast('Book restored to library', { type: 'success' });
     } catch (err) {
       console.error('Failed to restore book:', err);
@@ -103,6 +105,8 @@ export default function BinPage() {
       setBooks((prev) => prev.filter((b) => b.id !== selectedBook.id));
       setShowDeleteModal(false);
       setSelectedBook(null);
+      // Notify settings layout to update bin count
+      window.dispatchEvent(new CustomEvent('bin-updated'));
       showToast('Book permanently deleted', { type: 'success' });
     } catch (err) {
       console.error('Failed to permanently delete book:', err);
@@ -123,6 +127,8 @@ export default function BinPage() {
       const count = books.length;
       setBooks([]);
       setShowEmptyBinModal(false);
+      // Notify settings layout to update bin count
+      window.dispatchEvent(new CustomEvent('bin-updated'));
       showToast(`${count} book${count > 1 ? 's' : ''} permanently deleted`, { type: 'success' });
     } catch (err) {
       console.error('Failed to empty bin:', err);

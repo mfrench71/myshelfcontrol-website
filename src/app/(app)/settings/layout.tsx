@@ -73,8 +73,17 @@ export default function SettingsLayout({ children }: Props) {
 
     loadCounts();
 
+    // Listen for update events from other components
+    const handleBinUpdate = () => loadCounts();
+    const handleLibraryUpdate = () => loadCounts();
+
+    window.addEventListener('bin-updated', handleBinUpdate);
+    window.addEventListener('library-updated', handleLibraryUpdate);
+
     return () => {
       cancelled = true;
+      window.removeEventListener('bin-updated', handleBinUpdate);
+      window.removeEventListener('library-updated', handleLibraryUpdate);
     };
   }, [user]);
 

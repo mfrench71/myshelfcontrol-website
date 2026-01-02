@@ -376,6 +376,9 @@ export default function BookDetailPage() {
         }
       }
 
+      // Notify settings layout to update bin count
+      window.dispatchEvent(new CustomEvent('bin-updated'));
+
       // Show appropriate toast
       if (deleteSeriesChecked && book.seriesId && seriesBooks.length === 1) {
         if (seriesDeletedOk) {

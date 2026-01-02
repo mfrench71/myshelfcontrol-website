@@ -38,6 +38,27 @@ export const FORMAT_OPTIONS = [
 ] as const;
 
 /**
+ * Extract surname from author name for sorting
+ * - "First Last" → "last"
+ * - "First Middle Last" → "last"
+ * - "Last, First" → "last" (comma format)
+ */
+export function getAuthorSurname(author: string): string {
+  if (!author) return '';
+
+  const trimmed = author.trim().toLowerCase();
+
+  // Handle "Last, First" format
+  if (trimmed.includes(',')) {
+    return trimmed.split(',')[0].trim();
+  }
+
+  // Handle "First Last" or "First Middle Last" format
+  const parts = trimmed.split(/\s+/);
+  return parts[parts.length - 1];
+}
+
+/**
  * Get the reading status of a book based on its reads array
  */
 export function getBookStatus(book: { reads?: BookRead[] }): 'want-to-read' | 'reading' | 'finished' {
@@ -112,7 +133,8 @@ export function sortBooks(
         comparison = a.title.localeCompare(b.title);
         break;
       case 'author':
-        comparison = a.author.localeCompare(b.author);
+        // Sort by surname (last word of author name)
+        comparison = getAuthorSurname(a.author).localeCompare(getAuthorSurname(b.author));
         break;
       case 'rating':
         // Books without rating go to the end

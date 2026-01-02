@@ -7,6 +7,7 @@ import {
   STATUS_LABELS,
   STATUS_OPTIONS,
   FORMAT_OPTIONS,
+  getAuthorSurname,
   getBookStatus,
   filterBooks,
   sortBooks,
@@ -49,6 +50,40 @@ describe('FORMAT_OPTIONS', () => {
     expect(FORMAT_OPTIONS).toContainEqual({ value: 'Paperback', label: 'Paperback' });
     expect(FORMAT_OPTIONS).toContainEqual({ value: 'Hardcover', label: 'Hardcover' });
     expect(FORMAT_OPTIONS).toContainEqual({ value: 'Ebook', label: 'Ebook' });
+  });
+});
+
+describe('getAuthorSurname', () => {
+  it('extracts surname from "First Last" format', () => {
+    expect(getAuthorSurname('John Smith')).toBe('smith');
+  });
+
+  it('extracts surname from "First Middle Last" format', () => {
+    expect(getAuthorSurname('John Michael Smith')).toBe('smith');
+  });
+
+  it('extracts surname from "Last, First" format', () => {
+    expect(getAuthorSurname('Smith, John')).toBe('smith');
+  });
+
+  it('extracts surname from "Last, First Middle" format', () => {
+    expect(getAuthorSurname('Smith, John Michael')).toBe('smith');
+  });
+
+  it('handles single name (surname only)', () => {
+    expect(getAuthorSurname('Madonna')).toBe('madonna');
+  });
+
+  it('returns lowercase surname', () => {
+    expect(getAuthorSurname('J.K. Rowling')).toBe('rowling');
+  });
+
+  it('handles extra whitespace', () => {
+    expect(getAuthorSurname('  John   Smith  ')).toBe('smith');
+  });
+
+  it('returns empty string for empty input', () => {
+    expect(getAuthorSurname('')).toBe('');
   });
 });
 
@@ -310,15 +345,35 @@ describe('sortBooks', () => {
   });
 
   describe('sort by author', () => {
-    it('sorts ascending', () => {
-      const result = sortBooks(books, 'author', 'asc');
-      expect(result[0].author).toBe('Anna Author');
-      expect(result[2].author).toBe('Zara Author');
+    // Use books with different surnames for surname sorting tests
+    const surnameBooks: Book[] = [
+      createMockBook({ id: 'b1', author: 'John Zebra' }),
+      createMockBook({ id: 'b2', author: 'Anna Apple' }),
+      createMockBook({ id: 'b3', author: 'Mike Middle' }),
+    ];
+
+    it('sorts ascending by surname', () => {
+      const result = sortBooks(surnameBooks, 'author', 'asc');
+      expect(result[0].author).toBe('Anna Apple'); // apple
+      expect(result[1].author).toBe('Mike Middle'); // middle
+      expect(result[2].author).toBe('John Zebra'); // zebra
     });
 
-    it('sorts descending', () => {
-      const result = sortBooks(books, 'author', 'desc');
-      expect(result[0].author).toBe('Zara Author');
+    it('sorts descending by surname', () => {
+      const result = sortBooks(surnameBooks, 'author', 'desc');
+      expect(result[0].author).toBe('John Zebra'); // zebra
+      expect(result[1].author).toBe('Mike Middle'); // middle
+      expect(result[2].author).toBe('Anna Apple'); // apple
+    });
+
+    it('handles "Last, First" format', () => {
+      const commaBooks: Book[] = [
+        createMockBook({ id: 'b1', author: 'Zebra, John' }),
+        createMockBook({ id: 'b2', author: 'Apple, Anna' }),
+      ];
+      const result = sortBooks(commaBooks, 'author', 'asc');
+      expect(result[0].author).toBe('Apple, Anna');
+      expect(result[1].author).toBe('Zebra, John');
     });
   });
 

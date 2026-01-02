@@ -4,21 +4,18 @@ All notable changes to MyShelfControl are documented here.
 
 ---
 
-## 02-01-2025
+## 02-01-2026
 
+- Add section sub-links to settings sidebar (desktop only)
+- Add mobile section pills to Profile and Maintenance pages
+- Remove duplicate "In this section" navigation from Library/Preferences pages
+- Add section IDs to Profile and Maintenance pages
+- Document cover image upload and barcode scanner in PROJECT.md
 - Implement settings hub pattern with desktop sidebar
-  - Mobile: Hub page with cards, tap to drill down
-  - Desktop: Persistent sidebar navigation
-  - Staggered animation on hub cards
 - Add fade transitions to add book page (search/form swap)
 - Remove placeholder text from wishlist notes textarea
 - Document wishlist competitor analysis and gaps in PROJECT.md
 - Document settings hub vs tabs analysis in PROJECT.md
-
----
-
-## 02-01-2025 (afternoon)
-
 - Add wishlist button to search results (heart icon to add directly to wishlist)
 - Add date added display to wishlist items (matches book card format)
 - Fix duplicate key error in search results by using Google Books volume IDs
@@ -27,11 +24,6 @@ All notable changes to MyShelfControl are documented here.
 - Update book-api to return ISBNs from search results
 - Document wishlist features and OpenLibrary search enhancement in PROJECT.md
 - Document admin documentation/FAQ system in PROJECT.md
-
----
-
-## 02-01-2025 (earlier)
-
 - Add ErrorBoundary component for graceful error handling
 - Fix orphaned data when deleting genres (books now updated atomically)
 - Fix orphaned data when deleting series (books now updated atomically)

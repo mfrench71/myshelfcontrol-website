@@ -134,7 +134,9 @@ Per [Android Design Guidelines](https://developer.android.com/design/ui/mobile/g
 
 **Implementation details:**
 - Mobile: `/settings` shows hub cards, tap drills down to sub-page
+- Mobile: Section pills for in-page navigation (visible on md and below)
 - Desktop: Sidebar always visible, `/settings` redirects to `/settings/profile`
+- Desktop: Sub-links appear under active section for in-page navigation
 - Components: `SettingsHubCard`, `SettingsSidebarLink`
 - Animations: Staggered card fade-in, press effect
 
@@ -382,6 +384,43 @@ Currently, live search only queries Google Books API. Open Library is used only 
 2. Google Books API covers (prefer large > medium > thumbnail)
 3. Open Library covers (prefer large -L > medium -M)
 4. Placeholder gradient
+
+### Cover Image Upload
+
+**Feature Overview:**
+- Users can upload custom cover images for any book
+- Up to 10 images per book (primary + additional images)
+- Supported formats: JPEG, PNG, WebP
+- Maximum file size: 5MB per image
+- Images stored in Firebase Storage: `/users/{userId}/books/{bookId}/images/`
+
+**Upload Locations:**
+- Book edit page (primary cover and additional images)
+- Book add page (manual entry mode)
+
+**Camera Capture:**
+- Mobile devices can take photos directly via system file picker
+- Standard `<input type="file" accept="image/*">` allows camera option on mobile
+- Optional: Add `capture="environment"` attribute to prioritise camera over gallery
+
+**Manual Entry UX Improvement (TODO):**
+- Current: Shows placeholder with "No cover image available" message
+- Proposed: Replace with actionable upload prompt (camera icon + "Add cover image" text)
+- Matches profile photo upload pattern for consistency
+
+### Barcode Scanner
+
+**Feature Overview:**
+- ISBN barcode scanning for quick book lookup
+- Uses device camera via `navigator.mediaDevices.getUserMedia()`
+- Requires HTTPS (shows error on localhost without HTTPS)
+
+**Technical Details:**
+- Camera permission requested on first use
+- 10-second timeout for camera access
+- Handles common errors: permission denied, no camera found, camera in use
+- Scans ISBN-10 and ISBN-13 barcodes
+- Auto-lookup via Google Books API on successful scan
 
 ---
 

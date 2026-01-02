@@ -488,6 +488,14 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - Scans ISBN-10 and ISBN-13 barcodes
 - Auto-lookup via Google Books API on successful scan
 
+**First-Use Onboarding:**
+- [ ] Highlight barcode scanner button with animated callout on first visit to Add Book page
+- Button icon (camera) not immediately obvious to new users
+- Show pulsing ring or tooltip pointing to button: "Scan a book's barcode for quick entry"
+- Dismiss on: button click, callout click, or after 5 seconds
+- Store `hasSeenScannerTip` flag in localStorage (per-user if logged in)
+- Only show once per user
+
 ---
 
 ## Feature Roadmap

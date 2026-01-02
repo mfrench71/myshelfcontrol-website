@@ -851,7 +851,7 @@ export default function AddBookPage() {
                 <button
                   type="button"
                   onClick={() => handleSearch(searchQuery)}
-                  disabled={searching}
+                  disabled={searching || !searchQuery.trim()}
                   className="flex-shrink-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {searching ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Go'}

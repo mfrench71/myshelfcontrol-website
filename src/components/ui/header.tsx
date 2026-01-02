@@ -33,6 +33,7 @@ export function Header() {
   const router = useRouter();
   const { user } = useAuthContext();
   const [showMenu, setShowMenu] = useState(false);
+  const [menuClosing, setMenuClosing] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [gravatarUrl, setGravatarUrl] = useState<string | null>(null);
@@ -170,6 +171,17 @@ export function Header() {
   };
 
   /**
+   * Close desktop menu with animation
+   */
+  const closeDesktopMenu = useCallback(() => {
+    setMenuClosing(true);
+    setTimeout(() => {
+      setShowMenu(false);
+      setMenuClosing(false);
+    }, 200); // Match animation duration
+  }, []);
+
+  /**
    * Close menu when clicking outside (desktop only)
    */
   useEffect(() => {
@@ -178,7 +190,7 @@ export function Header() {
       if (window.innerWidth < 768) return;
 
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
+        closeDesktopMenu();
       }
     };
 
@@ -189,7 +201,7 @@ export function Header() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMenu]);
+  }, [showMenu, closeDesktopMenu]);
 
   /**
    * Close menu on escape key
@@ -197,7 +209,12 @@ export function Header() {
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setShowMenu(false);
+        // Use animated close on desktop
+        if (window.innerWidth >= 768) {
+          closeDesktopMenu();
+        } else {
+          setShowMenu(false);
+        }
       }
     };
 
@@ -208,7 +225,7 @@ export function Header() {
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [showMenu]);
+  }, [showMenu, closeDesktopMenu]);
 
   /**
    * Get user initials for avatar
@@ -392,12 +409,14 @@ export function Header() {
       {showMenu && (
         <div
           className="hidden md:block fixed inset-0 bg-black/50 z-50"
-          onClick={() => setShowMenu(false)}
+          style={{ animation: menuClosing ? 'fadeOut 0.2s ease-in forwards' : 'fadeIn 0.2s ease-out' }}
+          onClick={closeDesktopMenu}
         >
           {/* Desktop: Slide-out panel */}
           <div
             ref={menuRef}
             className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-xl"
+            style={{ animation: menuClosing ? 'slideOutRight 0.2s ease-in forwards' : 'slideInRight 0.25s ease-out forwards' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b border-gray-200">
@@ -414,7 +433,7 @@ export function Header() {
                   </div>
                 )}
                 <button
-                  onClick={() => setShowMenu(false)}
+                  onClick={closeDesktopMenu}
                   className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
                   aria-label="Close menu"
                 >
@@ -427,7 +446,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => {
-                  setShowMenu(false);
+                  closeDesktopMenu();
                   router.push('/wishlist');
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
@@ -446,7 +465,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => {
-                  setShowMenu(false);
+                  closeDesktopMenu();
                   router.push('/settings');
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${

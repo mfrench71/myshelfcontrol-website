@@ -302,6 +302,26 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 - **Rate Limit**: No hard limit, be respectful
 - **Used For**: Fallback for ISBN lookup, additional cover sizes
 
+### Future: Combined Search with Source Indicator
+
+Currently, live search only queries Google Books API. Open Library is used only for ISBN lookups.
+
+**Proposed enhancement:**
+1. Query both Google Books and Open Library in parallel during title/author search
+2. Deduplicate results by ISBN or title+author fuzzy match
+3. Show source indicator on each result (e.g., small "G" or "OL" badge)
+4. Prefer Google Books data when duplicates are found (better cover quality)
+
+**Deduplication strategy:**
+- Match by ISBN (if available) - exact match
+- Match by normalised title + author - fuzzy threshold (e.g., 90% Levenshtein)
+- Keep result with more complete data (cover, page count, etc.)
+
+**UI indicator options:**
+- Coloured badge: Blue "G" for Google, Orange "OL" for Open Library
+- Tooltip on hover showing source
+- Source shown in "Found via..." label when selecting result
+
 ### Cover Image Priority
 
 1. User-uploaded images (from Firebase Storage)
@@ -939,9 +959,54 @@ StoryGraph implementation:
 
 ---
 
-## Wishlist Feature Enhancements (Future)
+## Wishlist Feature
 
-### Competitor Analysis
+### Adding Books to Wishlist
+
+#### From Search Results (Add Book Page)
+
+When searching for books on the Add Book page (`/books/add`), each search result displays a heart icon button. Clicking this adds the book directly to your wishlist without adding it to your library.
+
+**Features:**
+- Heart icon appears on each search result
+- Pre-checks existing wishlist items (shown as filled heart)
+- Duplicate detection by ISBN and title/author match
+- Shows loading spinner while adding
+- Toast notification on success/error
+- Date added displayed on wishlist items
+
+**Use case:** You want to remember a book you found while searching but aren't ready to add it to your library yet.
+
+### Planned Enhancements
+
+#### Manual Entry (Quick-Add Modal)
+
+**Status:** Planned
+
+Add a "+" floating action button on the Wishlist page to open a quick-add modal with minimal fields:
+
+- Title (required)
+- Author
+- ISBN (for later API lookup)
+- Priority (High/Medium/Low)
+- Notes
+
+**Rationale:** Quick entry for books not in databases (self-published, heard about, specific editions) without navigating to the full Add Book page.
+
+#### Left Sidebar Filtering
+
+**Status:** Planned
+
+Move wishlist filtering/sorting to a left sidebar layout (matching the book list page):
+
+- Collapsible filter panel on left (desktop)
+- Sort dropdown and priority filters
+- On mobile: slide-out drawer or bottom sheet
+- Consistent with book list page layout pattern
+
+### Future Enhancements
+
+#### Competitor Analysis
 
 | Feature | Goodreads | StoryGraph | Amazon Kindle |
 |---------|-----------|------------|---------------|
@@ -951,7 +1016,7 @@ StoryGraph implementation:
 | **Gift List Feature** | Workaround | Planned | ✓ (registry) |
 | **Library Availability** | Via extensions | No | No |
 
-### Recommended Implementation
+#### Recommended Implementation
 
 **High Priority:**
 1. **Release Date Display** - Show publication date for upcoming books
@@ -1021,6 +1086,97 @@ The following physical formats are currently hardcoded in the app:
    - `Graphic Novel`
    - `Manga`
    - `Comic`
+
+---
+
+## Admin Documentation/FAQ System (Future)
+
+**Prerequisite:** Role-based permissions system (admin role)
+
+### Overview
+
+A system for admin users to create, edit, and publish user-facing documentation and FAQs directly within the app. This avoids the need for external documentation platforms.
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| **Rich Text Editor** | Markdown or WYSIWYG editor for formatting |
+| **Categories** | Organise articles into sections (Getting Started, Features, Troubleshooting) |
+| **Search** | Full-text search across all documentation |
+| **Versioning** | Track changes, ability to revert |
+| **Publish/Draft** | Articles can be in draft or published state |
+| **Ordering** | Drag-and-drop to reorder articles within categories |
+
+### Firestore Structure
+
+**Collections:**
+- `/docs/categories/{categoryId}` - Category metadata
+- `/docs/articles/{articleId}` - Article content
+
+```typescript
+type DocCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  order: number;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+type DocArticle = {
+  id: string;
+  categoryId: string;
+  title: string;
+  slug: string;
+  content: string;           // Markdown or HTML
+  excerpt?: string;          // Short description for listings
+  status: 'draft' | 'published';
+  order: number;
+  views: number;             // Page view counter
+  createdBy: string;         // User ID
+  updatedBy: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  publishedAt?: Timestamp;
+};
+```
+
+### Proposed Routes
+
+| Route | Access | Description |
+|-------|--------|-------------|
+| `/help` | Public | Documentation landing page |
+| `/help/{category-slug}` | Public | Category listing |
+| `/help/{category-slug}/{article-slug}` | Public | Individual article |
+| `/settings/documentation` | Admin only | Article management dashboard |
+| `/settings/documentation/new` | Admin only | Create new article |
+| `/settings/documentation/{id}/edit` | Admin only | Edit existing article |
+
+### Admin UI Components
+
+1. **Article List** - Table with title, category, status, last updated
+2. **Article Editor** - Title, category dropdown, content editor, publish toggle
+3. **Category Manager** - CRUD for categories with ordering
+4. **Preview Mode** - See article as users will see it
+
+### Security Rules
+
+```
+// Only admins can write, everyone can read published articles
+match /docs/{document=**} {
+  allow read: if resource.data.status == 'published' || isAdmin();
+  allow write: if isAdmin();
+}
+```
+
+### Implementation Priority
+
+1. **Phase 1:** Static FAQ page (hardcoded content)
+2. **Phase 2:** Firestore-backed articles (read-only for users)
+3. **Phase 3:** Admin editor UI
+4. **Phase 4:** Search and analytics
 
 ---
 
@@ -1297,4 +1453,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-01* (Visual polish: BookCover component with loading spinners, BottomSheet swipe-to-dismiss, profile photo modal improvements)
+*Last updated: 2026-01-02* (Wishlist documentation: fixed incorrect manual entry docs, added planned quick-add modal and left sidebar filtering)

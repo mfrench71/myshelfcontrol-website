@@ -6,6 +6,19 @@ All notable changes to MyShelfControl are documented here.
 
 ## 02-01-2025
 
+- Add wishlist button to search results (heart icon to add directly to wishlist)
+- Add date added display to wishlist items (matches book card format)
+- Fix duplicate key error in search results by using Google Books volume IDs
+- Fix unnecessary API calls when search input unchanged
+- Add dynamic indicator updates for wishlist, bin, and maintenance counts
+- Update book-api to return ISBNs from search results
+- Document wishlist features and OpenLibrary search enhancement in PROJECT.md
+- Document admin documentation/FAQ system in PROJECT.md
+
+---
+
+## 02-01-2025 (earlier)
+
 - Add ErrorBoundary component for graceful error handling
 - Fix orphaned data when deleting genres (books now updated atomically)
 - Fix orphaned data when deleting series (books now updated atomically)

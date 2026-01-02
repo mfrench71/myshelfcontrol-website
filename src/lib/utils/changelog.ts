@@ -14,10 +14,18 @@ export type ChangelogEntry = {
 };
 
 /**
- * Format ISO date (YYYY-MM-DD) to human-readable British format
+ * Parse UK date (DD-MM-YYYY) to Date object
  */
-function formatDate(isoDate: string): string {
-  const d = new Date(isoDate);
+function parseUKDate(ukDate: string): Date {
+  const [day, month, year] = ukDate.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/**
+ * Format UK date (DD-MM-YYYY) to human-readable British format
+ */
+function formatDate(ukDate: string): string {
+  const d = parseUKDate(ukDate);
   return d.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
@@ -44,8 +52,8 @@ export function getChangelog(): ChangelogEntry[] {
   let currentEntry: ChangelogEntry | null = null;
 
   for (const line of content.split('\n')) {
-    // Match date headings: ## 2025-01-02
-    const dateMatch = line.match(/^## (\d{4}-\d{2}-\d{2})$/);
+    // Match date headings: ## 02-01-2025 (UK format: DD-MM-YYYY)
+    const dateMatch = line.match(/^## (\d{2}-\d{2}-\d{4})$/);
     if (dateMatch) {
       if (currentEntry) entries.push(currentEntry);
       currentEntry = {

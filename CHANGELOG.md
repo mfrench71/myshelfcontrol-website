@@ -4,7 +4,7 @@ All notable changes to MyShelfControl are documented here.
 
 ---
 
-## 2025-01-02
+## 02-01-2025
 
 - Add ErrorBoundary component for graceful error handling
 - Fix orphaned data when deleting genres (books now updated atomically)
@@ -18,7 +18,7 @@ All notable changes to MyShelfControl are documented here.
 
 ---
 
-## 2024-12-31
+## 31-12-2024
 
 - Add Gravatar support for profile avatars
 - Add email verification status with resend option
@@ -30,7 +30,7 @@ All notable changes to MyShelfControl are documented here.
 
 ---
 
-## 2024-12-30
+## 30-12-2024
 
 - Add widget system for home dashboard
 - Add series progress tracking widget
@@ -43,7 +43,7 @@ All notable changes to MyShelfControl are documented here.
 
 ---
 
-## 2024-12-29
+## 29-12-2024
 
 - Initial Next.js migration from 11ty
 - Book list with filtering and sorting

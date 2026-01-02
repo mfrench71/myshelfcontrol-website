@@ -143,6 +143,11 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 
 ## Development Notes
 
+### Changelog
+Update `CHANGELOG.md` in the project root when making user-facing changes. Add a new date section (format: `## DD-MM-YYYY`) with bullet points describing changes. The changelog is parsed at build time and displayed on the About page.
+
+Version number is generated automatically from the build date (DD.MM.YYYY UK format) - no manual version updates needed.
+
 ### Backup Export/Import
 The backup export/import functionality in `/settings/library` must be updated whenever new data types are added. Currently exports:
 - Books (with genre/series ID remapping on import)

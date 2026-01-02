@@ -22,8 +22,12 @@ import {
   Trash2,
   ChevronUp,
   ChevronDown,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { useTheme } from '@/components/providers/theme-provider';
 import { useToast } from '@/components/ui/toast';
 import { BottomSheet } from '@/components/ui/modal';
 import {
@@ -103,15 +107,15 @@ function ClearCacheModal({
       closeOnEscape={!isClearing}
     >
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Clear Local Cache?</h3>
-        <p className="text-gray-600 text-sm mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Clear Local Cache?</h3>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
           This will clear all cached data from your browser. Your data in the cloud will not be affected.
         </p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
             disabled={isClearing}
-            className="flex-1 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px] disabled:opacity-50"
+            className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 min-h-[44px] disabled:opacity-50"
           >
             Cancel
           </button>
@@ -138,6 +142,7 @@ function ClearCacheModal({
 export default function PreferencesSettingsPage() {
   const { user, loading: authLoading } = useAuthContext();
   const { showToast } = useToast();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [widgets, setWidgets] = useState<WidgetConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -355,26 +360,32 @@ export default function PreferencesSettingsPage() {
   return (
     <>
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Preferences</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Preferences</h1>
 
         {/* Mobile Section Navigation (Pills) */}
         <nav className="md:hidden mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar" aria-label="Jump to section">
           <div className="flex gap-2">
             <a
+              href="#appearance"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+            >
+              Appearance
+            </a>
+            <a
               href="#sync"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Sync
             </a>
             <a
               href="#widgets"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Widgets
             </a>
             <a
               href="#browser"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Browser
             </a>
@@ -382,14 +393,68 @@ export default function PreferencesSettingsPage() {
         </nav>
 
         <div className="space-y-6">
+              {/* Appearance Section */}
+              <section id="appearance" className="scroll-mt-36 space-y-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Appearance</h2>
+
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Theme</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    Choose how MyShelfControl looks. Select &quot;System&quot; to automatically match your device settings.
+                  </p>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={() => setTheme('system')}
+                      className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors min-h-[44px] ${
+                        theme === 'system'
+                          ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <Monitor className="w-5 h-5" aria-hidden="true" />
+                      <span>System</span>
+                    </button>
+                    <button
+                      onClick={() => setTheme('light')}
+                      className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors min-h-[44px] ${
+                        theme === 'light'
+                          ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <Sun className="w-5 h-5" aria-hidden="true" />
+                      <span>Light</span>
+                    </button>
+                    <button
+                      onClick={() => setTheme('dark')}
+                      className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors min-h-[44px] ${
+                        theme === 'dark'
+                          ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <Moon className="w-5 h-5" aria-hidden="true" />
+                      <span>Dark</span>
+                    </button>
+                  </div>
+
+                  {theme === 'system' && (
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                      Currently using {resolvedTheme} mode based on your system settings.
+                    </p>
+                  )}
+                </div>
+              </section>
+
               {/* Sync Section */}
               <section id="sync" className="scroll-mt-36 space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">Sync</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sync</h2>
 
                 {/* Auto-Refresh Settings */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="font-medium text-gray-900 mb-2">Auto-Refresh Settings</h3>
-                  <p className="text-gray-600 text-sm mb-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Auto-Refresh Settings</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                     When you switch back to the app after being away, your library can automatically refresh to sync
                     changes from other devices.
                   </p>
@@ -397,7 +462,7 @@ export default function PreferencesSettingsPage() {
                   <div className="space-y-4">
                     {/* Toggle */}
                     <div className="flex items-center justify-between">
-                      <label htmlFor="auto-refresh-toggle" className="text-sm text-gray-700">
+                      <label htmlFor="auto-refresh-toggle" className="text-sm text-gray-700 dark:text-gray-300">
                         Enable auto-refresh on tab focus
                       </label>
                       <input
@@ -411,9 +476,9 @@ export default function PreferencesSettingsPage() {
 
                     {/* Options (shown when enabled) */}
                     {syncSettings.autoRefreshEnabled && (
-                      <div className="space-y-4 pt-2 border-t border-gray-100">
+                      <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-700">
                         <div>
-                          <label htmlFor="hidden-threshold" className="block text-sm text-gray-700 mb-1">
+                          <label htmlFor="hidden-threshold" className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
                             Refresh after hidden for
                           </label>
                           <select
@@ -430,7 +495,7 @@ export default function PreferencesSettingsPage() {
                         </div>
 
                         <div>
-                          <label htmlFor="cooldown-period" className="block text-sm text-gray-700 mb-1">
+                          <label htmlFor="cooldown-period" className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
                             Minimum time between refreshes
                           </label>
                           <select
@@ -450,9 +515,9 @@ export default function PreferencesSettingsPage() {
                 </div>
 
                 {/* Manual Refresh */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="font-medium text-gray-900 mb-2">Manual Refresh</h3>
-                  <p className="text-gray-600 text-sm mb-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Manual Refresh</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                     Force a full refresh of your library from the server to sync the latest changes.
                   </p>
                   <button
@@ -476,22 +541,22 @@ export default function PreferencesSettingsPage() {
               </section>
 
               {/* Dashboard Widgets */}
-              <section id="widgets" className="scroll-mt-36 bg-white rounded-xl border border-gray-200 p-6">
+              <section id="widgets" className="scroll-mt-36 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <LayoutGrid className="w-5 h-5 text-gray-600" aria-hidden="true" />
-                    <h2 className="text-lg font-semibold text-gray-900">Dashboard Widgets</h2>
+                    <LayoutGrid className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Dashboard Widgets</h2>
                   </div>
                   <button
                     onClick={handleReset}
                     disabled={saving}
-                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                    className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50"
                   >
                     <RotateCcw className="w-4 h-4" />
                     Reset
                   </button>
                 </div>
-                <p className="text-gray-500 text-sm mb-4">
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
                   <span className="hidden md:inline">Drag to reorder.</span>
                   <span className="md:hidden">Use arrows to reorder.</span>
                   {' '}Configure items to show and width for each widget.
@@ -513,15 +578,15 @@ export default function PreferencesSettingsPage() {
                         onDragEnd={handleDragEnd}
                         className={`p-4 rounded-lg border transition-all md:cursor-grab md:active:cursor-grabbing ${
                           draggedIndex === index
-                            ? 'border-primary bg-primary/5'
-                            : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                            ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                            : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
                         } ${!widget.enabled ? 'opacity-60' : ''}`}
                       >
                         {/* Header row */}
                         <div className="flex items-center gap-3">
                           {/* Drag handle - desktop only */}
                           <GripVertical
-                            className="hidden md:block w-4 h-4 text-gray-400 flex-shrink-0"
+                            className="hidden md:block w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0"
                             aria-hidden="true"
                           />
                           {/* Arrow buttons - mobile only */}
@@ -529,30 +594,30 @@ export default function PreferencesSettingsPage() {
                             <button
                               onClick={() => moveWidgetUp(index)}
                               disabled={saving || index === 0}
-                              className="p-1 rounded hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                               aria-label="Move up"
                             >
-                              <ChevronUp className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                              <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
                             </button>
                             <button
                               onClick={() => moveWidgetDown(index)}
                               disabled={saving || index === widgets.length - 1}
-                              className="p-1 rounded hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                               aria-label="Move down"
                             >
-                              <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
                             </button>
                           </div>
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <IconComponent className="w-4 h-4 text-gray-500" aria-hidden="true" />
+                            <IconComponent className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" />
                             <div className="min-w-0">
-                              <p className="font-medium text-gray-900 text-sm">{meta.name}</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">{meta.name}</p>
                             </div>
                           </div>
                           <button
                             onClick={() => toggleWidget(widget.id)}
                             disabled={saving}
-                            className="p-2 rounded-lg hover:bg-gray-200 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50"
+                            className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50"
                             aria-label={widget.enabled ? 'Hide widget' : 'Show widget'}
                           >
                             {widget.enabled ? (
@@ -565,11 +630,11 @@ export default function PreferencesSettingsPage() {
 
                         {/* Settings row (when enabled) */}
                         {widget.enabled && (
-                          <div className="mt-3 pt-3 border-t border-gray-200 flex flex-wrap gap-4">
+                          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 flex flex-wrap gap-4">
                             {/* Items to show */}
                             {showCountSetting && (
                               <div className="flex items-center gap-2">
-                                <label htmlFor={`count-${widget.id}`} className="text-xs text-gray-600">
+                                <label htmlFor={`count-${widget.id}`} className="text-xs text-gray-600 dark:text-gray-400">
                                   Items:
                                 </label>
                                 <select
@@ -589,7 +654,7 @@ export default function PreferencesSettingsPage() {
 
                             {/* Width */}
                             <div className="flex items-center gap-2">
-                              <label htmlFor={`size-${widget.id}`} className="text-xs text-gray-600">
+                              <label htmlFor={`size-${widget.id}`} className="text-xs text-gray-600 dark:text-gray-400">
                                 Width:
                               </label>
                               <select
@@ -613,7 +678,7 @@ export default function PreferencesSettingsPage() {
                 </div>
 
                 {saving && (
-                  <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500">
+                  <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500 dark:text-gray-400">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Saving...
                   </div>
@@ -622,18 +687,18 @@ export default function PreferencesSettingsPage() {
 
               {/* Browser Section */}
               <section id="browser" className="scroll-mt-36 space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">Browser</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Browser</h2>
 
                 {/* Clear Local Cache */}
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="font-medium text-gray-900 mb-2">Clear Local Cache</h3>
-                  <p className="text-gray-600 text-sm mb-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Clear Local Cache</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                     Clear cached data stored in your browser. This includes genre and series caches, sync settings, and
                     widget preferences. Your data in the cloud will not be affected.
                   </p>
                   <button
                     onClick={() => setShowCacheModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors min-h-[44px]"
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors min-h-[44px]"
                   >
                     <Trash2 className="w-4 h-4" aria-hidden="true" />
                     <span>Clear Cache</span>

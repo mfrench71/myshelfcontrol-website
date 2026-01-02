@@ -101,7 +101,7 @@ function ToastItem({
     },
     info: {
       icon: Info,
-      className: 'bg-gray-800 text-white',
+      className: 'bg-gray-800 dark:bg-gray-700 text-white',
     },
   }[toast.type];
 

@@ -73,7 +73,7 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
       {[1, 2, 3, 4, 5].map((star) => (
         <svg
           key={star}
-          className={`w-4 h-4 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          className={`w-4 h-4 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'}`}
           viewBox="0 0 24 24"
         >
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -91,14 +91,14 @@ function StatusBadge({ status }: { status: 'reading' | 'finished' }) {
     reading: {
       icon: BookOpen,
       label: 'Reading',
-      bgClass: 'bg-blue-100',
-      textClass: 'text-blue-700',
+      bgClass: 'bg-blue-100 dark:bg-blue-900/30',
+      textClass: 'text-blue-700 dark:text-blue-300',
     },
     finished: {
       icon: CheckCircle,
       label: 'Finished',
-      bgClass: 'bg-green-100',
-      textClass: 'text-green-700',
+      bgClass: 'bg-green-100 dark:bg-green-900/30',
+      textClass: 'text-green-700 dark:text-green-300',
     },
   };
 
@@ -133,7 +133,7 @@ function SeriesBadge({
 
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-700"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
       title={series.name}
     >
       <Library className="w-3 h-3" aria-hidden="true" />
@@ -192,7 +192,7 @@ export function BookCard({ book, genres = {}, series = {}, priority }: BookCardP
   return (
     <Link
       href={`/books/${book.id}`}
-      className="book-card flex gap-4 p-3 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all"
+      className="book-card flex gap-4 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary dark:hover:border-primary hover:shadow-md transition-all"
     >
       {/* Cover Image */}
       <div className="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden shadow-cover">
@@ -207,16 +207,16 @@ export function BookCard({ book, genres = {}, series = {}, priority }: BookCardP
       {/* Book Details */}
       <div className="flex-1 min-w-0">
         {/* Title */}
-        <h3 className="font-medium text-gray-900 truncate">{book.title}</h3>
+        <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">{book.title}</h3>
 
         {/* Author */}
-        <p className="text-sm text-gray-500 truncate">
+        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
           {book.author || 'Unknown author'}
         </p>
 
         {/* Date Added */}
         {dateAdded && (
-          <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+          <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 mt-0.5">
             <Calendar className="w-3 h-3" aria-hidden="true" />
             <span>Added {dateAdded}</span>
           </p>
@@ -247,7 +247,7 @@ export function BookCard({ book, genres = {}, series = {}, priority }: BookCardP
               <GenreBadge key={genre.id} genre={genre} />
             ))}
             {hasMoreGenres && (
-              <span className="inline-block px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+              <span className="inline-block px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
                 +{(book.genres || []).length - MAX_GENRE_BADGES}
               </span>
             )}

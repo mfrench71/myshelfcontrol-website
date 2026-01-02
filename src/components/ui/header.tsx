@@ -279,14 +279,14 @@ export function Header() {
       )}
 
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 h-14">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 h-14">
         <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-white" aria-hidden="true" />
             </div>
-            <span className="text-xl font-bold text-gray-900">MyShelfControl</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">MyShelfControl</span>
           </Link>
 
           {/* Right side buttons */}
@@ -308,19 +308,19 @@ export function Header() {
             {/* Search button */}
             <button
               onClick={() => setShowSearch(true)}
-              className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+              className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
               aria-label="Search books"
             >
-              <Search className="w-5 h-5 text-gray-600" aria-hidden="true" />
+              <Search className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
             </button>
 
             {/* Menu button */}
             <button
               onClick={() => setShowMenu(true)}
-              className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+              className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
               aria-label="Open menu"
             >
-              <Menu className="w-5 h-5 text-gray-600" aria-hidden="true" />
+              <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -339,10 +339,10 @@ export function Header() {
             <div className="flex items-center gap-3 mb-4">
               {renderAvatar('md')}
               <div>
-                <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
                   {user.email}
                 </p>
-                <p className="text-xs text-gray-500">MyShelfControl</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">MyShelfControl</p>
               </div>
             </div>
           )}
@@ -355,14 +355,14 @@ export function Header() {
                 setShowMenu(false);
                 router.push('/wishlist');
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
+              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
                 pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
               }`}
             >
               <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
               <span>Wishlist</span>
               {wishlistCount > 0 && (
-                <span className="ml-auto bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                <span className="ml-auto bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300 text-xs font-medium px-2 py-0.5 rounded-full">
                   {wishlistCount}
                 </span>
               )}
@@ -374,11 +374,11 @@ export function Header() {
                 setShowMenu(false);
                 router.push('/settings');
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
+              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
                 pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
               }`}
             >
-              <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
+              <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
               <span>Settings</span>
             </button>
 
@@ -386,7 +386,7 @@ export function Header() {
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-left text-red-600 min-h-[44px] transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left text-red-600 dark:text-red-400 min-h-[44px] transition-colors disabled:opacity-50"
               >
                 {loggingOut ? (
                   <>
@@ -415,26 +415,26 @@ export function Header() {
           {/* Desktop: Slide-out panel */}
           <div
             ref={menuRef}
-            className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-xl"
+            className="absolute right-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-800 shadow-xl"
             style={{ animation: menuClosing ? 'slideOutRight 0.2s ease-in forwards' : 'slideInRight 0.25s ease-out forwards' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 {user && (
                   <div className="flex items-center gap-3">
                     {renderAvatar('sm')}
                     <div>
-                      <p className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[180px]">
                         {user.email}
                       </p>
-                      <p className="text-xs text-gray-500">MyShelfControl</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">MyShelfControl</p>
                     </div>
                   </div>
                 )}
                 <button
                   onClick={closeDesktopMenu}
-                  className="p-2.5 hover:bg-gray-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+                  className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" aria-hidden="true" />
@@ -449,14 +449,14 @@ export function Header() {
                   closeDesktopMenu();
                   router.push('/wishlist');
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
                   pathname.startsWith('/wishlist') ? 'text-primary font-medium' : ''
                 }`}
               >
                 <Heart className="w-5 h-5 text-pink-500" aria-hidden="true" />
                 <span>Wishlist</span>
                 {wishlistCount > 0 && (
-                  <span className="ml-auto bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                  <span className="ml-auto bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300 text-xs font-medium px-2 py-0.5 rounded-full">
                     {wishlistCount}
                   </span>
                 )}
@@ -468,21 +468,21 @@ export function Header() {
                   closeDesktopMenu();
                   router.push('/settings');
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg min-h-[44px] transition-colors text-left ${
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg min-h-[44px] transition-colors text-left ${
                   pathname.startsWith('/settings') ? 'text-primary font-medium' : ''
                 }`}
               >
-                <Settings className="w-5 h-5 text-gray-600" aria-hidden="true" />
+                <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
                 <span>Settings</span>
               </button>
 
-              <hr className="my-2" />
+              <hr className="my-2 dark:border-gray-700" />
 
               {user && (
                 <button
                   onClick={handleLogout}
                   disabled={loggingOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg text-left text-red-600 min-h-[44px] transition-colors disabled:opacity-50"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-left text-red-600 dark:text-red-400 min-h-[44px] transition-colors disabled:opacity-50"
                 >
                   {loggingOut ? (
                     <>

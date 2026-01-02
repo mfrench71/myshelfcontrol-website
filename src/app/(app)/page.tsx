@@ -60,8 +60,8 @@ function HorizontalBookCard({ book, href, priority }: { book: Book; href: string
         className="w-24 h-36 rounded-lg shadow-cover overflow-hidden"
         priority={priority}
       />
-      <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
-      <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
+      <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-2 line-clamp-2">{book.title}</h3>
+      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{book.author || 'Unknown'}</p>
     </Link>
   );
 }
@@ -97,12 +97,12 @@ function WidgetContainer({
     : null;
 
   return (
-    <div className={`widget-col-${size} bg-white rounded-xl border border-gray-200 overflow-hidden`}>
+    <div className={`widget-col-${size} bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
         <div className="flex items-center gap-2">
           <Icon className={`w-5 h-5 ${iconColor}`} aria-hidden="true" />
-          <h3 className="font-semibold text-gray-900">{title}</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
         </div>
         {seeAllHref && !isEmpty && (
           <Link
@@ -116,8 +116,8 @@ function WidgetContainer({
       {/* Content */}
       {isEmpty ? (
         <div className="p-6 text-center">
-          <Icon className={`w-8 h-8 text-gray-300 mx-auto`} aria-hidden="true" />
-          <p className="text-sm text-gray-500 mt-2">{emptyMessage}</p>
+          <Icon className={`w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto`} aria-hidden="true" />
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{emptyMessage}</p>
         </div>
       ) : (
         children
@@ -142,20 +142,20 @@ function HorizontalScroll({ children }: { children: React.ReactNode }) {
  */
 function WidgetSkeleton({ size = 12 }: { size?: number }) {
   return (
-    <div className={`widget-col-${size} bg-white rounded-xl border border-gray-200 overflow-hidden animate-pulse`}>
-      <div className="p-4 border-b border-gray-100">
+    <div className={`widget-col-${size} bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-pulse`}>
+      <div className="p-4 border-b border-gray-100 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 bg-gray-200 rounded" />
-          <div className="h-5 bg-gray-200 rounded w-32" />
+          <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-32" />
         </div>
       </div>
       <div className="p-4">
         <div className="flex gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex-shrink-0">
-              <div className="w-24 h-36 bg-gray-200 rounded-lg" />
-              <div className="w-20 h-4 bg-gray-200 rounded mt-2" />
-              <div className="w-16 h-3 bg-gray-200 rounded mt-1" />
+              <div className="w-24 h-36 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+              <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded mt-2" />
+              <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded mt-1" />
             </div>
           ))}
         </div>
@@ -282,8 +282,8 @@ function TopRatedWidget({ books, config }: { books: Book[]; config: WidgetConfig
               className="w-24 h-36 rounded-lg shadow-md overflow-hidden"
               priority={index < 4}
             />
-            <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
-            <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-2 line-clamp-2">{book.title}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{book.author || 'Unknown'}</p>
             {book.rating != null && book.rating > 0 && (
               <div className="flex items-center gap-0.5 mt-1">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -356,8 +356,8 @@ function WishlistWidget({ items, config }: { items: WishlistItem[]; config: Widg
               className="w-24 h-36 rounded-lg shadow-md overflow-hidden"
               priority={index < 4}
             />
-            <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{item.title}</h3>
-            <p className="text-xs text-gray-500 truncate">{item.author || 'Unknown'}</p>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-2 line-clamp-2">{item.title}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.author || 'Unknown'}</p>
           </Link>
         ))}
       </HorizontalScroll>
@@ -399,15 +399,15 @@ function SeriesProgressWidget({
             <Link
               key={s.id}
               href={`/books?series=${s.id}`}
-              className="block p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="block p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-900 truncate">{s.name}</span>
-                <span className="text-xs text-gray-500">
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{s.name}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
                   {booksInSeries.length}/{totalBooks}
                 </span>
               </div>
-              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-purple-500 rounded-full transition-all"
                   style={{ width: `${percentage}%` }}
@@ -453,17 +453,17 @@ function EmailVerificationBanner({
   };
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 mb-6">
       <div className="flex items-start gap-3">
-        <Mail className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+        <Mail className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
         <div className="flex-1 min-w-0">
-          <p className="text-amber-800 font-medium">Please verify your email address</p>
-          <p className="text-amber-700 text-sm mt-1">
+          <p className="text-amber-800 dark:text-amber-200 font-medium">Please verify your email address</p>
+          <p className="text-amber-700 dark:text-amber-300 text-sm mt-1">
             We sent a verification link to <strong>{user.email}</strong>. Check your inbox.
           </p>
-          {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+          {error && <p className="text-red-600 dark:text-red-400 text-sm mt-2">{error}</p>}
           {sent ? (
-            <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
+            <p className="text-green-600 dark:text-green-400 text-sm mt-2 flex items-center gap-1">
               <CheckCircle className="w-4 h-4" />
               Verification email sent!
             </p>
@@ -471,7 +471,7 @@ function EmailVerificationBanner({
             <button
               onClick={handleResend}
               disabled={isSending}
-              className="mt-2 text-sm text-amber-700 hover:text-amber-800 underline disabled:opacity-50 inline-flex items-center gap-1"
+              className="mt-2 text-sm text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 underline disabled:opacity-50 inline-flex items-center gap-1"
             >
               {isSending ? (
                 <>
@@ -486,10 +486,10 @@ function EmailVerificationBanner({
         </div>
         <button
           onClick={onDismiss}
-          className="p-1 hover:bg-amber-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="p-1 hover:bg-amber-100 dark:hover:bg-amber-800/30 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
           aria-label="Dismiss verification banner"
         >
-          <X className="w-5 h-5 text-amber-600" aria-hidden="true" />
+          <X className="w-5 h-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -685,9 +685,9 @@ export default function HomePage() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="text-center py-12">
-          <BookOpen className="w-16 h-16 text-gray-300 mx-auto" aria-hidden="true" />
-          <h1 className="text-2xl font-bold text-gray-900 mt-4">Welcome to MyShelfControl</h1>
-          <p className="text-gray-500 mt-2">
+          <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-4">Welcome to MyShelfControl</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
             Track your reading journey and organise your book collection.
           </p>
           <Link
@@ -781,9 +781,9 @@ export default function HomePage() {
       {/* Empty State */}
       {books.length === 0 && (
         <div className="text-center py-12 mt-6">
-          <TrendingUp className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-          <h2 className="text-lg font-medium text-gray-900 mt-4">Start Your Collection</h2>
-          <p className="text-gray-500 mt-1">
+          <TrendingUp className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+          <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4">Start Your Collection</h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Add your first book to see your reading stats here.
           </p>
           <Link

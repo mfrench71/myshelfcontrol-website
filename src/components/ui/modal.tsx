@@ -91,15 +91,15 @@ export function Modal({
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       <div
-        className={`modal-content bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto ${className}`}
+        className={`modal-content bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto ${className}`}
       >
         {showCloseButton && (
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-gray-500" aria-hidden="true" />
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" />
           </button>
         )}
         {children}
@@ -193,16 +193,16 @@ export function BottomSheet({
       aria-labelledby={title ? 'sheet-title' : undefined}
     >
       <div
-        className={`bottom-sheet-content bg-white w-full md:max-w-md md:rounded-xl md:shadow-xl max-h-[90vh] overflow-y-auto relative ${className}`}
+        className={`bottom-sheet-content bg-white dark:bg-gray-800 w-full md:max-w-md md:rounded-xl md:shadow-xl max-h-[90vh] overflow-y-auto relative ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {showCloseButton && (
           <button
             onClick={handleClose}
-            className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center z-10"
+            className="absolute top-3 right-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center z-10"
             aria-label="Close"
           >
-            <X className="w-5 h-5 text-gray-500" aria-hidden="true" />
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" />
           </button>
         )}
         {children}
@@ -251,15 +251,15 @@ export function ConfirmModal({
 
   const content = (
     <div className="p-6">
-      <h3 id="sheet-title" className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 id="sheet-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
         {title}
       </h3>
-      <p className="text-gray-600 mb-6">{message}</p>
+      <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
       <div className="flex gap-3">
         <button
           onClick={onClose}
           disabled={isLoading}
-          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
         >
           {cancelText}
         </button>

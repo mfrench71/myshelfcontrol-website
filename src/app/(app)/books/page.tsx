@@ -509,14 +509,14 @@ function BooksPageContent() {
       <div id="loading" className="max-w-6xl mx-auto px-4 py-6">
         {/* Header skeleton */}
         <div className="flex items-center justify-between mb-6">
-          <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
-          <div className="h-10 bg-gray-200 rounded w-10 animate-pulse md:hidden" />
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse" />
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-10 animate-pulse md:hidden" />
         </div>
 
         {/* Mobile sort skeleton */}
         <div className="flex gap-2 mb-4 md:hidden">
-          <div className="flex-1 h-10 bg-gray-200 rounded animate-pulse" />
-          <div className="h-10 w-10 bg-gray-200 rounded animate-pulse" />
+          <div className="flex-1 h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
         </div>
 
         {/* Two-column layout */}
@@ -542,17 +542,17 @@ function BooksPageContent() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Books</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Books</h1>
         </div>
 
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
           <div>
-            <p className="text-red-700 font-medium">Error loading books</p>
-            <p className="text-red-600 text-sm mt-1">{error}</p>
+            <p className="text-red-700 dark:text-red-300 font-medium">Error loading books</p>
+            <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-2 text-sm text-red-700 underline hover:no-underline"
+              className="mt-2 text-sm text-red-700 dark:text-red-300 underline hover:no-underline"
             >
               Try again
             </button>
@@ -606,7 +606,7 @@ function BooksPageContent() {
           <button
             id="filter-btn"
             onClick={() => setShowFilterSheet(true)}
-            className="relative p-2.5 hover:bg-gray-100 rounded-lg text-gray-600 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="relative p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400 min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Open filters"
           >
             <SlidersHorizontal className="w-5 h-5" aria-hidden="true" />
@@ -635,7 +635,7 @@ function BooksPageContent() {
           {activeFilterLabels.length > 1 && (
             <button
               onClick={handleReset}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors min-h-[36px]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium transition-colors min-h-[36px]"
             >
               Clear All
             </button>
@@ -648,9 +648,9 @@ function BooksPageContent() {
 
       {/* Mobile Header */}
       <div className="flex items-center justify-between mb-4 md:hidden">
-        <h2 className="text-xl font-bold text-gray-900">My Books</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Books</h2>
         {books.length > 0 && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {hasActiveFilters
               ? `${filteredAndSortedBooks.length} of ${books.length}`
               : `${books.length} ${books.length === 1 ? 'book' : 'books'}`}
@@ -681,9 +681,9 @@ function BooksPageContent() {
         <div className="flex-1 min-w-0">
           {/* Desktop Header */}
           <div className="hidden md:flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">My Books</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">My Books</h2>
             {books.length > 0 && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {hasActiveFilters
                   ? `Showing ${filteredAndSortedBooks.length} of ${books.length} ${books.length === 1 ? 'book' : 'books'}`
                   : `${books.length} ${books.length === 1 ? 'book' : 'books'}`}
@@ -706,7 +706,7 @@ function BooksPageContent() {
               {activeFilterLabels.length > 1 && (
                 <button
                   onClick={handleReset}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors min-h-[36px]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium transition-colors min-h-[36px]"
                 >
                   Clear All
                 </button>
@@ -716,9 +716,9 @@ function BooksPageContent() {
           {/* Empty State */}
           {books.length === 0 ? (
             <div id="empty-state" className="text-center py-12 empty-state-animate">
-              <BookOpen className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-              <h2 className="text-lg font-medium text-gray-900 mt-4">No books yet</h2>
-              <p className="text-gray-500 mt-1">
+              <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4">No books yet</h2>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">
                 Start building your library by adding your first book.
               </p>
               <Link
@@ -732,13 +732,13 @@ function BooksPageContent() {
           ) : filteredAndSortedBooks.length === 0 ? (
             /* No results after filtering */
             <div className="text-center py-12 empty-state-animate">
-              <SearchX className="w-12 h-12 text-gray-300 mx-auto" aria-hidden="true" />
-              <p className="text-gray-500 mt-3">No books match your filters</p>
-              <p className="text-gray-400 text-sm mt-1">
+              <SearchX className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+              <p className="text-gray-500 dark:text-gray-400 mt-3">No books match your filters</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
                 Try adjusting your filters or{' '}
                 <button
                   onClick={handleReset}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
                   clear all filters
                 </button>
@@ -808,15 +808,15 @@ export default function BooksPage() {
       fallback={
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-6">
-            <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse" />
           </div>
           <div className="flex gap-6">
             <div className="hidden md:block w-72 flex-shrink-0">
-              <div className="bg-gray-200 rounded-xl h-96 animate-pulse" />
+              <div className="bg-gray-200 dark:bg-gray-700 rounded-xl h-96 animate-pulse" />
             </div>
             <div className="flex-1 space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="bg-gray-200 rounded-xl h-24 animate-pulse" />
+                <div key={i} className="bg-gray-200 dark:bg-gray-700 rounded-xl h-24 animate-pulse" />
               ))}
             </div>
           </div>

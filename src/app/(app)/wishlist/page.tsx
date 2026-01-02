@@ -8,7 +8,6 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Heart,
-  ChevronRight,
   Loader2,
   ShoppingBag,
   Pencil,
@@ -403,11 +402,9 @@ export default function WishlistPage() {
                   Home
                 </Link>
               </li>
-              <li className="flex items-center min-w-0">
-                <ChevronRight className="w-4 h-4 text-gray-400 mx-1 flex-shrink-0" aria-hidden="true" />
-                <span className="text-gray-900 font-medium" aria-current="page">
-                  Wishlist
-                </span>
+              <li className="mx-2 text-gray-400">/</li>
+              <li className="text-gray-900 font-medium" aria-current="page">
+                Wishlist
               </li>
             </ol>
           </nav>

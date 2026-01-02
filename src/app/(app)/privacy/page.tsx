@@ -3,7 +3,6 @@
  * Explains data collection, storage, and user rights
  */
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -24,11 +23,9 @@ export default function PrivacyPage() {
                   Home
                 </Link>
               </li>
-              <li className="flex items-center min-w-0">
-                <ChevronRight className="w-4 h-4 text-gray-400 mx-1 flex-shrink-0" aria-hidden="true" />
-                <span className="text-gray-900 font-medium" aria-current="page">
-                  Privacy Policy
-                </span>
+              <li className="mx-2 text-gray-400">/</li>
+              <li className="text-gray-900 font-medium" aria-current="page">
+                Privacy Policy
               </li>
             </ol>
           </nav>

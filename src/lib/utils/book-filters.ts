@@ -6,6 +6,23 @@
 import type { Book, BookFilters, BookRead } from '@/lib/types';
 
 /**
+ * Reading status labels for display
+ */
+export const STATUS_LABELS: Record<'want-to-read' | 'reading' | 'finished', string> = {
+  'want-to-read': 'Not Read',
+  'reading': 'Currently Reading',
+  'finished': 'Finished',
+};
+
+/**
+ * Status options for filters (excludes 'Not Read' as it's the default/unread state)
+ */
+export const STATUS_OPTIONS = [
+  { value: 'reading', label: 'Reading' },
+  { value: 'finished', label: 'Finished' },
+] as const;
+
+/**
  * Physical format options for book forms
  */
 export const FORMAT_OPTIONS = [

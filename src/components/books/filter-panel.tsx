@@ -9,6 +9,7 @@ import { useState, useId, useRef, useEffect } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import type { Genre, Series, BookFilters } from '@/lib/types';
 import { BottomSheet } from '@/components/ui/modal';
+import { STATUS_OPTIONS } from '@/lib/utils/book-filters';
 
 export type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc' | 'seriesPosition-asc';
 
@@ -49,11 +50,6 @@ const SERIES_SORT_OPTION: { value: SortOption; label: string } = {
   value: 'seriesPosition-asc',
   label: 'Series Order',
 };
-
-const STATUS_OPTIONS = [
-  { value: 'reading', label: 'Reading' },
-  { value: 'finished', label: 'Finished' },
-];
 
 const RATING_OPTIONS = [
   { value: 0, label: 'All Ratings' },

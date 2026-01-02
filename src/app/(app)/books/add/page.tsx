@@ -83,8 +83,10 @@ export default function AddBookPage() {
   // Scanner state
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scannerLoading, setScannerLoading] = useState(true);
+  const [scannerHint, setScannerHint] = useState<string | null>(null);
   const scannerContainerRef = useRef<HTMLDivElement>(null);
   const quaggaRef = useRef<typeof import('@ericblade/quagga2').default | null>(null);
+  const scannerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -599,6 +601,12 @@ export default function AddBookPage() {
             }
             Quagga.start();
             setScannerLoading(false);
+
+            // Show hint after 10 seconds if no barcode detected
+            scannerTimeoutRef.current = setTimeout(() => {
+              setScannerHint('Having trouble? Try moving closer or improving lighting.');
+            }, 10000);
+
             resolve();
           }
         );
@@ -647,6 +655,13 @@ export default function AddBookPage() {
   const closeScanner = () => {
     setScannerOpen(false);
     setScannerLoading(true);
+    setScannerHint(null);
+
+    // Clear timeout
+    if (scannerTimeoutRef.current) {
+      clearTimeout(scannerTimeoutRef.current);
+      scannerTimeoutRef.current = null;
+    }
 
     if (quaggaRef.current) {
       try {
@@ -1172,7 +1187,7 @@ export default function AddBookPage() {
           {/* Scanner container */}
           <div
             ref={scannerContainerRef}
-            className="w-full h-full"
+            className="w-full h-full [&>video]:absolute [&>video]:inset-0 [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover"
           />
 
           {/* Loading state */}
@@ -1185,20 +1200,26 @@ export default function AddBookPage() {
             </div>
           )}
 
-          {/* Viewfinder overlay */}
+          {/* Scanning indicator - corner brackets */}
           {!scannerLoading && (
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-64 h-32 border-2 border-white/50 rounded-lg">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full h-0.5 bg-red-500 animate-pulse" />
-                </div>
+              <div className="relative w-64 h-40">
+                {/* Animated corner brackets */}
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/70 rounded-tl-lg animate-pulse" />
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/70 rounded-tr-lg animate-pulse" />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/70 rounded-bl-lg animate-pulse" />
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/70 rounded-br-lg animate-pulse" />
               </div>
             </div>
           )}
 
-          <p className="absolute bottom-8 left-0 right-0 text-center text-white/80 text-sm">
-            Point camera at a book barcode
-          </p>
+          <div className="absolute bottom-8 left-0 right-0 text-center px-4">
+            {scannerHint ? (
+              <p className="text-amber-300 text-sm">{scannerHint}</p>
+            ) : (
+              <p className="text-white/80 text-sm animate-pulse">Scanning for barcode...</p>
+            )}
+          </div>
         </div>
       )}
     </>

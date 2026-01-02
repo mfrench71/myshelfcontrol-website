@@ -488,6 +488,16 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - Scans ISBN-10 and ISBN-13 barcodes
 - Auto-lookup via Google Books API on successful scan
 
+**Scanner UI:**
+- Full-screen camera view (no restrictive viewfinder box)
+- Animated pulsing corner brackets indicate active scanning
+- "Scanning for barcode..." text with pulse animation
+- 10-second timeout shows hint: "Having trouble? Try moving closer or improving lighting."
+- Haptic feedback (vibrate) on successful scan
+- Toast notification confirms scanned ISBN
+
+**Design Decision:** Removed misleading viewfinder box that implied barcode must be within a specific area. Quagga scans the entire camera frame, so the UI now reflects this honestly. Corner brackets provide visual feedback without implying constraint. Research: [Material Design ML guidelines](https://m2.material.io/design/machine-learning/barcode-scanning.html), [Scandit UX insights](https://www.scandit.com/blog/scanning-at-scale-ux-insights/).
+
 **First-Use Onboarding:**
 - [ ] Highlight barcode scanner button with animated callout on first visit to Add Book page
 - Button icon (camera) not immediately obvious to new users

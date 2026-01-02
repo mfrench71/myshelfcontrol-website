@@ -92,24 +92,72 @@ All data stored under `/users/{userId}/`:
 
 ### Architecture Decisions
 
-#### Settings Page: Hub Pattern
+#### Settings Page: Hub vs Tabs Analysis
 
-Settings uses a hub-and-drill-down pattern: main Settings page lists categories, each linking to a sub-page. This differs from the legacy app which used horizontal tabs with in-section links.
+**Current implementation:** Horizontal tabs (same as legacy app)
 
-| Aspect | **Hub Pattern** (Current) | **Horizontal Tabs** (Legacy) |
-|--------|---------------------------|------------------------------|
+**Question:** Should we switch to hub-and-drill-down pattern?
+
+##### Competitor Analysis
+
+| App | Pattern | Notes |
+|-----|---------|-------|
+| **iOS Settings** | Hub + Drill-down | Gold standard - grouped list with subscreens |
+| **Android Settings** | Hub + Drill-down | Material Design recommended pattern |
+| **Goodreads** | Hamburger → List | Settings via menu, then list layout |
+| **StoryGraph** | Hamburger → Page | Simpler settings, single page with sections |
+| **Spotify** | Hub + Drill-down | Profile icon → Settings list → Subscreens |
+| **Instagram** | Hub + Drill-down | Settings list with grouped categories |
+
+**Finding:** Native apps and major mobile apps overwhelmingly use hub pattern, not horizontal tabs.
+
+##### Pattern Comparison
+
+| Aspect | **Hub Pattern** | **Horizontal Tabs** (Current) |
+|--------|-----------------|-------------------------------|
 | Clicks to setting | 2-3 clicks | 1-2 clicks |
 | Mobile friendliness | Excellent (vertical list) | Moderate (horizontal scroll) |
 | Scalability | High (unlimited sections) | Limited (5-7 tabs max) |
 | Cognitive load | Low (one section at a time) | Higher (multiple visible) |
 | iOS/Android convention | ✓ Follows native patterns | ✗ Custom pattern |
+| Thumb reachability | ✓ Natural scrolling | ✗ Requires reach to top |
+| Hidden content risk | None | Tabs may scroll off-screen |
 
-**Decision:** Keep hub pattern. It follows iOS/Android conventions, scales well, and settings are infrequently accessed. Consider adding desktop sidebar layout as future enhancement.
+##### Decision: Recommend Hub Pattern
 
-**Potential improvements:**
-1. Keyboard shortcut (Cmd/Ctrl+,) for power users
-2. Surface frequent settings outside hub (dark mode toggle in header)
-3. Desktop sidebar (>768px): show settings categories always visible
+Per [Android Design Guidelines](https://developer.android.com/design/ui/mobile/guides/patterns/settings) and [NN/g Tab Guidelines](https://www.nngroup.com/articles/tabs-used-right/):
+
+- Tabs work best with ≤5 options (we have 6)
+- Settings are infrequently accessed (hub adds one tap, acceptable)
+- Mobile-first PWA should follow mobile conventions
+- Hub scales if we add more settings categories
+
+##### Sub-Section Access from Hub: Overkill?
+
+**Question:** Should hub items show expandable sub-sections inline?
+
+**Recommendation:** No - keep it simple.
+
+1. **Consistency:** iOS/Android don't expand settings inline
+2. **Complexity:** Adds UI state management for minimal benefit
+3. **Discoverability:** Users expect tap → drill-down pattern
+4. **Alternative:** Show status/summary text on hub items instead
+
+**Better approach:** Show contextual info on hub cards:
+```
+┌─────────────────────────────────────────┐
+│ 🔧 Maintenance                    (3) →│
+│    3 issues found in your library       │
+└─────────────────────────────────────────┘
+```
+
+##### Potential Hub Improvements
+
+1. **Status indicators:** Show counts/issues on hub cards
+2. **Desktop sidebar (>768px):** Always-visible categories sidebar
+3. **Search:** Add settings search for 15+ options
+4. **Keyboard shortcut:** Cmd/Ctrl+, for power users
+5. **Frequent settings:** Surface dark mode toggle in header
 
 #### Author Sorting
 
@@ -977,6 +1025,22 @@ When searching for books on the Add Book page (`/books/add`), each search result
 
 **Use case:** You want to remember a book you found while searching but aren't ready to add it to your library yet.
 
+### Current Wishlist Item Data
+
+Each wishlist item stores:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| Title | Required | Book title |
+| Author | Required | Author name |
+| ISBN | Optional | For later API lookup/enrichment |
+| Cover Image | Optional | From Google Books/Open Library |
+| Priority | Optional | High / Medium / Low |
+| Notes | Optional | Why you want this book, who recommended it |
+| Date Added | Auto | Timestamp when added |
+
+**Edit functionality:** Priority and Notes can be edited via the Edit modal on the wishlist page.
+
 ### Planned Enhancements
 
 #### Manual Entry (Quick-Add Modal)
@@ -1016,17 +1080,37 @@ Move wishlist filtering/sorting to a left sidebar layout (matching the book list
 | **Gift List Feature** | Workaround | Planned | ✓ (registry) |
 | **Library Availability** | Via extensions | No | No |
 
+#### Additional Wishlist Fields (Gaps to Consider)
+
+Based on competitor analysis (Goodreads, StoryGraph, BookBuddy):
+
+| Field | Competitor Support | Effort | Value | Notes |
+|-------|-------------------|--------|-------|-------|
+| **Recommended By** | Goodreads ✓ | Low | Medium | Text field - remember who suggested the book |
+| **Expected Price** | None | Low | Medium | Currency field for budget tracking |
+| **Custom Tags** | Goodreads, StoryGraph ✓ | Medium | Medium | Beyond priority - e.g. "gift idea", "holiday read" |
+| **Where to Buy Link** | Goodreads ✓ | Low | Low | URL field - affiliate/ethical concerns |
+| **Barcode Scan to Wishlist** | All competitors ✓ | Medium | High | Scan ISBN → add directly to wishlist |
+
+**Current advantage over competitors:** MyShelfControl has explicit 3-level priority system. Goodreads requires workarounds (custom shelves, manual shelf positioning). StoryGraph limits "Up Next" to 5 books.
+
 #### Recommended Implementation
 
 **High Priority:**
-1. **Release Date Display** - Show publication date for upcoming books
-2. **Release Notifications** - Alert when wishlisted books release
+1. **Manual Entry** - Quick-add modal (already planned above)
+2. **Barcode Scan to Wishlist** - Scan → add to wishlist flow from wishlist page
 3. **Import from Goodreads** - CSV import for want-to-read shelf
 
 **Medium Priority:**
-4. **Library Availability** - Check Libby/OverDrive availability
-5. **Shareable Wishlists** - Public link for gift coordination
-6. **Gift Reservation** - Prevent duplicate purchases
+4. **Recommended By Field** - Simple text field addition
+5. **Release Date Display** - Show publication date for upcoming books
+6. **Release Notifications** - Alert when wishlisted books release
+
+**Low Priority:**
+7. **Expected Price Field** - Budget tracking
+8. **Custom Tags** - Flexible organisation beyond priority
+9. **Library Availability** - Check Libby/OverDrive availability
+10. **Shareable Wishlists** - Public link for gift coordination
 
 ---
 
@@ -1453,4 +1537,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-02* (Wishlist documentation: fixed incorrect manual entry docs, added planned quick-add modal and left sidebar filtering)
+*Last updated: 2026-01-02* (Settings hub analysis, wishlist competitor analysis and gaps, UX/UI documentation)

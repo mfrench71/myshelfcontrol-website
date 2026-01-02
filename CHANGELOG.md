@@ -6,6 +6,19 @@ All notable changes to MyShelfControl are documented here.
 
 ## 02-01-2025
 
+- Implement settings hub pattern with desktop sidebar
+  - Mobile: Hub page with cards, tap to drill down
+  - Desktop: Persistent sidebar navigation
+  - Staggered animation on hub cards
+- Add fade transitions to add book page (search/form swap)
+- Remove placeholder text from wishlist notes textarea
+- Document wishlist competitor analysis and gaps in PROJECT.md
+- Document settings hub vs tabs analysis in PROJECT.md
+
+---
+
+## 02-01-2025 (afternoon)
+
 - Add wishlist button to search results (heart icon to add directly to wishlist)
 - Add date added display to wishlist items (matches book card format)
 - Fix duplicate key error in search results by using Google Books volume IDs

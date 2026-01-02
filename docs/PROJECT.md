@@ -94,9 +94,9 @@ All data stored under `/users/{userId}/`:
 
 #### Settings Page: Hub vs Tabs Analysis
 
-**Current implementation:** Horizontal tabs (same as legacy app)
+**Current implementation:** Hub pattern with desktop sidebar (implemented 02-01-2025)
 
-**Question:** Should we switch to hub-and-drill-down pattern?
+**Previous:** Horizontal tabs (legacy pattern)
 
 ##### Competitor Analysis
 
@@ -123,7 +123,7 @@ All data stored under `/users/{userId}/`:
 | Thumb reachability | ✓ Natural scrolling | ✗ Requires reach to top |
 | Hidden content risk | None | Tabs may scroll off-screen |
 
-##### Decision: Recommend Hub Pattern
+##### Decision: Hub Pattern ✅ Implemented
 
 Per [Android Design Guidelines](https://developer.android.com/design/ui/mobile/guides/patterns/settings) and [NN/g Tab Guidelines](https://www.nngroup.com/articles/tabs-used-right/):
 
@@ -131,6 +131,12 @@ Per [Android Design Guidelines](https://developer.android.com/design/ui/mobile/g
 - Settings are infrequently accessed (hub adds one tap, acceptable)
 - Mobile-first PWA should follow mobile conventions
 - Hub scales if we add more settings categories
+
+**Implementation details:**
+- Mobile: `/settings` shows hub cards, tap drills down to sub-page
+- Desktop: Sidebar always visible, `/settings` redirects to `/settings/profile`
+- Components: `SettingsHubCard`, `SettingsSidebarLink`
+- Animations: Staggered card fade-in, press effect
 
 ##### Sub-Section Access from Hub: Overkill?
 

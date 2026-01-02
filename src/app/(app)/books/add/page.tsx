@@ -877,7 +877,7 @@ export default function AddBookPage() {
                   ref={resultsContainerRef}
                   className="divide-y divide-gray-100 max-h-80 overflow-y-auto"
                 >
-                  {searchResults.map((result) => {
+                  {searchResults.map((result, index) => {
                     const wishlisted = isInWishlist(result);
                     return (
                       <div
@@ -899,6 +899,7 @@ export default function AddBookPage() {
                                 width={48}
                                 height={64}
                                 className="w-full h-full object-cover"
+                                priority={index < 4}
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">

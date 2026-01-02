@@ -388,7 +388,7 @@ export default function MaintenanceSettingsPage() {
                 <>
                   {/* Issues List */}
                   <div className="space-y-2 mb-4 max-h-96 overflow-y-auto">
-                    {booksWithIssues.map(({ book, missing }) => (
+                    {booksWithIssues.map(({ book, missing }, index) => (
                       <div
                         key={book.id}
                         className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200"
@@ -399,6 +399,7 @@ export default function MaintenanceSettingsPage() {
                           width={32}
                           height={48}
                           className="w-8 h-12 flex-shrink-0 rounded overflow-hidden"
+                          priority={index < 6}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900 truncate">

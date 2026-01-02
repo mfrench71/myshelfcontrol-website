@@ -121,11 +121,13 @@ function WishlistItemCard({
   onMove,
   onEdit,
   onDelete,
+  priority,
 }: {
   item: WishlistItem;
   onMove: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  priority?: boolean;
 }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-3 flex gap-4 relative">
@@ -136,6 +138,7 @@ function WishlistItemCard({
           alt={item.title}
           width={64}
           height={96}
+          priority={priority}
         />
       </div>
 
@@ -455,13 +458,14 @@ export default function WishlistPage() {
         ) : (
           /* Wishlist items */
           <div className="space-y-4">
-            {sortedItems.map((item) => (
+            {sortedItems.map((item, index) => (
               <div key={item.id} className="card-animate">
                 <WishlistItemCard
                   item={item}
                   onMove={() => openMoveModal(item)}
                   onEdit={() => openEditModal(item)}
                   onDelete={() => openDeleteModal(item)}
+                  priority={index < 6}
                 />
               </div>
             ))}

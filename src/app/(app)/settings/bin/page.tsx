@@ -191,7 +191,7 @@ export default function BinPage() {
           </div>
         ) : (
           <div id="bin-list" className="space-y-4">
-            {books.map((book) => {
+            {books.map((book, index) => {
               const daysRemaining = getDaysRemaining(book.deletedAt);
               const isUrgent = daysRemaining <= 7;
               const badgeClass = isUrgent
@@ -210,6 +210,7 @@ export default function BinPage() {
                     width={64}
                     height={96}
                     className="w-16 h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-cover"
+                    priority={index < 6}
                   />
 
                   {/* Details */}

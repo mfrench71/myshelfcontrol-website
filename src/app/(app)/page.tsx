@@ -49,7 +49,7 @@ function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
 /**
  * Horizontal scrolling book cover card (matches old site)
  */
-function HorizontalBookCard({ book, href }: { book: Book; href: string }) {
+function HorizontalBookCard({ book, href, priority }: { book: Book; href: string; priority?: boolean }) {
   return (
     <Link href={href} className="flex-shrink-0 w-24 snap-start">
       <BookCover
@@ -58,6 +58,7 @@ function HorizontalBookCard({ book, href }: { book: Book; href: string }) {
         width={96}
         height={144}
         className="w-24 h-36 rounded-lg shadow-cover overflow-hidden"
+        priority={priority}
       />
       <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
       <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
@@ -217,8 +218,8 @@ function CurrentlyReadingWidget({ books, config }: { books: Book[]; config: Widg
       size={config.size || 6}
     >
       <HorizontalScroll>
-        {displayBooks.map((book) => (
-          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} />
+        {displayBooks.map((book, index) => (
+          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} priority={index < 4} />
         ))}
       </HorizontalScroll>
     </WidgetContainer>
@@ -244,8 +245,8 @@ function RecentlyAddedWidget({ books, config }: { books: Book[]; config: WidgetC
       size={config.size || 12}
     >
       <HorizontalScroll>
-        {displayBooks.map((book) => (
-          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} />
+        {displayBooks.map((book, index) => (
+          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} priority={index < 4} />
         ))}
       </HorizontalScroll>
     </WidgetContainer>
@@ -271,7 +272,7 @@ function TopRatedWidget({ books, config }: { books: Book[]; config: WidgetConfig
       size={config.size || 6}
     >
       <HorizontalScroll>
-        {displayBooks.map((book) => (
+        {displayBooks.map((book, index) => (
           <Link key={book.id} href={`/books/${book.id}`} className="flex-shrink-0 w-24 snap-start">
             <BookCover
               src={book.coverImageUrl}
@@ -279,6 +280,7 @@ function TopRatedWidget({ books, config }: { books: Book[]; config: WidgetConfig
               width={96}
               height={144}
               className="w-24 h-36 rounded-lg shadow-md overflow-hidden"
+              priority={index < 4}
             />
             <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{book.title}</h3>
             <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown'}</p>
@@ -318,8 +320,8 @@ function RecentlyFinishedWidget({ books, config }: { books: Book[]; config: Widg
       size={config.size || 6}
     >
       <HorizontalScroll>
-        {displayBooks.map((book) => (
-          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} />
+        {displayBooks.map((book, index) => (
+          <HorizontalBookCard key={book.id} book={book} href={`/books/${book.id}`} priority={index < 4} />
         ))}
       </HorizontalScroll>
     </WidgetContainer>
@@ -344,7 +346,7 @@ function WishlistWidget({ items, config }: { items: WishlistItem[]; config: Widg
       size={config.size || 6}
     >
       <HorizontalScroll>
-        {displayItems.map((item) => (
+        {displayItems.map((item, index) => (
           <Link key={item.id} href="/wishlist" className="flex-shrink-0 w-24 snap-start">
             <BookCover
               src={item.coverImageUrl}
@@ -352,6 +354,7 @@ function WishlistWidget({ items, config }: { items: WishlistItem[]; config: Widg
               width={96}
               height={144}
               className="w-24 h-36 rounded-lg shadow-md overflow-hidden"
+              priority={index < 4}
             />
             <h3 className="text-sm font-medium text-gray-900 mt-2 line-clamp-2">{item.title}</h3>
             <p className="text-xs text-gray-500 truncate">{item.author || 'Unknown'}</p>

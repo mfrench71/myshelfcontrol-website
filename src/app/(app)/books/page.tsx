@@ -747,12 +747,13 @@ function BooksPageContent() {
           ) : (
             /* Books List */
             <div id="book-list" className="space-y-4">
-              {visibleBooks.map((book) => (
+              {visibleBooks.map((book, index) => (
                 <div key={book.id} className="card-animate">
                   <BookCard
                     book={book}
                     genres={genreLookup}
                     series={seriesLookup}
+                    priority={index < 6}
                   />
                 </div>
               ))}

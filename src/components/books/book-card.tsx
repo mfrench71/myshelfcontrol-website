@@ -45,6 +45,7 @@ type BookCardProps = {
   book: Book;
   genres?: Record<string, Genre>;
   series?: Record<string, Series>;
+  priority?: boolean;
 };
 
 /**
@@ -175,7 +176,7 @@ function getContrastColor(hexColor: string): string {
 /**
  * Book card component - matches old site layout
  */
-export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
+export function BookCard({ book, genres = {}, series = {}, priority }: BookCardProps) {
   const status = getBookStatus(book);
   const bookSeries = book.seriesId ? series[book.seriesId] : undefined;
   const bookGenres = (book.genres || [])
@@ -199,6 +200,7 @@ export function BookCard({ book, genres = {}, series = {} }: BookCardProps) {
           src={book.coverImageUrl}
           width={64}
           height={96}
+          priority={priority}
         />
       </div>
 

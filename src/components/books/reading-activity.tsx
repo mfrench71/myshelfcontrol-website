@@ -36,17 +36,29 @@ export function EditDatesModal({
 }: EditDatesModalProps) {
   const [startedAt, setStartedAt] = useState('');
   const [finishedAt, setFinishedAt] = useState('');
+  const [initialStartedAtValue, setInitialStartedAtValue] = useState('');
+  const [initialFinishedAtValue, setInitialFinishedAtValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Initialise form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setStartedAt(formatDateForInput(initialStartedAt));
-      setFinishedAt(formatDateForInput(initialFinishedAt));
+      const startVal = formatDateForInput(initialStartedAt);
+      const finishVal = formatDateForInput(initialFinishedAt);
+      setStartedAt(startVal);
+      setFinishedAt(finishVal);
+      setInitialStartedAtValue(startVal);
+      setInitialFinishedAtValue(finishVal);
       setError(null);
     }
   }, [isOpen, initialStartedAt, initialFinishedAt]);
+
+  // Check if form has changes
+  const hasChanges = startedAt !== initialStartedAtValue || finishedAt !== initialFinishedAtValue;
+
+  // Today's date for max attribute
+  const todayString = formatDateForInput(Date.now());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +67,24 @@ export function EditDatesModal({
     // Validate dates
     const start = startedAt ? new Date(startedAt).getTime() : null;
     const finish = finishedAt ? new Date(finishedAt).getTime() : null;
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // End of today
+    const todayTime = today.getTime();
+
+    if (!start && !finish) {
+      setError('At least one date is required');
+      return;
+    }
+
+    if (start && start > todayTime) {
+      setError('Start date cannot be in the future');
+      return;
+    }
+
+    if (finish && finish > todayTime) {
+      setError('Finish date cannot be in the future');
+      return;
+    }
 
     if (start && finish && start > finish) {
       setError('Start date cannot be after finish date');
@@ -100,6 +130,7 @@ export function EditDatesModal({
               type="date"
               id="started-at"
               value={startedAt}
+              max={todayString}
               onChange={(e) => setStartedAt(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
             />
@@ -113,6 +144,7 @@ export function EditDatesModal({
               type="date"
               id="finished-at"
               value={finishedAt}
+              max={todayString}
               onChange={(e) => setFinishedAt(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
             />
@@ -123,14 +155,14 @@ export function EditDatesModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 min-h-[44px]"
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-2"
+              disabled={saving || !hasChanges}
+              className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>
@@ -169,6 +201,7 @@ export function EditNotesModal({
   initialNotes = '',
 }: EditNotesModalProps) {
   const [notes, setNotes] = useState('');
+  const [initialNotesValue, setInitialNotesValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -176,9 +209,13 @@ export function EditNotesModal({
   useEffect(() => {
     if (isOpen) {
       setNotes(initialNotes);
+      setInitialNotesValue(initialNotes);
       setError(null);
     }
   }, [isOpen, initialNotes]);
+
+  // Check if form has changes
+  const hasChanges = notes.trim() !== initialNotesValue.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,14 +267,14 @@ export function EditNotesModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 min-h-[44px]"
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={saving}
-              className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-2"
+              disabled={saving || !hasChanges}
+              className="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>

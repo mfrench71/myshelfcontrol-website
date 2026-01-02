@@ -16,6 +16,9 @@ const mockQuery = vi.fn();
 const mockWhere = vi.fn();
 const mockOrderBy = vi.fn();
 const mockLimit = vi.fn();
+const mockWriteBatch = vi.fn();
+const mockBatchUpdate = vi.fn();
+const mockBatchCommit = vi.fn();
 
 vi.mock('@/lib/firebase/client', () => ({
   db: {},
@@ -33,6 +36,7 @@ vi.mock('firebase/firestore', () => ({
   where: (...args: unknown[]) => mockWhere(...args),
   orderBy: (...args: unknown[]) => mockOrderBy(...args),
   limit: (...args: unknown[]) => mockLimit(...args),
+  writeBatch: (...args: unknown[]) => mockWriteBatch(...args),
   Timestamp: {
     now: () => ({ seconds: 1234567890, nanoseconds: 0 }),
   },
@@ -51,6 +55,8 @@ import {
   getBinBooks,
   getBooksBySeries,
   getBookCount,
+  batchMergeGenre,
+  batchMergeSeries,
 } from '../books';
 
 // Helper to create mock Firestore snapshot
@@ -71,6 +77,16 @@ function createMockDoc(id: string, data: Record<string, unknown>) {
   };
 }
 
+// Helper to create mock document with ref (for batch operations)
+function createMockDocWithRef(id: string, data: Record<string, unknown>) {
+  return {
+    id,
+    data: () => data,
+    exists: () => true,
+    ref: { id, path: `users/user-123/books/${id}` },
+  };
+}
+
 describe('books repository', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -80,6 +96,11 @@ describe('books repository', () => {
     mockOrderBy.mockReturnValue('orderBy');
     mockWhere.mockReturnValue('where');
     mockLimit.mockReturnValue('limit');
+    mockBatchCommit.mockResolvedValue(undefined);
+    mockWriteBatch.mockReturnValue({
+      update: mockBatchUpdate,
+      commit: mockBatchCommit,
+    });
   });
 
   describe('getBooks', () => {
@@ -356,6 +377,153 @@ describe('books repository', () => {
       const count = await getBookCount('user-123');
 
       expect(count).toBe(0);
+    });
+  });
+
+  describe('batchMergeGenre', () => {
+    it('returns 0 when no books have the source genre', async () => {
+      mockGetDocs.mockResolvedValue(createMockSnapshot([]));
+
+      const count = await batchMergeGenre('user-123', 'source-genre', 'target-genre');
+
+      expect(count).toBe(0);
+      expect(mockBatchCommit).not.toHaveBeenCalled();
+    });
+
+    it('replaces source genre with target genre in all matching books', async () => {
+      const mockDocs = [
+        createMockDocWithRef('book-1', { genres: ['source-genre', 'other-genre'] }),
+        createMockDocWithRef('book-2', { genres: ['source-genre'] }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      const count = await batchMergeGenre('user-123', 'source-genre', 'target-genre');
+
+      expect(count).toBe(2);
+      expect(mockWhere).toHaveBeenCalledWith('genres', 'array-contains', 'source-genre');
+      expect(mockBatchUpdate).toHaveBeenCalledTimes(2);
+      expect(mockBatchCommit).toHaveBeenCalled();
+    });
+
+    it('does not duplicate target genre if already present', async () => {
+      const mockDocs = [
+        createMockDocWithRef('book-1', { genres: ['source-genre', 'target-genre'] }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      await batchMergeGenre('user-123', 'source-genre', 'target-genre');
+
+      // Verify update was called with genres that don't have target duplicated
+      expect(mockBatchUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          genres: ['target-genre'],
+          updatedAt: expect.anything(),
+        })
+      );
+    });
+
+    it('removes source genre and adds target genre', async () => {
+      const mockDocs = [
+        createMockDocWithRef('book-1', { genres: ['source-genre', 'other-genre'] }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      await batchMergeGenre('user-123', 'source-genre', 'target-genre');
+
+      expect(mockBatchUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          genres: expect.arrayContaining(['other-genre', 'target-genre']),
+          updatedAt: expect.anything(),
+        })
+      );
+    });
+
+    it('handles books with empty genres array', async () => {
+      const mockDocs = [
+        createMockDocWithRef('book-1', { genres: [] }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      const count = await batchMergeGenre('user-123', 'source-genre', 'target-genre');
+
+      expect(count).toBe(1);
+      expect(mockBatchUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          genres: ['target-genre'],
+        })
+      );
+    });
+  });
+
+  describe('batchMergeSeries', () => {
+    it('returns 0 when no books are in the source series', async () => {
+      mockGetDocs.mockResolvedValue(createMockSnapshot([]));
+
+      const count = await batchMergeSeries('user-123', 'source-series', 'target-series');
+
+      expect(count).toBe(0);
+      expect(mockBatchCommit).not.toHaveBeenCalled();
+    });
+
+    it('updates seriesId for all books in source series', async () => {
+      const mockDocs = [
+        createMockDocWithRef('book-1', { seriesId: 'source-series', seriesPosition: 1 }),
+        createMockDocWithRef('book-2', { seriesId: 'source-series', seriesPosition: 2 }),
+        createMockDocWithRef('book-3', { seriesId: 'source-series', seriesPosition: 3 }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      const count = await batchMergeSeries('user-123', 'source-series', 'target-series');
+
+      expect(count).toBe(3);
+      expect(mockWhere).toHaveBeenCalledWith('seriesId', '==', 'source-series');
+      expect(mockBatchUpdate).toHaveBeenCalledTimes(3);
+      expect(mockBatchCommit).toHaveBeenCalled();
+    });
+
+    it('updates seriesId to target and preserves updatedAt', async () => {
+      const mockDocs = [
+        createMockDocWithRef('book-1', { seriesId: 'source-series', seriesPosition: 1 }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      await batchMergeSeries('user-123', 'source-series', 'target-series');
+
+      expect(mockBatchUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          seriesId: 'target-series',
+          updatedAt: expect.anything(),
+        })
+      );
+    });
+
+    it('commits batch after all updates', async () => {
+      const mockDocs = [
+        createMockDocWithRef('book-1', { seriesId: 'source-series' }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      await batchMergeSeries('user-123', 'source-series', 'target-series');
+
+      expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getBooksByStatus edge cases', () => {
+    it('returns empty array for unknown status', async () => {
+      const mockDocs = [
+        createMockDoc('book-1', { title: 'Book', author: 'Author', reads: [] }),
+      ];
+      mockGetDocs.mockResolvedValue(createMockSnapshot(mockDocs));
+
+      // @ts-expect-error Testing invalid status
+      const books = await getBooksByStatus('user-123', 'invalid-status');
+
+      expect(books).toHaveLength(0);
     });
   });
 });

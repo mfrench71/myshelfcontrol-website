@@ -174,7 +174,6 @@ function WishlistItemCard({
         <button
           onClick={onMove}
           className="p-2 hover:bg-green-50 rounded text-gray-400 hover:text-green-600 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
-          title="I bought this"
           aria-label="Add to library"
         >
           <ShoppingBag className="w-4 h-4" aria-hidden="true" />
@@ -182,7 +181,6 @@ function WishlistItemCard({
         <button
           onClick={onEdit}
           className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
-          title="Edit"
           aria-label="Edit item"
         >
           <Pencil className="w-4 h-4" aria-hidden="true" />
@@ -190,7 +188,6 @@ function WishlistItemCard({
         <button
           onClick={onDelete}
           className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
-          title="Remove"
           aria-label="Remove from wishlist"
         >
           <Trash2 className="w-4 h-4" aria-hidden="true" />

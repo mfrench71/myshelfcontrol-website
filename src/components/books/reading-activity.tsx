@@ -457,7 +457,6 @@ export function ReadingActivitySection({
                               disabled={updatingStatus}
                               className="p-2 hover:bg-green-50 rounded text-green-500 hover:text-green-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center disabled:opacity-50"
                               aria-label="Mark as finished"
-                              title="Mark as finished"
                             >
                               {updatingStatus ? (
                                 <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />

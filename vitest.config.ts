@@ -38,8 +38,11 @@ export default defineConfig({
         'src/components/ui/toast.tsx',
         'src/components/ui/modal.tsx',
         'src/components/ui/search-overlay.tsx',
+        'src/components/ui/collapsible-section.tsx',
         'src/components/books/book-card.tsx',
         'src/components/books/filter-panel.tsx',
+        'src/components/books/reading-activity.tsx',
+        'src/lib/utils/book-filters.ts',
       ],
       exclude: [
         'src/**/*.test.{ts,tsx}',

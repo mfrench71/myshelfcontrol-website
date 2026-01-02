@@ -5,7 +5,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, Pencil, BookOpen, Play, CheckCircle, RotateCcw, Loader2, Trash2, ChevronDown, MessageSquare } from 'lucide-react';
+import { Calendar, Pencil, BookOpen, Play, CheckCircle, RotateCcw, Loader2, Trash2, ChevronDown, MessageSquare, X } from 'lucide-react';
 import { BottomSheet, ConfirmModal } from '@/components/ui/modal';
 import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { STATUS_LABELS, formatDate, formatDateForInput } from '@/lib/utils/book-filters';
@@ -141,14 +141,26 @@ export function EditDatesModal({
             <label htmlFor="finished-at" className="block text-sm font-medium text-gray-700 mb-1">
               Finished
             </label>
-            <input
-              type="date"
-              id="finished-at"
-              value={finishedAt}
-              max={todayString}
-              onChange={(e) => setFinishedAt(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
-            />
+            <div className="flex gap-2">
+              <input
+                type="date"
+                id="finished-at"
+                value={finishedAt}
+                max={todayString}
+                onChange={(e) => setFinishedAt(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary min-h-[44px]"
+              />
+              {finishedAt && (
+                <button
+                  type="button"
+                  onClick={() => setFinishedAt('')}
+                  className="px-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 border border-gray-300 rounded-lg min-h-[44px] flex items-center justify-center"
+                  aria-label="Clear finished date"
+                >
+                  <X className="w-4 h-4" aria-hidden="true" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">

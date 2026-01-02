@@ -182,6 +182,43 @@ Per [Android Design Guidelines](https://developer.android.com/design/ui/mobile/g
 
 **Decision:** Keep current approach (count first, then full name A-Z). Add surname display as future enhancement if users request it.
 
+#### Book Notes: Single vs Multiple Entries
+
+**Current implementation:** Single note field per book
+
+**Competitor analysis (Jan 2026):**
+
+| App | Approach | Notes |
+|-----|----------|-------|
+| **Goodreads** | Single note field | One private notes field, updated/overwritten. Browser-only (not in app). |
+| **StoryGraph** | Multiple journal entries | Each progress update can include a note. Creates chronological "Reading Journal" per book. Private by default. |
+
+**Key differences:**
+- Goodreads: Single field for static info ("who recommended this")
+- StoryGraph: Journal entries tied to reading progress, allowing reactions/quotes as you read
+
+**Recommendation:** Keep single note field for MVP, add journal entries as future enhancement.
+
+**Single note works well for:**
+- Who recommended the book
+- Brief personal thoughts
+- Quick reference info
+
+**Journal entries would enable:**
+- Reading reactions over time
+- Tracking favourite quotes with page numbers
+- Detailed progress thoughts
+- Timestamped reading experience log
+
+**Future implementation path:**
+1. **Phase 1 (current):** Single note field ✓
+2. **Phase 2:** Add optional note when updating reading progress
+3. **Phase 3:** Full reading journal view (per-book and combined)
+
+**Sources:**
+- [StoryGraph Private Notes Feature Request](https://roadmap.thestorygraph.com/requests-ideas/posts/private-notes-on-books-1)
+- [Goodreads vs StoryGraph Comparison](https://laurieisreading.com/2024/01/07/discussion-goodreads-vs-the-storygraph/)
+
 ---
 
 ## Project Structure
@@ -1582,4 +1619,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-02* (Settings hub analysis, wishlist competitor analysis and gaps, UX/UI documentation)
+*Last updated: 2026-01-02* (Book notes architecture decision, reading activity UI improvements)

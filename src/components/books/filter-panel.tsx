@@ -5,11 +5,59 @@
 
 'use client';
 
-import { useState, useId, useRef, useEffect } from 'react';
+import { useState, useId, useRef, useEffect, useCallback } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import type { Genre, Series, BookFilters } from '@/lib/types';
 import { BottomSheet } from '@/components/ui/modal';
 import { STATUS_OPTIONS } from '@/lib/utils/book-filters';
+
+/**
+ * ScrollFadeContainer - Wrapper that adds scroll position-aware fade indicators
+ */
+function ScrollFadeContainer({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const updateScrollClasses = useCallback(() => {
+    const container = containerRef.current;
+    const wrapper = wrapperRef.current;
+    if (!container || !wrapper) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const scrollBuffer = 5;
+
+    const atTop = scrollTop <= scrollBuffer;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - scrollBuffer;
+
+    wrapper.classList.toggle('scrolled-to-top', atTop);
+    wrapper.classList.toggle('scrolled-to-bottom', atBottom);
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Initial check
+    updateScrollClasses();
+
+    container.addEventListener('scroll', updateScrollClasses);
+    const resizeObserver = new ResizeObserver(updateScrollClasses);
+    resizeObserver.observe(container);
+
+    return () => {
+      container.removeEventListener('scroll', updateScrollClasses);
+      resizeObserver.disconnect();
+    };
+  }, [updateScrollClasses]);
+
+  return (
+    <div ref={wrapperRef} className="scroll-fade-container scrolled-to-top">
+      <div ref={containerRef} className={className}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export type SortOption = 'createdAt-desc' | 'createdAt-asc' | 'title-asc' | 'title-desc' | 'author-asc' | 'author-desc' | 'rating-desc' | 'rating-asc' | 'seriesPosition-asc';
 
@@ -412,34 +460,32 @@ export function FilterSidebar({
       {genres.length > 0 && (
         <div>
           <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
-          <div className="scroll-fade-container">
-            <div className="space-y-3 max-h-48 overflow-y-auto pr-2 pb-4">
-              {genres.map((genre) => {
-              const count = bookCounts?.genres?.[genre.id] ?? 0;
-              const isSelected = filters.genreIds?.includes(genre.id) || false;
-              return (
-                <label
-                  key={genre.id}
-                  htmlFor={`${id}-genre-${genre.id}`}
-                  className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
-                >
-                  <span className="text-sm text-gray-900">{genre.name}</span>
-                  <span className="flex items-center gap-3">
-                    <span className="text-sm text-gray-500">({count})</span>
-                    <input
-                      type="checkbox"
-                      id={`${id}-genre-${genre.id}`}
-                      checked={isSelected}
-                      onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
-                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
-                      disabled={count === 0 && !isSelected}
-                    />
-                  </span>
-                </label>
-              );
-              })}
-            </div>
-          </div>
+          <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-2 pb-4">
+            {genres.map((genre) => {
+            const count = bookCounts?.genres?.[genre.id] ?? 0;
+            const isSelected = filters.genreIds?.includes(genre.id) || false;
+            return (
+              <label
+                key={genre.id}
+                htmlFor={`${id}-genre-${genre.id}`}
+                className={`flex items-center justify-between cursor-pointer ${count === 0 && !isSelected ? 'opacity-50' : ''}`}
+              >
+                <span className="text-sm text-gray-900">{genre.name}</span>
+                <span className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500">({count})</span>
+                  <input
+                    type="checkbox"
+                    id={`${id}-genre-${genre.id}`}
+                    checked={isSelected}
+                    onChange={(e) => handleGenreChange(genre.id, e.target.checked)}
+                    className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
+                    disabled={count === 0 && !isSelected}
+                  />
+                </span>
+              </label>
+            );
+            })}
+          </ScrollFadeContainer>
         </div>
       )}
 
@@ -460,8 +506,7 @@ export function FilterSidebar({
           {showMoreFilters && (
             <div>
               <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-              <div className="scroll-fade-container">
-                <div className="space-y-3 max-h-48 overflow-y-auto pr-2 pb-4">
+              <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-2 pb-4">
                 {series.map((s) => {
                   const count = bookCounts?.series?.[s.id] ?? 0;
                   const isSelected = filters.seriesIds?.includes(s.id) || false;
@@ -486,8 +531,7 @@ export function FilterSidebar({
                     </label>
                   );
                 })}
-                </div>
-              </div>
+              </ScrollFadeContainer>
             </div>
           )}
         </>
@@ -728,8 +772,7 @@ export function FilterBottomSheet({
           {genres.length > 0 && (
             <div>
               <span className="block text-sm font-semibold text-gray-900 mb-2">Genre</span>
-              <div className="scroll-fade-container">
-                <div className="space-y-3 max-h-48 overflow-y-auto pr-3 pb-4">
+              <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-3 pb-4">
                 {genres.map((genre) => {
                   const count = bookCounts?.genres?.[genre.id] ?? 0;
                   const isSelected = filters.genreIds?.includes(genre.id) || false;
@@ -754,8 +797,7 @@ export function FilterBottomSheet({
                     </label>
                   );
                 })}
-                </div>
-              </div>
+              </ScrollFadeContainer>
             </div>
           )}
 
@@ -776,8 +818,7 @@ export function FilterBottomSheet({
               {showMoreFilters && (
                 <div>
                   <span className="block text-sm font-semibold text-gray-900 mb-2">Series</span>
-                  <div className="scroll-fade-container">
-                    <div className="space-y-3 max-h-48 overflow-y-auto pr-3 pb-4">
+                  <ScrollFadeContainer className="space-y-3 max-h-48 overflow-y-auto pr-3 pb-4">
                     {series.map((s) => {
                       const count = bookCounts?.series?.[s.id] ?? 0;
                       const isSelected = filters.seriesIds?.includes(s.id) || false;
@@ -802,8 +843,7 @@ export function FilterBottomSheet({
                         </label>
                       );
                     })}
-                    </div>
-                  </div>
+                  </ScrollFadeContainer>
                 </div>
               )}
             </>

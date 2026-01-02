@@ -6,6 +6,11 @@ All notable changes to MyShelfControl are documented here.
 
 ## 02-01-2026
 
+- Refactor Reading Log and Notes into accordion UI on book view
+- Add collapsible sections with smooth CSS grid animations
+- Move status pill next to book title
+- Add scroll fade indicators for filter panel (position-aware)
+- Change 'Currently Reading' status label to 'Reading'
 - Make mobile filter bottom sheet footer sticky with Reset/Apply buttons
 - Add disabled states to filter buttons when no filters active
 - Update wishlist card styling to match book cards (cover size, font sizes, action placement)

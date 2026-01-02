@@ -29,7 +29,7 @@ import { getBook, softDeleteBook, getBooksBySeries, updateBook } from '@/lib/rep
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
 import { getSeries, deleteSeries } from '@/lib/repositories/series';
 import { Lightbox } from '@/components/lightbox';
-import { ReadingActivitySection, NotesSection } from '@/components/books/reading-activity';
+import { ReadingActivitySection, NotesSection, StatusPill } from '@/components/books/reading-activity';
 import type { Book, Genre, Series } from '@/lib/types';
 
 /**
@@ -294,6 +294,18 @@ export default function BookDetailPage() {
     await updateBook(user.uid, book.id, { notes });
     setBook({ ...book, notes });
     showToast('Notes saved', { type: 'success' });
+  };
+
+  /**
+   * Handle deleting a reading entry
+   */
+  const handleDeleteRead = async (readIndex: number) => {
+    if (!user || !book || !book.reads) return;
+
+    const newReads = book.reads.filter((_, i) => i !== readIndex);
+    await updateBook(user.uid, book.id, { reads: newReads });
+    setBook({ ...book, reads: newReads });
+    showToast('Reading entry deleted', { type: 'success' });
   };
 
   const genreLookup = createGenreLookup(genres);
@@ -583,7 +595,10 @@ export default function BookDetailPage() {
           <div className="flex-1 space-y-6">
             {/* Title & Author */}
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{book.title}</h1>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{book.title}</h1>
+                <StatusPill status={status} />
+              </div>
               <Link
                 href={`/books?author=${encodeURIComponent(book.author)}`}
                 className="inline-flex items-center gap-1 text-lg text-primary mt-1 hover:underline"
@@ -719,19 +734,20 @@ export default function BookDetailPage() {
               </dl>
             </div>
 
-            {/* Reading Activity */}
-            <ReadingActivitySection
-              status={status}
-              reads={book.reads || []}
-              onStartReading={handleStartReading}
-              onMarkFinished={handleMarkFinished}
-              onStartReread={handleStartReread}
-              onUpdateDates={handleUpdateDates}
-              updatingStatus={updatingStatus}
-            />
-
-            {/* Notes */}
-            <NotesSection notes={book.notes || ''} onSave={handleUpdateNotes} />
+            {/* Reading Activity & Notes Accordion */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-200">
+              <ReadingActivitySection
+                status={status}
+                reads={book.reads || []}
+                onStartReading={handleStartReading}
+                onMarkFinished={handleMarkFinished}
+                onStartReread={handleStartReread}
+                onUpdateDates={handleUpdateDates}
+                onDeleteRead={handleDeleteRead}
+                updatingStatus={updatingStatus}
+              />
+              <NotesSection notes={book.notes || ''} onSave={handleUpdateNotes} />
+            </div>
           </div>
         </div>
       </div>

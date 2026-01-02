@@ -10,7 +10,7 @@ import type { Book, BookFilters, BookRead } from '@/lib/types';
  */
 export const STATUS_LABELS: Record<'want-to-read' | 'reading' | 'finished', string> = {
   'want-to-read': 'Not Read',
-  'reading': 'Currently Reading',
+  'reading': 'Reading',
   'finished': 'Finished',
 };
 

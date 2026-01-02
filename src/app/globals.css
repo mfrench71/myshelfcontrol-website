@@ -91,11 +91,27 @@ select {
   scrollbar-width: none;
 }
 
-/* Scrollable container with bottom fade indicator */
+/* Scrollable container with top and bottom fade indicators */
 .scroll-fade-container {
   position: relative;
 }
 
+/* Top fade */
+.scroll-fade-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  background: linear-gradient(to top, transparent, white);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 1;
+}
+
+/* Bottom fade */
 .scroll-fade-container::after {
   content: '';
   position: absolute;
@@ -109,7 +125,17 @@ select {
   transition: opacity 0.15s ease;
 }
 
-/* Hide fade when scrolled to bottom (controlled via JS class) */
+/* Hide top fade when at top (default state) */
+.scroll-fade-container.scrolled-to-top::before {
+  opacity: 0;
+}
+
+/* Show top fade when scrolled down */
+.scroll-fade-container:not(.scrolled-to-top)::before {
+  opacity: 1;
+}
+
+/* Hide bottom fade when scrolled to bottom */
 .scroll-fade-container.scrolled-to-bottom::after {
   opacity: 0;
 }

@@ -5,8 +5,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, Pencil, BookOpen, Play, CheckCircle, RotateCcw, Loader2, Plus } from 'lucide-react';
-import { BottomSheet } from '@/components/ui/modal';
+import { Calendar, Pencil, BookOpen, Play, CheckCircle, RotateCcw, Loader2, Trash2, ChevronDown, MessageSquare } from 'lucide-react';
+import { BottomSheet, ConfirmModal } from '@/components/ui/modal';
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { STATUS_LABELS, formatDate, formatDateForInput } from '@/lib/utils/book-filters';
 import type { BookRead } from '@/lib/types';
 
@@ -293,6 +294,33 @@ export function EditNotesModal({
 }
 
 // ============================================================================
+// StatusPill Component
+// ============================================================================
+
+type StatusPillProps = {
+  status: 'want-to-read' | 'reading' | 'finished';
+};
+
+/**
+ * Status pill badge for displaying reading status
+ */
+export function StatusPill({ status }: StatusPillProps) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium ${
+      status === 'reading'
+        ? 'bg-blue-100 text-blue-700'
+        : status === 'finished'
+          ? 'bg-green-100 text-green-700'
+          : 'bg-gray-100 text-gray-600'
+    }`}>
+      {status === 'reading' && <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />}
+      {status === 'finished' && <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />}
+      {STATUS_LABELS[status]}
+    </span>
+  );
+}
+
+// ============================================================================
 // ReadingActivitySection Component
 // ============================================================================
 
@@ -303,12 +331,19 @@ type ReadingActivityProps = {
   onMarkFinished: () => Promise<void>;
   onStartReread: () => Promise<void>;
   onUpdateDates: (readIndex: number, startedAt: number | null, finishedAt: number | null) => Promise<void>;
+  onDeleteRead: (readIndex: number) => Promise<void>;
   updatingStatus: boolean;
+  /** Controlled mode: whether section is expanded */
+  isExpanded?: boolean;
+  /** Controlled mode: callback when toggle is clicked */
+  onToggle?: () => void;
+  /** Uncontrolled mode: initial expanded state */
+  defaultExpanded?: boolean;
 };
 
 /**
  * Reading Activity section for book view
- * Shows status, reading history, and inline actions
+ * Shows reading history and inline actions in a collapsible section
  */
 export function ReadingActivitySection({
   status,
@@ -317,9 +352,20 @@ export function ReadingActivitySection({
   onMarkFinished,
   onStartReread,
   onUpdateDates,
+  onDeleteRead,
   updatingStatus,
+  isExpanded: controlledExpanded,
+  onToggle,
+  defaultExpanded = false,
 }: ReadingActivityProps) {
+  const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
+
+  // Use controlled mode if both isExpanded and onToggle are provided
+  const isControlled = controlledExpanded !== undefined && onToggle !== undefined;
+  const isExpanded = isControlled ? controlledExpanded : internalExpanded;
+  const handleToggle = isControlled ? onToggle : () => setInternalExpanded(!internalExpanded);
   const [editingReadIndex, setEditingReadIndex] = useState<number | null>(null);
+  const [deletingReadIndex, setDeletingReadIndex] = useState<number | null>(null);
   const editingRead = editingReadIndex !== null ? reads[editingReadIndex] : null;
 
   const handleSaveDates = async (startedAt: number | null, finishedAt: number | null) => {
@@ -328,123 +374,153 @@ export function ReadingActivitySection({
     }
   };
 
+  const handleConfirmDelete = async () => {
+    if (deletingReadIndex !== null) {
+      await onDeleteRead(deletingReadIndex);
+      setDeletingReadIndex(null);
+    }
+  };
+
   return (
-    <div className="space-y-3">
-      {/* Section Header */}
-      <h2 className="font-semibold text-gray-700 flex items-center gap-2 text-base">
-        <BookOpen className="w-4 h-4" aria-hidden="true" />
-        Reading Activity
-      </h2>
-
-      {/* Status Row */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-500">Status:</span>
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium ${
-          status === 'reading'
-            ? 'bg-blue-100 text-blue-700'
-            : status === 'finished'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-600'
-        }`}>
-          {status === 'reading' && <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />}
-          {status === 'finished' && <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />}
-          {STATUS_LABELS[status]}
+    <div>
+      {/* Collapsible Header */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleToggle();
+        }}
+        className="w-full flex items-center justify-between p-3 text-left min-h-[44px] hover:bg-gray-50"
+      >
+        <span className="font-semibold text-gray-700 flex items-center gap-2 text-base">
+          Reading Log
+          {reads.length > 0 && (
+            <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">
+              {reads.length}
+            </span>
+          )}
         </span>
-      </div>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
 
-      {/* Current Read Info (if reading) */}
-      {status === 'reading' && reads.length > 0 && (
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Calendar className="w-4 h-4 text-gray-400" aria-hidden="true" />
-            <span>Started: {formatDate(reads[reads.length - 1].startedAt)}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setEditingReadIndex(reads.length - 1)}
-            className="text-primary hover:text-primary-dark text-sm font-medium transition-colors"
-          >
-            Edit
-          </button>
+      <div
+        className={`grid transition-all duration-200 ease-out ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          {/* Reading History */}
+          {reads.length > 0 ? (
+            <div className="bg-white border-t border-gray-100">
+              <table className="w-full">
+                <tbody className="divide-y divide-gray-100">
+                  {reads.map((read, index) => {
+                    const startDate = formatDate(read.startedAt);
+                    const endDate = formatDate(read.finishedAt);
+                    const isInProgress = !read.finishedAt;
+
+                    return (
+                      <tr key={`${read.startedAt}-${read.finishedAt}`} className="hover:bg-gray-50">
+                        <td className="py-1.5 px-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
+                            <span>
+                              {startDate || 'Unknown'}
+                              {endDate ? ` – ${endDate}` : ' – In progress'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-0 px-0 text-right whitespace-nowrap">
+                          {isInProgress && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onMarkFinished();
+                              }}
+                              disabled={updatingStatus}
+                              className="p-2 hover:bg-green-50 rounded text-green-500 hover:text-green-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center disabled:opacity-50"
+                              aria-label="Mark as finished"
+                              title="Mark as finished"
+                            >
+                              {updatingStatus ? (
+                                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                              ) : (
+                                <CheckCircle className="w-4 h-4" aria-hidden="true" />
+                              )}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setEditingReadIndex(index);
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label="Edit reading dates"
+                          >
+                            <Pencil className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setDeletingReadIndex(index);
+                            }}
+                            className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                            aria-label="Delete reading entry"
+                          >
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 italic px-3 py-2 bg-white border-t border-gray-100">No reading history yet</p>
+          )}
+
+          {/* Action Button - only for status changes that don't have a row */}
+          {(status === 'want-to-read' || status === 'finished') && (
+            <div className="px-3 py-2 bg-white border-t border-gray-100">
+              {status === 'want-to-read' && (
+                <button
+                  onClick={onStartReading}
+                  disabled={updatingStatus}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors disabled:opacity-50"
+                >
+                  {updatingStatus ? (
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Play className="w-4 h-4" aria-hidden="true" />
+                  )}
+                  Start Reading
+                </button>
+              )}
+              {status === 'finished' && (
+                <button
+                  onClick={onStartReread}
+                  disabled={updatingStatus}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors disabled:opacity-50"
+                >
+                  {updatingStatus ? (
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <RotateCcw className="w-4 h-4" aria-hidden="true" />
+                  )}
+                  Start Re-read
+                </button>
+              )}
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Reading History (if finished with history) */}
-      {status === 'finished' && reads.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Reading History</h4>
-          <div className="space-y-1.5">
-            {reads.map((read, index) => {
-              const startDate = formatDate(read.startedAt);
-              const endDate = formatDate(read.finishedAt);
-
-              return (
-                <div key={`${read.startedAt}-${read.finishedAt}`} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
-                    <span>
-                      {startDate || 'Unknown'}
-                      {endDate ? ` – ${endDate}` : ' – In progress'}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setEditingReadIndex(index)}
-                    className="text-primary hover:text-primary-dark text-sm font-medium transition-colors"
-                  >
-                    Edit
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Action Button */}
-      <div className="pt-1">
-        {status === 'want-to-read' && (
-          <button
-            onClick={onStartReading}
-            disabled={updatingStatus}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors disabled:opacity-50"
-          >
-            {updatingStatus ? (
-              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Play className="w-4 h-4" aria-hidden="true" />
-            )}
-            Start Reading
-          </button>
-        )}
-        {status === 'reading' && (
-          <button
-            onClick={onMarkFinished}
-            disabled={updatingStatus}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600 hover:text-green-700 transition-colors disabled:opacity-50"
-          >
-            {updatingStatus ? (
-              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <CheckCircle className="w-4 h-4" aria-hidden="true" />
-            )}
-            Mark as Finished
-          </button>
-        )}
-        {status === 'finished' && (
-          <button
-            onClick={onStartReread}
-            disabled={updatingStatus}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors disabled:opacity-50"
-          >
-            {updatingStatus ? (
-              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <RotateCcw className="w-4 h-4" aria-hidden="true" />
-            )}
-            Start Re-read
-          </button>
-        )}
       </div>
 
       {/* Edit Dates Modal */}
@@ -454,6 +530,17 @@ export function ReadingActivitySection({
         onSave={handleSaveDates}
         initialStartedAt={editingRead?.startedAt}
         initialFinishedAt={editingRead?.finishedAt}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deletingReadIndex !== null}
+        onClose={() => setDeletingReadIndex(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Reading Entry"
+        message="Are you sure you want to delete this reading entry? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   );
@@ -466,43 +553,138 @@ export function ReadingActivitySection({
 type NotesSectionProps = {
   notes: string;
   onSave: (notes: string) => Promise<void>;
+  /** Controlled mode: whether section is expanded */
+  isExpanded?: boolean;
+  /** Controlled mode: callback when toggle is clicked */
+  onToggle?: () => void;
+  /** Uncontrolled mode: initial expanded state */
+  defaultExpanded?: boolean;
 };
 
 /**
- * Notes section for book view with inline editing
+ * Notes section for book view with inline editing (collapsible)
  */
-export function NotesSection({ notes, onSave }: NotesSectionProps) {
+export function NotesSection({
+  notes,
+  onSave,
+  isExpanded: controlledExpanded,
+  onToggle,
+  defaultExpanded = false,
+}: NotesSectionProps) {
+  const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
+
+  // Use controlled mode if both isExpanded and onToggle are provided
+  const isControlled = controlledExpanded !== undefined && onToggle !== undefined;
+  const isExpanded = isControlled ? controlledExpanded : internalExpanded;
+  const handleToggle = isControlled ? onToggle : () => setInternalExpanded(!internalExpanded);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    await onSave('');
+    setIsDeleting(false);
+  };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-gray-700 flex items-center gap-2 text-base">
-          <Pencil className="w-4 h-4" aria-hidden="true" />
+    <div>
+      {/* Collapsible Header */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleToggle();
+        }}
+        className="w-full flex items-center justify-between p-3 text-left min-h-[44px] hover:bg-gray-50"
+      >
+        <span className="font-semibold text-gray-700 flex items-center gap-2 text-base">
           Notes
-        </h2>
-        <button
-          type="button"
-          onClick={() => setIsEditing(true)}
-          className="text-primary hover:text-primary-dark text-sm font-medium transition-colors"
-        >
-          {notes ? 'Edit' : 'Add'}
-        </button>
-      </div>
+          {notes && (
+            <MessageSquare className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" title="Has notes" />
+          )}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
 
-      {notes ? (
-        <div className="text-sm text-gray-600 whitespace-pre-wrap bg-gray-50 rounded-lg p-3">
-          {notes}
+      <div
+        className={`grid transition-all duration-200 ease-out ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          {notes ? (
+            <div className="bg-white border-t border-gray-100">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 text-sm text-gray-600 whitespace-pre-wrap p-3">
+                  {notes}
+                </div>
+                <div className="flex items-center flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsEditing(true);
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                    aria-label="Edit notes"
+                  >
+                    <Pencil className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsDeleting(true);
+                    }}
+                    className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                    aria-label="Delete notes"
+                  >
+                    <Trash2 className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-400 italic p-3">No notes yet</p>
+                <div className="flex items-center flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsEditing(true);
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                    aria-label="Add notes"
+                  >
+                    <Pencil className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      ) : (
-        <p className="text-sm text-gray-400 italic">No notes yet</p>
-      )}
+      </div>
 
       <EditNotesModal
         isOpen={isEditing}
         onClose={() => setIsEditing(false)}
         onSave={onSave}
         initialNotes={notes}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleting}
+        onClose={() => setIsDeleting(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Notes"
+        message="Are you sure you want to delete your notes? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   );

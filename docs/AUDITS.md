@@ -157,18 +157,6 @@ Test with Lighthouse or PageSpeed Insights.
 
 ---
 
-## Scalability Audit
-
-- [ ] Firestore queries use proper indexes?
-- [ ] Pagination implemented for large collections?
-- [ ] Caching reduces repeated reads?
-- [ ] Batch writes used where possible?
-- [ ] No N+1 query patterns?
-- [ ] Large lists virtualised?
-- [ ] API calls debounced/throttled where appropriate?
-
----
-
 ## Privacy/GDPR Audit
 
 ### Data Collection & Consent
@@ -237,6 +225,160 @@ npm run test:e2e  # Includes axe-core accessibility tests
 
 ---
 
+## Code Quality Audit
+
+### Duplication & Dead Code
+- [ ] No significant code duplication (DRY principle)?
+- [ ] No unused exports or dead code?
+- [ ] No commented-out code blocks?
+- [ ] TODO/FIXME comments addressed or tracked?
+
+### Complexity & Readability
+- [ ] Functions under 50 lines?
+- [ ] Components under 300 lines?
+- [ ] Cyclomatic complexity reasonable (no deeply nested conditionals)?
+- [ ] Variable/function names descriptive and consistent?
+- [ ] Magic numbers extracted to named constants?
+
+### Code Organisation
+- [ ] Related code grouped logically?
+- [ ] Consistent file naming conventions?
+- [ ] Imports organised (external, internal, relative)?
+
+---
+
+## Performance Audit
+
+### Bundle Size
+```bash
+npm run build  # Check .next output size
+```
+- [ ] No unnecessarily large dependencies?
+- [ ] Dynamic imports used for heavy components?
+- [ ] Tree-shaking working (no importing entire libraries)?
+
+### React Rendering
+- [ ] Expensive computations memoized with `useMemo`?
+- [ ] Callback functions memoized with `useCallback` where needed?
+- [ ] Components memoized with `React.memo` where beneficial?
+- [ ] No unnecessary re-renders (check with React DevTools)?
+- [ ] Lists have stable `key` props (not array index)?
+
+### Images & Assets
+- [ ] Images use Next.js `<Image>` component?
+- [ ] Appropriate image formats (WebP where possible)?
+- [ ] Images sized appropriately (not oversized)?
+- [ ] Lazy loading for below-fold images?
+
+### Data Fetching
+- [ ] API calls cached/deduplicated where appropriate?
+- [ ] Pagination for large datasets?
+- [ ] Loading states prevent layout shift?
+
+---
+
+## Scalability Audit (Expanded)
+
+### Firestore Patterns
+- [ ] Queries use proper indexes (check Firebase console)?
+- [ ] No N+1 query patterns (fetching in loops)?
+- [ ] Batch writes used for multiple operations?
+- [ ] Pagination implemented for collections that could grow large?
+- [ ] Data denormalised where it reduces reads?
+
+### Client-Side Performance
+- [ ] Large lists virtualised (react-window/react-virtual)?
+- [ ] Search/filter operations debounced?
+- [ ] Heavy computations offloaded or cached?
+
+### Data Structure
+- [ ] Collections structured for query efficiency?
+- [ ] No unbounded arrays in documents?
+- [ ] Timestamps used for ordering (not client-side sorting)?
+
+### Orphaned Data
+- [ ] Deleted genres don't leave orphaned references in books?
+- [ ] Deleted series don't leave orphaned references in books?
+- [ ] Soft-deleted books properly moved to bin collection?
+- [ ] Permanently deleted books remove associated images from storage?
+- [ ] User account deletion removes all subcollections?
+- [ ] No stale widget settings referencing deleted widgets?
+
+---
+
+## Architecture Audit
+
+### Separation of Concerns
+- [ ] UI components don't contain business logic?
+- [ ] Data fetching separated from presentation?
+- [ ] Repositories abstract database operations?
+- [ ] Schemas handle validation (not components)?
+
+### Dependency Direction
+- [ ] No circular dependencies between modules?
+- [ ] Components don't import from pages?
+- [ ] Utilities don't import from components?
+
+### Component Design
+- [ ] Components have single responsibility?
+- [ ] Props interfaces well-defined and minimal?
+- [ ] No prop drilling beyond 2-3 levels (use context)?
+- [ ] Shared UI in `components/ui/`, domain-specific in feature folders?
+
+### File Structure
+- [ ] Consistent directory structure?
+- [ ] Colocated tests (`__tests__/` folders)?
+- [ ] No orphaned files?
+
+---
+
+## React Best Practices Audit
+
+### Hooks Usage
+- [ ] `useEffect` dependencies complete and correct?
+- [ ] No missing dependencies causing stale closures?
+- [ ] Cleanup functions in effects that create subscriptions?
+- [ ] No `useEffect` for derived state (use `useMemo`)?
+- [ ] Custom hooks extract reusable logic?
+
+### State Management
+- [ ] State colocated to where it's used?
+- [ ] No unnecessary lifting of state?
+- [ ] Context used appropriately (not for frequently changing values)?
+- [ ] No state that can be derived from other state?
+
+### Component Patterns
+- [ ] Controlled components for forms?
+- [ ] Error boundaries for graceful failure?
+- [ ] Suspense boundaries for async components?
+- [ ] Forward refs where needed for DOM access?
+
+---
+
+## TypeScript Audit
+
+### Type Safety
+```bash
+grep -r "any" src/ --include="*.ts" --include="*.tsx" | wc -l
+```
+- [ ] Minimal use of `any` type?
+- [ ] No `@ts-ignore` or `@ts-expect-error` without justification?
+- [ ] Strict mode enabled in tsconfig?
+- [ ] No implicit `any` from missing types?
+
+### Type Quality
+- [ ] Props interfaces defined for all components?
+- [ ] Return types explicit on exported functions?
+- [ ] Discriminated unions for variant types?
+- [ ] Proper type narrowing (not type assertions)?
+
+### Type Organisation
+- [ ] Types colocated with their usage?
+- [ ] Shared types in central location?
+- [ ] No duplicate type definitions?
+
+---
+
 ## Test Coverage Audit
 
 ### Coverage Thresholds
@@ -272,4 +414,4 @@ npm run test:coverage
 
 ---
 
-*Last updated: 2025-12-31*
+*Last updated: 2026-01-01*

@@ -24,11 +24,14 @@ Guidance for Claude Code when working with this repository.
 ## Build Commands
 
 ```bash
-npm run dev       # Development server
-npm run build     # Production build
-npm run start     # Start production server
-npm run lint      # ESLint check
-npm test          # Run tests
+npm run dev            # Development server
+npm run build          # Production build
+npm run start          # Start production server
+npm run lint           # ESLint check
+npm test               # Run tests
+npm run check:unused   # Knip unused deps/exports check
+npm run check:circular # Madge circular deps check
+npm run analyze        # Bundle analyzer (opens browser)
 ```
 
 ## Architecture

@@ -13,6 +13,9 @@ npm run lint                 # ESLint check
 npm run build                # TypeScript + build check
 npm test                     # Unit tests
 npm run test:e2e             # E2E + accessibility tests
+npm run check:unused         # Knip unused deps/exports check
+npm run check:circular       # Madge circular dependency check
+npm run analyze              # Bundle analyzer (opens browser)
 npx lighthouse http://localhost:3000 --view  # Performance audit
 ```
 
@@ -414,4 +417,4 @@ npm run test:coverage
 
 ---
 
-*Last updated: 2026-01-01*
+*Last updated: 2026-01-02*

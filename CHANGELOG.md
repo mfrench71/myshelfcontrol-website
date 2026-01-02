@@ -46,6 +46,11 @@ All notable changes to MyShelfControl are documented here.
 - Update PWA service worker cache (add /settings/profile)
 - Remove unused firebase-admin dependency
 - Add code quality audit sections to documentation
+- Add Knip for unused dependency/export detection
+- Add Madge for circular dependency detection
+- Add bundle analyzer for build size analysis
+- Remove unused Prettier dependency
+- Add ADR for code quality tooling decisions
 
 ---
 

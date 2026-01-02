@@ -621,16 +621,23 @@ export function FilterBottomSheet({
     });
   };
 
+  const hasActiveFilters =
+    (filters.statuses && filters.statuses.length > 0) ||
+    (filters.genreIds && filters.genreIds.length > 0) ||
+    (filters.seriesIds && filters.seriesIds.length > 0) ||
+    filters.minRating ||
+    filters.author;
+
   return (
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
       title="Filters"
-      className="md:hidden"
+      className="md:hidden !overflow-hidden flex flex-col"
       showCloseButton={false}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+      {/* Header - sticky */}
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200">
         <h2 id="filter-sheet-title" className="text-lg font-semibold">
           Filters
         </h2>
@@ -643,8 +650,8 @@ export function FilterBottomSheet({
         </button>
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-4">
+      {/* Content - scrollable */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Status */}
           <div>
             <span className="block text-sm font-semibold text-gray-900 mb-2">Status</span>
@@ -806,24 +813,23 @@ export function FilterBottomSheet({
             </>
           )}
 
-          {/* Reset */}
-          <button
-            onClick={() => {
-              onReset();
-            }}
-            className="w-full py-2 px-4 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors"
-          >
-            Reset Filters
-          </button>
         </div>
 
-      {/* Apply Button */}
-      <div className="p-4 border-t border-gray-200">
+      {/* Footer - sticky */}
+      <div className="flex-shrink-0 p-4 border-t border-gray-200 flex gap-3">
+        <button
+          onClick={onReset}
+          disabled={!hasActiveFilters}
+          className="flex-1 py-3 px-4 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Reset
+        </button>
         <button
           onClick={onClose}
-          className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors"
+          disabled={!hasActiveFilters}
+          className="flex-1 bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Apply Filters
+          Apply
         </button>
       </div>
     </BottomSheet>

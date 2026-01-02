@@ -114,7 +114,7 @@ function sortItems(items: WishlistItem[], sortKey: SortOption): WishlistItem[] {
 }
 
 /**
- * Wishlist item card
+ * Wishlist item card - matches book card styling
  */
 function WishlistItemCard({
   item,
@@ -128,20 +128,21 @@ function WishlistItemCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-3">
-      {/* Cover - 48x72 matching old site */}
-      <BookCover
-        src={item.coverImageUrl}
-        alt={item.title}
-        width={48}
-        height={72}
-        className="w-12 h-[72px] flex-shrink-0 rounded-lg overflow-hidden shadow-cover"
-      />
+    <div className="bg-white rounded-xl border border-gray-200 p-3 flex gap-4 relative">
+      {/* Cover - matches book card size */}
+      <div className="flex-shrink-0 w-16 h-24 rounded-lg overflow-hidden shadow-cover">
+        <BookCover
+          src={item.coverImageUrl}
+          alt={item.title}
+          width={64}
+          height={96}
+        />
+      </div>
 
-      {/* Content */}
+      {/* Content - matches book card styling */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-gray-900 truncate text-sm">{item.title}</h3>
-        <p className="text-sm text-gray-500 truncate">{item.author || 'Unknown'}</p>
+        <h3 className="font-medium text-gray-900 truncate">{item.title}</h3>
+        <p className="text-sm text-gray-500 truncate">{item.author || 'Unknown author'}</p>
         {/* Date Added */}
         {item.createdAt && (
           <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
@@ -149,25 +150,28 @@ function WishlistItemCard({
             <span>Added {formatShortDate(item.createdAt)}</span>
           </p>
         )}
-        <div className="flex items-center gap-1.5 mt-1">
-          {item.priority && (
-            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${PRIORITY_COLOURS[item.priority]}`}>
-              {PRIORITY_LABELS[item.priority]}
-            </span>
-          )}
-          {item.notes && (
-            <span title="Has notes">
-              <MessageSquare className="w-3 h-3 text-gray-400" aria-hidden="true" />
-            </span>
-          )}
-        </div>
+        {/* Priority & Notes badges */}
+        {(item.priority || item.notes) && (
+          <div className="flex items-center gap-1.5 mt-1">
+            {item.priority && (
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${PRIORITY_COLOURS[item.priority]}`}>
+                {PRIORITY_LABELS[item.priority]}
+              </span>
+            )}
+            {item.notes && (
+              <span title="Has notes">
+                <MessageSquare className="w-3 h-3 text-gray-400" aria-hidden="true" />
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-1 flex-shrink-0">
+      {/* Actions - bottom right */}
+      <div className="absolute bottom-2 right-2 flex gap-1">
         <button
           onClick={onMove}
-          className="p-2 hover:bg-green-50 rounded text-gray-400 hover:text-green-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+          className="p-2 hover:bg-green-50 rounded text-gray-400 hover:text-green-600 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
           title="I bought this"
           aria-label="Add to library"
         >
@@ -175,7 +179,7 @@ function WishlistItemCard({
         </button>
         <button
           onClick={onEdit}
-          className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+          className="p-2 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
           title="Edit"
           aria-label="Edit item"
         >
@@ -183,7 +187,7 @@ function WishlistItemCard({
         </button>
         <button
           onClick={onDelete}
-          className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+          className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 min-w-[40px] min-h-[40px] inline-flex items-center justify-center"
           title="Remove"
           aria-label="Remove from wishlist"
         >

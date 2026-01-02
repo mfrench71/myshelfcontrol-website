@@ -13,6 +13,7 @@ All notable changes to MyShelfControl are documented here.
 - Change 'Currently Reading' status label to 'Reading'
 - Add clear button for finished date in edit dates modal
 - Add tests for reading activity components and book-filters utilities
+- Document form dirty state tracking pattern in PROJECT.md
 - Make mobile filter bottom sheet footer sticky with Reset/Apply buttons
 - Add disabled states to filter buttons when no filters active
 - Update wishlist card styling to match book cards (cover size, font sizes, action placement)

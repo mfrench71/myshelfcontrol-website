@@ -167,6 +167,35 @@ Per [Android Design Guidelines](https://developer.android.com/design/ui/mobile/g
 4. **Keyboard shortcut:** Cmd/Ctrl+, for power users
 5. **Frequent settings:** Surface dark mode toggle in header
 
+#### Form Dirty State Tracking
+
+**Pattern:** Track unsaved changes in forms to prevent accidental data loss.
+
+##### Implementation
+- Compare current form values against initial values
+- Disable save button when no changes detected
+- Show visual indicator when form has unsaved changes
+- Optionally prompt user before navigating away with unsaved changes
+
+##### Current Usage
+- Book add/edit forms
+- Settings forms (profile, preferences)
+- Reading dates modal (compares initial vs current dates)
+- Notes modal (compares initial vs current text)
+- Series/Genre edit modals
+
+##### Code Pattern
+```tsx
+const [initialValues] = useState(props.initial);
+const hasChanges = JSON.stringify(values) !== JSON.stringify(initialValues);
+
+<button disabled={!hasChanges || saving}>Save</button>
+```
+
+##### Future Enhancement
+- Add `beforeunload` warning for unsaved changes
+- Consider `useBeforeUnload` hook from React Router patterns
+
 #### Author Sorting
 
 | Context | Sorting Logic |

@@ -149,14 +149,15 @@ Update `CHANGELOG.md` in the project root when making user-facing changes. Add a
 Version number is generated automatically from the build date (DD.MM.YYYY UK format) - no manual version updates needed.
 
 ### Backup Export/Import
-The backup export/import functionality in `/settings/library` must be updated whenever new data types are added. Currently exports:
+The backup export/import functionality in `/settings/library` must be updated whenever new user data is added or modified. Currently exports:
 - Books (with genre/series ID remapping on import)
+  - Includes: `reads` array (reading log), `notes`, `rating`, all metadata
 - Genres
 - Series
 - Wishlist (with cross-check against owned books)
 - Bin
 
-**Review `handleExport` and `handleImport` in `src/app/(app)/settings/library/page.tsx` when adding new collections or fields.**
+**IMPORTANT:** When adding new fields to books or other collections (e.g., reading log entries, notes, new metadata), ensure they are included in both export and import. Review `handleExport` and `handleImport` in `src/app/(app)/settings/library/page.tsx`.
 
 ## Migration Status
 

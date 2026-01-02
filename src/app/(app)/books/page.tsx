@@ -19,6 +19,7 @@ import {
   type SortOption,
   type BookCounts,
 } from '@/components/books/filter-panel';
+import { getBookStatus, filterBooks, sortBooks } from '@/lib/utils/book-filters';
 import type { Book, Genre, Series, BookFilters } from '@/lib/types';
 
 /**
@@ -27,121 +28,6 @@ import type { Book, Genre, Series, BookFilters } from '@/lib/types';
 function parseSortOption(option: SortOption): { sortBy: string; direction: 'asc' | 'desc' } {
   const [sortBy, direction] = option.split('-') as [string, 'asc' | 'desc'];
   return { sortBy, direction };
-}
-
-/**
- * Get the reading status of a book based on its reads array
- */
-function getBookStatus(book: Book): 'want-to-read' | 'reading' | 'finished' {
-  const reads = book.reads || [];
-  if (reads.length === 0) return 'want-to-read';
-
-  const latestRead = reads[reads.length - 1];
-  if (latestRead.finishedAt) return 'finished';
-  if (latestRead.startedAt) return 'reading';
-
-  return 'want-to-read';
-}
-
-/**
- * Filter books based on active filters (multi-select for status, genre, series)
- */
-function filterBooks(books: Book[], filters: BookFilters): Book[] {
-  return books.filter((book) => {
-    // Search filter
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      const matchesTitle = book.title.toLowerCase().includes(searchLower);
-      const matchesAuthor = book.author.toLowerCase().includes(searchLower);
-      if (!matchesTitle && !matchesAuthor) return false;
-    }
-
-    // Status filter (multi-select: book must match ANY selected status)
-    if (filters.statuses && filters.statuses.length > 0) {
-      const bookStatus = getBookStatus(book);
-      if (!filters.statuses.includes(bookStatus)) return false;
-    }
-
-    // Genre filter (multi-select: book must have ANY selected genre)
-    if (filters.genreIds && filters.genreIds.length > 0) {
-      const bookGenres = book.genres || [];
-      const hasMatchingGenre = filters.genreIds.some((genreId) => bookGenres.includes(genreId));
-      if (!hasMatchingGenre) return false;
-    }
-
-    // Series filter (multi-select: book must be in ANY selected series)
-    if (filters.seriesIds && filters.seriesIds.length > 0) {
-      if (!book.seriesId || !filters.seriesIds.includes(book.seriesId)) return false;
-    }
-
-    // Rating filter
-    if (filters.minRating) {
-      if (!book.rating || book.rating < filters.minRating) return false;
-    }
-
-    // Author filter
-    if (filters.author) {
-      if (book.author.toLowerCase() !== filters.author.toLowerCase()) return false;
-    }
-
-    return true;
-  });
-}
-
-/**
- * Sort books based on sort options
- */
-function sortBooks(
-  books: Book[],
-  sortBy: string,
-  direction: 'asc' | 'desc'
-): Book[] {
-  const sorted = [...books].sort((a, b) => {
-    let comparison = 0;
-
-    switch (sortBy) {
-      case 'title':
-        comparison = a.title.localeCompare(b.title);
-        break;
-      case 'author':
-        comparison = a.author.localeCompare(b.author);
-        break;
-      case 'rating':
-        // Books without rating go to the end
-        if (!a.rating && !b.rating) comparison = 0;
-        else if (!a.rating) comparison = 1;
-        else if (!b.rating) comparison = -1;
-        else comparison = a.rating - b.rating;
-        break;
-      case 'seriesPosition':
-        // Books without position go to the end
-        const aPos = a.seriesPosition ?? Number.MAX_SAFE_INTEGER;
-        const bPos = b.seriesPosition ?? Number.MAX_SAFE_INTEGER;
-        comparison = aPos - bPos;
-        break;
-      case 'createdAt':
-        const aTime = a.createdAt
-          ? typeof a.createdAt === 'number'
-            ? a.createdAt
-            : 'toMillis' in a.createdAt
-              ? a.createdAt.toMillis()
-              : new Date(a.createdAt).getTime()
-          : 0;
-        const bTime = b.createdAt
-          ? typeof b.createdAt === 'number'
-            ? b.createdAt
-            : 'toMillis' in b.createdAt
-              ? b.createdAt.toMillis()
-              : new Date(b.createdAt).getTime()
-          : 0;
-        comparison = aTime - bTime;
-        break;
-    }
-
-    return direction === 'asc' ? comparison : -comparison;
-  });
-
-  return sorted;
 }
 
 /**
@@ -757,9 +643,12 @@ function BooksPageContent() {
         </div>
       )}
 
+      {/* Page heading (visually hidden, for SEO/accessibility) */}
+      <h1 className="sr-only">My Books</h1>
+
       {/* Mobile Header */}
       <div className="flex items-center justify-between mb-4 md:hidden">
-        <h1 className="text-xl font-bold text-gray-900">My Books</h1>
+        <h2 className="text-xl font-bold text-gray-900">My Books</h2>
         {books.length > 0 && (
           <p className="text-sm text-gray-500">
             {hasActiveFilters
@@ -792,7 +681,7 @@ function BooksPageContent() {
         <div className="flex-1 min-w-0">
           {/* Desktop Header */}
           <div className="hidden md:flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-gray-900">My Books</h1>
+            <h2 className="text-xl font-bold text-gray-900">My Books</h2>
             {books.length > 0 && (
               <p className="text-sm text-gray-500">
                 {hasActiveFilters

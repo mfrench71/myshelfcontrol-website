@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Calendar,
   Loader2,
-  Star,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
@@ -22,94 +21,15 @@ import { getBook, updateBook } from '@/lib/repositories/books';
 import { GenrePicker, SeriesPicker, AuthorPicker, CoverPicker } from '@/components/pickers';
 import { ImageGallery, type GalleryImage } from '@/components/image-gallery';
 import { lookupISBN } from '@/lib/utils/book-api';
+import { RatingInput } from '@/components/books/rating-input';
+import {
+  FORMAT_OPTIONS,
+  getBookStatus,
+  formatDateForInput,
+  formatDate,
+} from '@/lib/utils/book-filters';
 import type { CoverOptions } from '@/components/pickers';
 import type { Book, PhysicalFormat, BookRead, BookCovers } from '@/lib/types';
-
-// Format options
-const FORMAT_OPTIONS = [
-  { value: '', label: 'Select format...' },
-  { value: 'Paperback', label: 'Paperback' },
-  { value: 'Hardcover', label: 'Hardcover' },
-  { value: 'Mass Market Paperback', label: 'Mass Market Paperback' },
-  { value: 'Trade Paperback', label: 'Trade Paperback' },
-  { value: 'Library Binding', label: 'Library Binding' },
-  { value: 'Spiral-bound', label: 'Spiral-bound' },
-  { value: 'Audio CD', label: 'Audio CD' },
-  { value: 'Ebook', label: 'Ebook' },
-];
-
-/**
- * Star rating input component
- */
-function RatingInput({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (rating: number) => void;
-}) {
-  return (
-    <div id="rating-input" className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => onChange(value === star ? 0 : star)}
-          className={`p-1 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-            star <= value ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'
-          }`}
-          aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-        >
-          <Star
-            className={`w-6 h-6 ${star <= value ? 'fill-yellow-400' : ''}`}
-            aria-hidden="true"
-          />
-        </button>
-      ))}
-      {value > 0 && (
-        <button
-          type="button"
-          onClick={() => onChange(0)}
-          className="ml-2 text-sm text-gray-500 hover:text-gray-700 min-h-[44px] px-2"
-        >
-          Clear
-        </button>
-      )}
-    </div>
-  );
-}
-
-/**
- * Get book reading status from reads array
- */
-function getBookStatus(book: { reads?: BookRead[] }): 'want-to-read' | 'reading' | 'finished' {
-  const reads = book.reads || [];
-  if (reads.length === 0) return 'want-to-read';
-  const latestRead = reads[reads.length - 1];
-  if (latestRead.finishedAt) return 'finished';
-  if (latestRead.startedAt) return 'reading';
-  return 'want-to-read';
-}
-
-/**
- * Format date for input field
- */
-function formatDateForInput(timestamp: number | string | Date | null | undefined): string {
-  if (!timestamp) return '';
-  const date = typeof timestamp === 'number' ? new Date(timestamp) : new Date(timestamp);
-  if (isNaN(date.getTime())) return '';
-  return date.toISOString().split('T')[0];
-}
-
-/**
- * Format date for display
- */
-function formatDate(timestamp: number | string | Date | null | undefined): string {
-  if (!timestamp) return '';
-  const date = typeof timestamp === 'number' ? new Date(timestamp) : new Date(timestamp);
-  if (isNaN(date.getTime())) return '';
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -885,8 +805,8 @@ export default function EditBookPage({ params }: PageProps) {
                     {previousReads
                       .slice()
                       .reverse()
-                      .map((read, index) => (
-                        <div key={index} className="flex items-center gap-2">
+                      .map((read) => (
+                        <div key={`${read.startedAt}-${read.finishedAt}`} className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" aria-hidden="true" />
                           <span>
                             {formatDate(read.startedAt) || 'Unknown'} -{' '}

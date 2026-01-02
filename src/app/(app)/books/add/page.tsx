@@ -18,7 +18,6 @@ import {
   ChevronLeft,
   Loader2,
   AlertCircle,
-  Star,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
@@ -35,6 +34,8 @@ import {
   type CoverOptions,
   type CoverSource,
 } from '@/components/pickers';
+import { RatingInput } from '@/components/books/rating-input';
+import { FORMAT_OPTIONS } from '@/lib/utils/book-filters';
 import type { PhysicalFormat, BookCovers } from '@/lib/types';
 
 // Quagga types - use library types
@@ -54,61 +55,7 @@ type SearchResult = {
   categories?: string[];
 };
 
-// Format options
-const FORMAT_OPTIONS = [
-  { value: '', label: 'Select format...' },
-  { value: 'Paperback', label: 'Paperback' },
-  { value: 'Hardcover', label: 'Hardcover' },
-  { value: 'Mass Market Paperback', label: 'Mass Market Paperback' },
-  { value: 'Trade Paperback', label: 'Trade Paperback' },
-  { value: 'Library Binding', label: 'Library Binding' },
-  { value: 'Spiral-bound', label: 'Spiral-bound' },
-  { value: 'Audio CD', label: 'Audio CD' },
-  { value: 'Ebook', label: 'Ebook' },
-];
-
 const SEARCH_PAGE_SIZE = 10;
-
-/**
- * Star rating input component
- */
-function RatingInput({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (rating: number) => void;
-}) {
-  return (
-    <div id="rating-input" className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => onChange(value === star ? 0 : star)}
-          className={`p-1 transition-colors ${
-            star <= value ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'
-          }`}
-          aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-        >
-          <Star
-            className={`w-6 h-6 ${star <= value ? 'fill-yellow-400' : ''}`}
-            aria-hidden="true"
-          />
-        </button>
-      ))}
-      {value > 0 && (
-        <button
-          type="button"
-          onClick={() => onChange(0)}
-          className="ml-2 text-sm text-gray-500 hover:text-gray-700"
-        >
-          Clear
-        </button>
-      )}
-    </div>
-  );
-}
 
 export default function AddBookPage() {
   const router = useRouter();
@@ -717,8 +664,7 @@ export default function AddBookPage() {
       router.push('/books');
     } catch (error) {
       console.error('Failed to add book:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      showToast(`Error adding book: ${errorMessage}`, { type: 'error' });
+      showToast('Failed to add book. Please try again.', { type: 'error' });
       setSubmitting(false);
     }
   };

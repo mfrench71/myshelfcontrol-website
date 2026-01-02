@@ -6,13 +6,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Footer } from '../footer';
 
-// Mock the APP_VERSION constant
-vi.mock('@/lib/constants', () => ({
-  APP_VERSION: '1.2.3',
-}));
-
 describe('Footer', () => {
   let originalDate: typeof Date;
+  const originalEnv = process.env;
 
   beforeEach(() => {
     // Mock Date to return a fixed year
@@ -27,10 +23,14 @@ describe('Footer', () => {
       }
     } as typeof Date;
     global.Date = mockDate;
+
+    // Mock environment variable (UK date format: DD.MM.YYYY)
+    vi.stubEnv('NEXT_PUBLIC_BUILD_VERSION', '02.01.2025');
   });
 
   afterEach(() => {
     global.Date = originalDate;
+    vi.unstubAllEnvs();
   });
 
   describe('rendering', () => {
@@ -48,10 +48,17 @@ describe('Footer', () => {
       expect(privacyLink).toHaveAttribute('href', '/privacy');
     });
 
-    it('renders app version', () => {
+    it('renders build version from environment', () => {
       render(<Footer />);
 
-      expect(screen.getByText('v1.2.3')).toBeInTheDocument();
+      expect(screen.getByText('v02.01.2025')).toBeInTheDocument();
+    });
+
+    it('shows dev when version not set', () => {
+      vi.stubEnv('NEXT_PUBLIC_BUILD_VERSION', '');
+      render(<Footer />);
+
+      expect(screen.getByText('vdev')).toBeInTheDocument();
     });
   });
 

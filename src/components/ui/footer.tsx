@@ -2,10 +2,10 @@
 'use client';
 
 import Link from 'next/link';
-import { APP_VERSION } from '@/lib/constants';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const version = process.env.NEXT_PUBLIC_BUILD_VERSION || 'dev';
 
   return (
     <footer className="bg-gray-100 border-t border-gray-200 py-4 mt-auto">
@@ -15,7 +15,7 @@ export function Footer() {
           <Link href="/privacy" className="hover:text-gray-700 transition-colors">
             Privacy Policy
           </Link>
-          <span className="text-gray-400">v{APP_VERSION}</span>
+          <span className="text-gray-400">v{version}</span>
         </div>
       </div>
     </footer>

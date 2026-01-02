@@ -20,12 +20,7 @@ import {
   ArrowRight,
   ChevronRight,
   Library,
-  CheckCircle,
-  Calendar,
   Images,
-  Play,
-  RotateCcw,
-  Loader2,
   Star,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
@@ -34,6 +29,7 @@ import { getBook, softDeleteBook, getBooksBySeries, updateBook } from '@/lib/rep
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
 import { getSeries, deleteSeries } from '@/lib/repositories/series';
 import { Lightbox } from '@/components/lightbox';
+import { ReadingActivitySection, NotesSection } from '@/components/books/reading-activity';
 import type { Book, Genre, Series } from '@/lib/types';
 
 /**
@@ -273,6 +269,31 @@ export default function BookDetailPage() {
     } finally {
       setUpdatingStatus(false);
     }
+  };
+
+  /**
+   * Handle updating reading dates for a specific read session
+   */
+  const handleUpdateDates = async (readIndex: number, startedAt: number | null, finishedAt: number | null) => {
+    if (!user || !book || !book.reads) return;
+
+    const newReads = [...book.reads];
+    newReads[readIndex] = { startedAt, finishedAt };
+
+    await updateBook(user.uid, book.id, { reads: newReads });
+    setBook({ ...book, reads: newReads });
+    showToast('Dates updated', { type: 'success' });
+  };
+
+  /**
+   * Handle updating book notes
+   */
+  const handleUpdateNotes = async (notes: string) => {
+    if (!user || !book) return;
+
+    await updateBook(user.uid, book.id, { notes });
+    setBook({ ...book, notes });
+    showToast('Notes saved', { type: 'success' });
   };
 
   const genreLookup = createGenreLookup(genres);
@@ -579,67 +600,6 @@ export default function BookDetailPage() {
               </div>
             )}
 
-            {/* Reading Status with Quick Actions */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Status Badge */}
-              {status === 'reading' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                  <BookOpen className="w-4 h-4" aria-hidden="true" />
-                  Currently Reading
-                </span>
-              )}
-              {status === 'finished' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-700">
-                  <CheckCircle className="w-4 h-4" aria-hidden="true" />
-                  Finished
-                </span>
-              )}
-
-              {/* Quick Action Buttons */}
-              {status === 'want-to-read' && (
-                <button
-                  onClick={handleStartReading}
-                  disabled={updatingStatus}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50"
-                >
-                  {updatingStatus ? (
-                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Play className="w-4 h-4" aria-hidden="true" />
-                  )}
-                  Start Reading
-                </button>
-              )}
-              {status === 'reading' && (
-                <button
-                  onClick={handleMarkFinished}
-                  disabled={updatingStatus}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-green-600 hover:bg-green-700 text-white transition-colors disabled:opacity-50"
-                >
-                  {updatingStatus ? (
-                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <CheckCircle className="w-4 h-4" aria-hidden="true" />
-                  )}
-                  Mark as Finished
-                </button>
-              )}
-              {status === 'finished' && (
-                <button
-                  onClick={handleStartReread}
-                  disabled={updatingStatus}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors disabled:opacity-50"
-                >
-                  {updatingStatus ? (
-                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <RotateCcw className="w-4 h-4" aria-hidden="true" />
-                  )}
-                  Start Re-read
-                </button>
-              )}
-            </div>
-
             {/* Genres */}
             {bookGenres.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -759,45 +719,19 @@ export default function BookDetailPage() {
               </dl>
             </div>
 
-            {/* Reading History */}
-            {book.reads && book.reads.length > 0 && (
-              <div>
-                <h2 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-base">
-                  <BookOpen className="w-4 h-4" aria-hidden="true" />
-                  Reading History
-                </h2>
-                <div className="space-y-2">
-                  {book.reads.map((read) => {
-                    const startDate = read.startedAt ? formatDate(read.startedAt) : null;
-                    const endDate = read.finishedAt ? formatDate(read.finishedAt) : null;
-                    const status = endDate ? 'Finished' : 'In progress';
-
-                    return (
-                      <div key={`${read.startedAt}-${read.finishedAt}`} className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
-                        <span>
-                          {startDate}
-                          {endDate ? ` – ${endDate}` : ` - ${status}`}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            {/* Reading Activity */}
+            <ReadingActivitySection
+              status={status}
+              reads={book.reads || []}
+              onStartReading={handleStartReading}
+              onMarkFinished={handleMarkFinished}
+              onStartReread={handleStartReread}
+              onUpdateDates={handleUpdateDates}
+              updatingStatus={updatingStatus}
+            />
 
             {/* Notes */}
-            {book.notes && (
-              <div>
-                <h2 className="font-semibold text-gray-700 mb-3 flex items-center gap-2 text-base">
-                  <Pencil className="w-4 h-4" aria-hidden="true" />
-                  Notes
-                </h2>
-                <div className="text-sm text-gray-600 whitespace-pre-wrap">
-                  {book.notes}
-                </div>
-              </div>
-            )}
+            <NotesSection notes={book.notes || ''} onSave={handleUpdateNotes} />
           </div>
         </div>
       </div>

@@ -40,9 +40,8 @@ export function Header() {
   const [isOffline, setIsOffline] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Track online/offline status
+  // Track online/offline status (must set initial state in effect to avoid hydration mismatch)
   useEffect(() => {
-    // Set initial state
     setIsOffline(!navigator.onLine);
 
     const handleOnline = () => setIsOffline(false);
@@ -73,6 +72,7 @@ export function Header() {
     }
   }, [user]);
 
+  // Load wishlist count on mount (data fetching pattern)
   useEffect(() => {
     loadWishlistCount();
   }, [loadWishlistCount]);

@@ -73,7 +73,7 @@ export function ImageGallery({
   const total = images.length + uploading.size;
   const canAdd = total < maxImages;
 
-  // Initialize image load states
+  // Initialize image load states for new images (prop synchronization pattern)
   useEffect(() => {
     const newStates: Record<string, 'loading' | 'loaded' | 'error'> = {};
     images.forEach(img => {

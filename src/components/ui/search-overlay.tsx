@@ -168,7 +168,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   // Lock body scroll when open
   useBodyScrollLock(isOpen);
 
-  // Load recent searches when overlay opens
+  // Load recent searches when overlay opens (modal initialization pattern)
   useEffect(() => {
     if (isOpen) {
       setRecentSearches(getRecentSearches());
@@ -347,9 +347,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 </button>
               </div>
               <div className="space-y-1">
-                {recentSearches.map((search, index) => (
+                {recentSearches.map((search) => (
                   <button
-                    key={index}
+                    key={search}
                     onClick={() => handleSelectRecent(search)}
                     className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg text-left transition-colors"
                   >

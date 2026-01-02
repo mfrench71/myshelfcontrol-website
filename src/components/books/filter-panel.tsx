@@ -106,7 +106,7 @@ function AuthorTypeahead({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Sync input with external value changes
+  // Sync input with external value changes (controlled component pattern)
   useEffect(() => {
     const newValue = value || '';
     if (newValue !== query) {

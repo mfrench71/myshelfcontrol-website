@@ -764,13 +764,13 @@ export default function BookDetailPage() {
                   Reading History
                 </h2>
                 <div className="space-y-2">
-                  {book.reads.map((read, index) => {
+                  {book.reads.map((read) => {
                     const startDate = read.startedAt ? formatDate(read.startedAt) : null;
                     const endDate = read.finishedAt ? formatDate(read.finishedAt) : null;
                     const status = endDate ? 'Finished' : 'In progress';
 
                     return (
-                      <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                      <div key={`${read.startedAt}-${read.finishedAt}`} className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
                         <span>
                           {startDate}

@@ -92,7 +92,7 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
     setRotation((prev) => (prev + 90) % 360);
   }, []);
 
-  // Reset state when opening or changing images
+  // Reset state when opening or changing images (modal initialization pattern)
   useEffect(() => {
     if (isOpen) {
       setCurrentIndex(initialIndex);
@@ -391,7 +391,7 @@ export function Lightbox({ images, initialIndex = 0, isOpen, onClose }: Lightbox
         <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-black/50 rounded-lg p-2 max-w-[90vw] overflow-x-auto">
           {images.map((img, index) => (
             <button
-              key={index}
+              key={img.url}
               onClick={(e) => {
                 e.stopPropagation();
                 setCurrentIndex(index);

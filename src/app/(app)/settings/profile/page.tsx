@@ -497,7 +497,7 @@ function DeleteAccountModal({
   const [confirmText, setConfirmText] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Clear form state when modal opens
+  // Clear form state when modal opens (legitimate modal initialization pattern)
   useEffect(() => {
     if (isOpen) {
       setPassword('');

@@ -96,7 +96,6 @@ export default function AddBookPage() {
   const [physicalFormat, setPhysicalFormat] = useState<PhysicalFormat>('');
   const [pageCount, setPageCount] = useState('');
   const [rating, setRating] = useState(0);
-  const [notes, setNotes] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [genreSuggestions, setGenreSuggestions] = useState<string[]>([]);
   const [seriesSelection, setSeriesSelection] = useState<SeriesSelection>({
@@ -107,8 +106,6 @@ export default function AddBookPage() {
   const [suggestedSeriesName, setSuggestedSeriesName] = useState<string | null>(null);
   const [suggestedSeriesPosition, setSuggestedSeriesPosition] = useState<number | null>(null);
   const [coverOptions, setCoverOptions] = useState<CoverOptions>({});
-  const [startedAt, setStartedAt] = useState('');
-  const [finishedAt, setFinishedAt] = useState('');
   const [images, setImages] = useState<GalleryImage[]>([]);
 
   // Duplicate detection state
@@ -131,13 +128,12 @@ export default function AddBookPage() {
       publishedDate.trim() ||
       physicalFormat ||
       pageCount.trim() ||
-      notes.trim() ||
       rating > 0 ||
       selectedGenres.length > 0 ||
       seriesSelection.seriesId ||
       images.length > 0
     );
-  }, [title, author, coverUrl, publisher, publishedDate, physicalFormat, pageCount, notes, rating, selectedGenres, seriesSelection, images]);
+  }, [title, author, coverUrl, publisher, publishedDate, physicalFormat, pageCount, rating, selectedGenres, seriesSelection, images]);
 
   /**
    * Warn before leaving with unsaved changes
@@ -463,14 +459,11 @@ export default function AddBookPage() {
     setPhysicalFormat('' as PhysicalFormat);
     setPageCount('');
     setRating(0);
-    setNotes('');
     setSelectedGenres([]);
     setGenreSuggestions([]);
     setSeriesSelection({ seriesId: null, seriesName: '', position: null });
     setSuggestedSeriesName(null);
     setSuggestedSeriesPosition(null);
-    setStartedAt('');
-    setFinishedAt('');
     setImages([]);
     setDataSource(null);
     setDuplicateWarning(null);
@@ -724,12 +717,6 @@ export default function AddBookPage() {
         }
       }
 
-      // Build reads array if dates are set
-      const reads =
-        startedAt || finishedAt
-          ? [{ startedAt: startedAt || null, finishedAt: finishedAt || null }]
-          : [];
-
       await addBook(user.uid, {
         title: title.trim(),
         author: author.trim(),
@@ -741,11 +728,9 @@ export default function AddBookPage() {
         physicalFormat: physicalFormat || undefined,
         pageCount: pageCount ? parseInt(pageCount, 10) : undefined,
         rating: rating || undefined,
-        notes: notes.trim() || undefined,
         genres: selectedGenres,
         seriesId: seriesSelection.seriesId || undefined,
         seriesPosition: seriesSelection.position || undefined,
-        reads,
         images: images.map((img) => ({
           id: img.id,
           url: img.url,
@@ -1151,58 +1136,6 @@ export default function AddBookPage() {
               <div>
                 <label className="block font-semibold text-gray-700 mb-2">Rating</label>
                 <RatingInput value={rating} onChange={setRating} />
-              </div>
-
-              {/* Reading Dates */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-2">Reading Dates</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="startedAt" className="block text-sm text-gray-600 mb-1">
-                      Started
-                    </label>
-                    <input
-                      type="date"
-                      id="startedAt"
-                      name="startedAt"
-                      value={startedAt}
-                      onChange={(e) => setStartedAt(e.target.value)}
-                      max={finishedAt || undefined}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="finishedAt" className="block text-sm text-gray-600 mb-1">
-                      Finished
-                    </label>
-                    <input
-                      type="date"
-                      id="finishedAt"
-                      name="finishedAt"
-                      value={finishedAt}
-                      onChange={(e) => setFinishedAt(e.target.value)}
-                      min={startedAt || undefined}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  Leave empty for &quot;To Read&quot; status
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="notes" className="block font-semibold text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  id="notes"
-                  name="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
-                />
               </div>
 
               <button

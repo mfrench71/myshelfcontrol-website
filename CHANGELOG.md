@@ -6,6 +6,7 @@ All notable changes to MyShelfControl are documented here.
 
 ## 02-01-2026
 
+- Remove reading dates and notes from book add/edit pages (now managed via book view accordion)
 - Refactor Reading Log and Notes into accordion UI on book view
 - Add collapsible sections with smooth CSS grid animations
 - Move status pill next to book title

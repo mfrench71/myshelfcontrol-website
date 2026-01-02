@@ -1,6 +1,6 @@
 /**
  * Edit Book Page
- * Edit an existing book's details with all pickers, image gallery, and reading dates
+ * Edit an existing book's details with all pickers and image gallery
  */
 'use client';
 
@@ -10,9 +10,6 @@ import Link from 'next/link';
 import {
   AlertCircle,
   RefreshCw,
-  RotateCcw,
-  ChevronRight,
-  Calendar,
   Loader2,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
@@ -22,14 +19,9 @@ import { GenrePicker, SeriesPicker, AuthorPicker, CoverPicker } from '@/componen
 import { ImageGallery, type GalleryImage } from '@/components/image-gallery';
 import { lookupISBN } from '@/lib/utils/book-api';
 import { RatingInput } from '@/components/books/rating-input';
-import {
-  FORMAT_OPTIONS,
-  getBookStatus,
-  formatDateForInput,
-  formatDate,
-} from '@/lib/utils/book-filters';
+import { FORMAT_OPTIONS } from '@/lib/utils/book-filters';
 import type { CoverOptions } from '@/components/pickers';
-import type { Book, PhysicalFormat, BookRead, BookCovers } from '@/lib/types';
+import type { Book, PhysicalFormat, BookCovers } from '@/lib/types';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -59,7 +51,6 @@ export default function EditBookPage({ params }: PageProps) {
   const [physicalFormat, setPhysicalFormat] = useState<PhysicalFormat>('');
   const [pageCount, setPageCount] = useState('');
   const [rating, setRating] = useState(0);
-  const [notes, setNotes] = useState('');
 
   // Picker state
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -70,20 +61,8 @@ export default function EditBookPage({ params }: PageProps) {
   // Image gallery state
   const [images, setImages] = useState<GalleryImage[]>([]);
 
-  // Reading dates state
-  const [reads, setReads] = useState<BookRead[]>([]);
-  const [readingDateError, setReadingDateError] = useState<string | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
-
   // Original values for dirty checking
   const [originalValues, setOriginalValues] = useState<string>('');
-
-  // Get current read entry
-  const currentRead = reads.length > 0 ? reads[reads.length - 1] : null;
-  const previousReads = reads.slice(0, -1);
-
-  // Calculate reading status
-  const readingStatus = useMemo(() => getBookStatus({ reads }), [reads]);
 
   // Check if form has unsaved changes
   const formValues = useMemo(
@@ -98,14 +77,12 @@ export default function EditBookPage({ params }: PageProps) {
         physicalFormat,
         pageCount,
         rating,
-        notes,
         selectedGenres,
         seriesId,
         seriesPosition,
-        reads,
         images: images.map(i => i.id),
       }),
-    [title, author, isbn, coverUrl, publisher, publishedDate, physicalFormat, pageCount, rating, notes, selectedGenres, seriesId, seriesPosition, reads, images]
+    [title, author, isbn, coverUrl, publisher, publishedDate, physicalFormat, pageCount, rating, selectedGenres, seriesId, seriesPosition, images]
   );
 
   const isDirty = originalValues !== '' && originalValues !== formValues;
@@ -164,12 +141,10 @@ export default function EditBookPage({ params }: PageProps) {
         setPhysicalFormat((bookData.physicalFormat || '') as PhysicalFormat);
         setPageCount(bookData.pageCount?.toString() || '');
         setRating(bookData.rating || 0);
-        setNotes(bookData.notes || '');
         setSelectedGenres(bookData.genres || []);
         setSeriesId(bookData.seriesId || null);
         setSeriesPosition(bookData.seriesPosition || null);
         setImages(bookData.images || []);
-        setReads(bookData.reads || []);
 
         // Store original values for dirty checking
         setOriginalValues(
@@ -183,11 +158,9 @@ export default function EditBookPage({ params }: PageProps) {
             physicalFormat: bookData.physicalFormat || '',
             pageCount: bookData.pageCount?.toString() || '',
             rating: bookData.rating || 0,
-            notes: bookData.notes || '',
             selectedGenres: bookData.genres || [],
             seriesId: bookData.seriesId || null,
             seriesPosition: bookData.seriesPosition || null,
-            reads: bookData.reads || [],
             images: (bookData.images || []).map((i: GalleryImage) => i.id),
           })
         );
@@ -222,87 +195,6 @@ export default function EditBookPage({ params }: PageProps) {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
-
-  // Handle started date change
-  const handleStartedDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const newTimestamp = value ? new Date(value).getTime() : null;
-    setReadingDateError(null);
-
-    setReads((prev) => {
-      // Check if value actually changed
-      if (prev.length === 0) {
-        if (!value) return prev; // No change - was empty, still empty
-        return [{ startedAt: newTimestamp, finishedAt: null }];
-      }
-
-      const lastRead = prev[prev.length - 1];
-      const currentTimestamp = typeof lastRead.startedAt === 'number' ? lastRead.startedAt : null;
-
-      // Compare timestamps (both null or same value means no change)
-      if (currentTimestamp === newTimestamp) return prev;
-
-      const updatedRead = { ...lastRead, startedAt: newTimestamp };
-
-      // Validate: finished can't be before started
-      const finishedTime = typeof updatedRead.finishedAt === 'number' ? updatedRead.finishedAt : null;
-      if (finishedTime && newTimestamp && finishedTime < newTimestamp) {
-        setReadingDateError('Finished date cannot be before started date');
-      }
-
-      const newReads = [...prev];
-      newReads[newReads.length - 1] = updatedRead;
-      return newReads;
-    });
-  }, []);
-
-  // Handle finished date change
-  const handleFinishedDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const newTimestamp = value ? new Date(value).getTime() : null;
-    setReadingDateError(null);
-
-    setReads((prev) => {
-      if (prev.length === 0) {
-        // Can't set finished without started
-        if (value) {
-          setReadingDateError('Please set a start date first');
-        }
-        return prev;
-      }
-
-      const lastRead = prev[prev.length - 1];
-      const currentTimestamp = typeof lastRead.finishedAt === 'number' ? lastRead.finishedAt : null;
-
-      // Check if value actually changed
-      if (currentTimestamp === newTimestamp) return prev;
-
-      // Validate: need started date first
-      if (value && !lastRead.startedAt) {
-        setReadingDateError('Please set a start date first');
-        return prev;
-      }
-
-      const updatedRead = { ...lastRead, finishedAt: newTimestamp };
-
-      // Validate: finished can't be before started
-      const startedTime = typeof updatedRead.startedAt === 'number' ? updatedRead.startedAt : null;
-      if (newTimestamp && startedTime && newTimestamp < startedTime) {
-        setReadingDateError('Finished date cannot be before started date');
-      }
-
-      const newReads = [...prev];
-      newReads[newReads.length - 1] = updatedRead;
-      return newReads;
-    });
-  }, []);
-
-  // Handle re-read button
-  const handleStartReread = useCallback(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    setReads((prev) => [...prev, { startedAt: today.getTime(), finishedAt: null }]);
-  }, []);
 
   // Handle series selection change
   const handleSeriesChange = useCallback(
@@ -409,11 +301,6 @@ export default function EditBookPage({ params }: PageProps) {
 
     if (!user || !title.trim()) return;
 
-    // Validate reading dates
-    if (readingDateError) {
-      return;
-    }
-
     setSaving(true);
     try {
       await updateBook(user.uid, id, {
@@ -427,12 +314,10 @@ export default function EditBookPage({ params }: PageProps) {
         physicalFormat: physicalFormat || undefined,
         pageCount: pageCount ? parseInt(pageCount, 10) : undefined,
         rating: rating || undefined,
-        notes: notes.trim() || undefined,
         genres: selectedGenres,
         seriesId: seriesId || undefined,
         seriesPosition: seriesPosition || undefined,
         images: images,
-        reads: reads.length > 0 ? reads : undefined,
       });
 
       // Mark gallery images as saved
@@ -716,123 +601,6 @@ export default function EditBookPage({ params }: PageProps) {
           <div>
             <label className="block font-semibold text-gray-700 mb-2">Rating</label>
             <RatingInput value={rating} onChange={setRating} />
-          </div>
-
-          {/* Reading Dates */}
-          <div>
-            <span className="block font-semibold text-gray-700 mb-2">Reading Dates</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="started-date" className="block text-sm text-gray-500 mb-1">
-                  Started
-                </label>
-                <input
-                  type="date"
-                  id="started-date"
-                  value={currentRead ? formatDateForInput(currentRead.startedAt) : ''}
-                  onChange={handleStartedDateChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${
-                    readingDateError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
-                  }`}
-                />
-              </div>
-              <div>
-                <label htmlFor="finished-date" className="block text-sm text-gray-500 mb-1">
-                  Finished
-                </label>
-                <input
-                  type="date"
-                  id="finished-date"
-                  value={currentRead ? formatDateForInput(currentRead.finishedAt) : ''}
-                  onChange={handleFinishedDateChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${
-                    readingDateError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'
-                  }`}
-                />
-              </div>
-            </div>
-
-            {/* Reading date error */}
-            {readingDateError && (
-              <p className="text-sm text-red-600 mt-1">{readingDateError}</p>
-            )}
-
-            {/* Re-read button and status badge */}
-            <div className="flex items-center gap-2 mt-3">
-              <button
-                type="button"
-                onClick={handleStartReread}
-                disabled={!currentRead?.finishedAt}
-                className="px-3 py-2 min-h-[44px] rounded-lg border border-gray-300 text-sm flex items-center gap-1.5 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <RotateCcw className="w-4 h-4" aria-hidden="true" />
-                <span>Start Re-read</span>
-              </button>
-
-              {/* Status badge */}
-              {readingStatus === 'reading' && (
-                <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">
-                  Reading
-                </span>
-              )}
-              {readingStatus === 'finished' && (
-                <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800">
-                  Finished
-                </span>
-              )}
-            </div>
-
-            {/* Read History */}
-            {previousReads.length > 0 && (
-              <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 min-h-[44px]"
-                >
-                  <ChevronRight
-                    className={`w-4 h-4 transition-transform ${showHistory ? 'rotate-90' : ''}`}
-                    aria-hidden="true"
-                  />
-                  <span>
-                    Read History ({previousReads.length} previous read
-                    {previousReads.length !== 1 ? 's' : ''})
-                  </span>
-                </button>
-
-                {showHistory && (
-                  <div className="mt-2 pl-5 border-l-2 border-gray-200 space-y-1 text-sm text-gray-500">
-                    {previousReads
-                      .slice()
-                      .reverse()
-                      .map((read) => (
-                        <div key={`${read.startedAt}-${read.finishedAt}`} className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" aria-hidden="true" />
-                          <span>
-                            {formatDate(read.startedAt) || 'Unknown'} -{' '}
-                            {formatDate(read.finishedAt) || 'In progress'}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label htmlFor="notes" className="block font-semibold text-gray-700 mb-1">
-              Notes
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
-            />
           </div>
 
           {/* Action Buttons */}

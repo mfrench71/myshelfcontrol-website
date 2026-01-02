@@ -6,6 +6,9 @@ All notable changes to MyShelfControl are documented here.
 
 ## 02-01-2026
 
+- Add pre-commit hooks with husky (runs lint and tests before commit)
+- Expand test coverage to all lib and component files (82% coverage)
+- Add tests for AuthorPicker, RatingInput, CoverPicker, ErrorBoundary, SettingsHubCard, ServiceWorkerRegister, and changelog utilities
 - Improve barcode scanner UI: full-screen camera, corner brackets, 10-second timeout hint
 - Remove reading dates and notes from book add/edit pages (now managed via book view accordion)
 - Refactor Reading Log and Notes into accordion UI on book view

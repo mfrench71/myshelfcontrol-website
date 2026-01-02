@@ -28,11 +28,16 @@ npm run dev            # Development server
 npm run build          # Production build
 npm run start          # Start production server
 npm run lint           # ESLint check
-npm test               # Run tests
+npm test               # Run unit tests (Vitest)
+npm run test:watch     # Run tests in watch mode (TDD)
+npm run test:coverage  # Run tests with coverage report
+npm run test:e2e       # Run E2E tests (Playwright)
 npm run check:unused   # Knip unused deps/exports check
 npm run check:circular # Madge circular deps check
 npm run analyze        # Bundle analyzer (opens browser)
 ```
+
+**Pre-commit hooks**: Husky runs `npm run lint && npm test` before each commit.
 
 ## Architecture
 

@@ -5,8 +5,9 @@
 
 import type { BookCovers } from '@/lib/types';
 
-/** ISBN lookup result */
-export interface ISBNLookupResult {
+/** Book search result */
+export interface BookSearchResult {
+  id: string;
   title: string;
   author: string;
   coverImageUrl: string;
@@ -19,7 +20,11 @@ export interface ISBNLookupResult {
   seriesName?: string;
   seriesPosition?: number | null;
   source?: string;
+  isbn?: string;
 }
+
+/** ISBN lookup result (alias for backwards compatibility) */
+export type ISBNLookupResult = Omit<BookSearchResult, 'id' | 'isbn'>;
 
 /** Google Books API volume info */
 interface GoogleBooksVolumeInfo {
@@ -38,9 +43,15 @@ interface GoogleBooksVolumeInfo {
   industryIdentifiers?: Array<{ identifier: string }>;
 }
 
+/** Google Books API item */
+interface GoogleBooksItem {
+  id: string;
+  volumeInfo: GoogleBooksVolumeInfo;
+}
+
 /** Google Books API response */
 interface GoogleBooksResponse {
-  items?: Array<{ volumeInfo: GoogleBooksVolumeInfo }>;
+  items?: GoogleBooksItem[];
   totalItems?: number;
 }
 
@@ -300,11 +311,12 @@ export async function lookupISBN(isbn: string | null | undefined): Promise<ISBNL
 
 /**
  * Search for books by title/author
+ * Returns results from Google Books API with unique volume IDs
  */
 export async function searchBooks(
   query: string,
   options: { startIndex?: number; maxResults?: number } = {}
-): Promise<{ books: ISBNLookupResult[]; hasMore: boolean; totalItems: number }> {
+): Promise<{ books: BookSearchResult[]; hasMore: boolean; totalItems: number }> {
   const { startIndex = 0, maxResults = 10 } = options;
 
   try {
@@ -317,7 +329,7 @@ export async function searchBooks(
       return { books: [], hasMore: false, totalItems: 0 };
     }
 
-    const books: ISBNLookupResult[] = data.items.map(item => {
+    const books: BookSearchResult[] = data.items.map(item => {
       const book = item.volumeInfo;
       const imageLinks = book.imageLinks || {};
       const coverUrl = (
@@ -328,7 +340,13 @@ export async function searchBooks(
         ''
       ).replace('http:', 'https:');
 
+      // Extract ISBN from industry identifiers
+      const isbn = book.industryIdentifiers?.find(
+        id => id.identifier.length === 10 || id.identifier.length === 13
+      )?.identifier;
+
       return {
+        id: item.id, // Google Books volume ID - guaranteed unique
         title: normalizeTitle(book.title || ''),
         author: normalizeAuthor(book.authors?.join(', ') || ''),
         coverImageUrl: coverUrl,
@@ -337,6 +355,7 @@ export async function searchBooks(
         physicalFormat: '',
         pageCount: book.pageCount || null,
         genres: parseGenres(book.categories || []),
+        isbn,
       };
     });
 

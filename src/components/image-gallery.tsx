@@ -75,17 +75,19 @@ export function ImageGallery({
 
   // Initialize image load states for new images (prop synchronization pattern)
   useEffect(() => {
-    const newStates: Record<string, 'loading' | 'loaded' | 'error'> = {};
-    images.forEach(img => {
-      if (!imageLoadStates[img.id]) {
-        newStates[img.id] = 'loading';
-      } else {
-        newStates[img.id] = imageLoadStates[img.id];
-      }
+    setImageLoadStates(prev => {
+      const newStates: Record<string, 'loading' | 'loaded' | 'error'> = {};
+      let hasChanges = false;
+      images.forEach(img => {
+        if (!prev[img.id]) {
+          newStates[img.id] = 'loading';
+          hasChanges = true;
+        } else {
+          newStates[img.id] = prev[img.id];
+        }
+      });
+      return hasChanges ? { ...prev, ...newStates } : prev;
     });
-    if (Object.keys(newStates).length > 0) {
-      setImageLoadStates(prev => ({ ...prev, ...newStates }));
-    }
   }, [images]);
 
   // Handle image load complete

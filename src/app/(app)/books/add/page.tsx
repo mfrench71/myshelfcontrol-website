@@ -24,7 +24,7 @@ import { useAuthContext } from '@/components/providers/auth-provider';
 import { useToast } from '@/components/ui/toast';
 import { addBook } from '@/lib/repositories/books';
 import { getWishlist, addWishlistItem } from '@/lib/repositories/wishlist';
-import { lookupISBN, searchBooks as searchBooksAPI, type BookSearchResult } from '@/lib/utils/book-api';
+import { lookupISBN, searchBooks as searchBooksAPI } from '@/lib/utils/book-api';
 import type { WishlistItem, PhysicalFormat, BookCovers } from '@/lib/types';
 import { isISBN, cleanISBN, checkForDuplicate } from '@/lib/utils/duplicate-checker';
 import { ImageGallery, type GalleryImage } from '@/components/image-gallery';
@@ -341,8 +341,7 @@ export default function AddBookPage() {
     }, 400);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]); // Only re-run when searchQuery changes, not when handleSearch changes
+  }, [searchQuery]);
 
   /**
    * Handle search input keypress

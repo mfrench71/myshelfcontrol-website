@@ -8,7 +8,6 @@ import { Footer } from '../footer';
 
 describe('Footer', () => {
   let originalDate: typeof Date;
-  const originalEnv = process.env;
 
   beforeEach(() => {
     // Mock Date to return a fixed year

@@ -6,6 +6,9 @@ All notable changes to MyShelfControl are documented here.
 
 ## 02-01-2026
 
+- Make mobile filter bottom sheet footer sticky with Reset/Apply buttons
+- Add disabled states to filter buttons when no filters active
+- Update wishlist card styling to match book cards (cover size, font sizes, action placement)
 - Add section sub-links to settings sidebar (desktop only)
 - Add mobile section pills to Profile and Maintenance pages
 - Remove duplicate "In this section" navigation from Library/Preferences pages

@@ -472,24 +472,24 @@ describe('FilterBottomSheet', () => {
     expect(screen.getByRole('checkbox', { name: /fantasy/i })).toBeInTheDocument();
   });
 
-  it('renders Apply Filters button', () => {
+  it('renders Apply button', () => {
     renderBottomSheet();
 
-    expect(screen.getByRole('button', { name: /apply filters/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^apply$/i })).toBeInTheDocument();
   });
 
-  it('calls onClose when Apply Filters is clicked', () => {
-    renderBottomSheet();
+  it('calls onClose when Apply is clicked', () => {
+    renderBottomSheet({ filters: { statuses: ['reading'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /apply filters/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^apply$/i }));
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onReset when Reset Filters is clicked', () => {
-    renderBottomSheet();
+  it('calls onReset when Reset is clicked', () => {
+    renderBottomSheet({ filters: { statuses: ['reading'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /reset filters/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^reset$/i }));
 
     expect(mockOnReset).toHaveBeenCalledTimes(1);
   });

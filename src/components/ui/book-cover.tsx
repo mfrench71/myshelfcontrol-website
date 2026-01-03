@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 
@@ -19,6 +19,7 @@ interface BookCoverProps {
 
 /**
  * Book cover with loading spinner and gradient placeholder
+ * Skips spinner if image is already cached
  */
 export function BookCover({
   src,
@@ -28,8 +29,25 @@ export function BookCover({
   priority = false,
   className = '',
 }: BookCoverProps) {
-  const [loading, setLoading] = useState(!!src);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const hasCheckedCache = useRef(false);
+
+  // Check if image is already cached on mount
+  useEffect(() => {
+    if (!src || hasCheckedCache.current) return;
+    hasCheckedCache.current = true;
+
+    const img = new window.Image();
+    img.src = src;
+
+    // If image is already complete (cached), skip loading state
+    if (img.complete) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [src]);
 
   // Check if className contains full sizing classes (let container control size)
   const hasFullSizing = className.includes('w-full') || className.includes('h-full');

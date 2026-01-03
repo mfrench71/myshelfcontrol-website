@@ -541,6 +541,7 @@ export default function DashboardPage() {
   // Auto-refresh tracking refs
   const hiddenAtRef = useRef<number | null>(null);
   const lastRefreshRef = useRef<number>(Date.now());
+  const isRefreshingRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -594,7 +595,7 @@ export default function DashboardPage() {
     if (!user) return;
 
     const checkAndRefresh = async () => {
-      if (!hiddenAtRef.current) return;
+      if (!hiddenAtRef.current || isRefreshingRef.current) return;
 
       const settings = loadSyncSettings();
       if (!settings.autoRefreshEnabled) {
@@ -607,6 +608,7 @@ export default function DashboardPage() {
       const timeSinceLastRefresh = (now - lastRefreshRef.current) / 1000;
 
       if (hiddenDuration >= settings.hiddenThreshold && timeSinceLastRefresh >= settings.cooldownPeriod) {
+        isRefreshingRef.current = true;
         try {
           const [userBooks, userSeries, userWishlist, userWidgets] = await Promise.all([
             getBooks(user.uid),
@@ -622,6 +624,8 @@ export default function DashboardPage() {
           showToast('Dashboard refreshed', { type: 'success' });
         } catch (err) {
           console.error('Failed to auto-refresh:', err);
+        } finally {
+          isRefreshingRef.current = false;
         }
       }
 

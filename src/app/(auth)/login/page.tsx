@@ -187,7 +187,7 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
       {/* Logo */}
-      <div className="flex items-center gap-2 mb-8">
+      <Link href="/" className="flex items-center gap-2 mb-8 hover:opacity-80 transition-opacity">
         <Image
           src="/branding/logo-icon.svg"
           alt=""
@@ -200,7 +200,7 @@ function LoginForm() {
           <span className="font-bold text-slate-800">book</span>
           <span className="font-normal text-blue-500">assembly</span>
         </span>
-      </div>
+      </Link>
 
       {/* Auth Card */}
       <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -492,7 +492,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
-        <div className="flex items-center gap-2 mb-8">
+        <Link href="/" className="flex items-center gap-2 mb-8 hover:opacity-80 transition-opacity">
           <Image
             src="/branding/logo-icon.svg"
             alt=""
@@ -505,7 +505,7 @@ export default function LoginPage() {
             <span className="font-bold text-slate-800">book</span>
             <span className="font-normal text-blue-500">assembly</span>
           </span>
-        </div>
+        </Link>
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-6 bg-gray-200 rounded w-2/3 mx-auto" />

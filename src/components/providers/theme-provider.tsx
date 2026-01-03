@@ -24,14 +24,15 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = 'theme';
 
-// Public pages that always use light mode (landing, login, privacy)
-const PUBLIC_PAGES = ['/', '/login', '/privacy'];
+// Public pages that always use light mode (landing, login)
+// Note: /privacy respects user preference when logged in
+const PUBLIC_PAGES = ['/', '/login'];
 
 /**
  * Check if pathname is a public page (always light mode)
  */
 function isPublicPage(pathname: string): boolean {
-  return PUBLIC_PAGES.includes(pathname) || pathname.startsWith('/privacy');
+  return PUBLIC_PAGES.includes(pathname);
 }
 
 /**

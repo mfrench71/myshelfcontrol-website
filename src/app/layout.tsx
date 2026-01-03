@@ -7,11 +7,11 @@ import { ToastProvider } from '@/components/ui/toast';
 import { ServiceWorkerRegister } from '@/components/service-worker-register';
 
 // Anti-flash script to set theme before React hydrates
-// Public pages (landing, login, privacy) always use light mode
+// Public pages (landing, login) always use light mode
 const themeScript = `
   (function() {
     var path = window.location.pathname;
-    var isPublicPage = path === '/' || path.startsWith('/login') || path.startsWith('/privacy');
+    var isPublicPage = path === '/' || path.startsWith('/login');
 
     // Public pages always use light mode
     if (isPublicPage) {

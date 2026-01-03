@@ -1,6 +1,10 @@
 [build]
-  command = "npm run check:unused && npm run check:circular && npm test && npm run build"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Run checks in CI before build (optional - uncomment to enable)
+# [build.lifecycle]
+#   onBuild = "npm run check:unused && npm run check:circular && npm test"

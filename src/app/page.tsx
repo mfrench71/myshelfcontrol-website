@@ -19,6 +19,8 @@ export default function LandingPage() {
             height={48}
             className="w-12 h-12"
             aria-hidden="true"
+            priority
+            unoptimized
           />
           <h1 className="text-4xl">
             <span className="font-bold text-slate-800">book</span>

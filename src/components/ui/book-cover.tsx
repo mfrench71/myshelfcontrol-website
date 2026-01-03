@@ -49,6 +49,7 @@ export function BookCover({
           height={height}
           className="w-[50%] h-[50%] opacity-80"
           aria-hidden="true"
+          unoptimized
         />
       </div>
     );

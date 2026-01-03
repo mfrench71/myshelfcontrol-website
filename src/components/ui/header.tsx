@@ -30,7 +30,7 @@ const GRAVATAR_CACHE_KEY = 'gravatar_cache';
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuthContext();
+  const { user, loading: authLoading } = useAuthContext();
   const [showMenu, setShowMenu] = useState(false);
   const [menuClosing, setMenuClosing] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -266,7 +266,8 @@ export function Header() {
   };
 
   // Simple header for unauthenticated users (e.g., on privacy page)
-  if (!user) {
+  // Only show when auth has finished loading and there's definitely no user
+  if (!authLoading && !user) {
     return (
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 h-14">
         <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
@@ -278,6 +279,8 @@ export function Header() {
               height={32}
               className="w-8 h-8"
               aria-hidden="true"
+              priority
+              unoptimized
             />
             <span className="text-xl">
               <span className="font-bold text-slate-800">book</span>
@@ -319,10 +322,12 @@ export function Header() {
               height={32}
               className="w-8 h-8"
               aria-hidden="true"
+              priority
+              unoptimized
             />
             <span className="text-xl">
               <span className="font-bold text-slate-800 dark:text-slate-200">book</span>
-              <span className="font-normal text-blue-500">republic</span>
+              <span className="font-normal text-blue-500 dark:text-blue-400">republic</span>
             </span>
           </Link>
 

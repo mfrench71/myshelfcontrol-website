@@ -2,13 +2,71 @@
  * Landing Page - Promotional page for logged-out users
  * Logged-in users are redirected to /dashboard by middleware
  */
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Library, Star, TrendingUp } from 'lucide-react';
 
+export const metadata: Metadata = {
+  title: 'Book Assembly - Track Your Reading Journey',
+  description:
+    'Free book tracking app. Organise your library, track reading progress, rate books, and manage series. Works offline as a PWA.',
+  keywords: [
+    'book tracking',
+    'reading tracker',
+    'book library',
+    'reading progress',
+    'book organiser',
+    'book collection',
+    'reading list',
+  ],
+  openGraph: {
+    title: 'Book Assembly - Track Your Reading Journey',
+    description:
+      'Free book tracking app. Organise your library, track reading progress, rate books, and manage series.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Book Assembly - Track Your Reading Journey',
+    description:
+      'Free book tracking app. Organise your library and track your reading.',
+  },
+};
+
+// JSON-LD structured data for search engines
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Book Assembly',
+  description:
+    'Free book tracking app. Organise your library, track reading progress, rate books, and manage series.',
+  url: 'https://bookassembly.co.uk',
+  applicationCategory: 'LifestyleApplication',
+  operatingSystem: 'Web',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'GBP',
+  },
+  featureList: [
+    'Book cataloguing',
+    'Reading progress tracking',
+    'Star ratings',
+    'Series management',
+    'Offline support',
+    'ISBN barcode scanning',
+  ],
+};
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Hero Section */}
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <div className="flex items-center justify-center gap-3 mb-6">

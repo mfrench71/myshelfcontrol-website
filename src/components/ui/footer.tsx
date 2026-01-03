@@ -17,8 +17,11 @@ export function Footer() {
           <Link href={user ? '/settings/support' : '/support'} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
             Support
           </Link>
+          <Link href="/terms" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+            Terms
+          </Link>
           <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-            Privacy Policy
+            Privacy
           </Link>
           {user && (
             <Link href="/settings/about" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">

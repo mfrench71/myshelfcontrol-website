@@ -24,8 +24,8 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = 'theme';
 
-// Public pages that always use light mode (landing, login)
-// Note: /privacy respects user preference when logged in
+// Public standalone pages that always use light mode (landing, login, support)
+// Note: /privacy and /terms are in (app) route group and respect user theme preference
 const PUBLIC_PAGES = ['/', '/login', '/support'];
 
 /**

@@ -81,8 +81,12 @@ export default function LandingPage() {
           Support
         </Link>
         <span className="mx-2 text-gray-300">·</span>
+        <Link href="/terms" className="text-sm text-gray-500 hover:text-gray-700">
+          Terms
+        </Link>
+        <span className="mx-2 text-gray-300">·</span>
         <Link href="/privacy" className="text-sm text-gray-500 hover:text-gray-700">
-          Privacy Policy
+          Privacy
         </Link>
       </div>
     </div>

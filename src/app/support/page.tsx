@@ -222,8 +222,12 @@ export default function SupportPage() {
       <p className="mt-8 text-sm text-gray-500">
         <span>Support</span>
         <span className="mx-2 text-gray-300">·</span>
+        <Link href="/terms" className="hover:text-gray-700">
+          Terms
+        </Link>
+        <span className="mx-2 text-gray-300">·</span>
         <Link href="/privacy" className="hover:text-gray-700">
-          Privacy Policy
+          Privacy
         </Link>
       </p>
     </div>

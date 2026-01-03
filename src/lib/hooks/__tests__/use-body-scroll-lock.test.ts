@@ -8,12 +8,14 @@ import { useBodyScrollLock } from '../use-body-scroll-lock';
 
 describe('useBodyScrollLock', () => {
   beforeEach(() => {
-    // Reset body class
-    document.body.classList.remove('scroll-locked');
+    // Reset body and html styles
+    document.body.style.cssText = '';
+    document.documentElement.style.cssText = '';
   });
 
   afterEach(() => {
-    document.body.classList.remove('scroll-locked');
+    document.body.style.cssText = '';
+    document.documentElement.style.cssText = '';
   });
 
   describe('when isLocked is false', () => {
@@ -21,51 +23,55 @@ describe('useBodyScrollLock', () => {
       renderHook(() => useBodyScrollLock(false));
 
       await waitFor(() => {
-        expect(document.body.classList.contains('scroll-locked')).toBe(false);
+        expect(document.body.style.position).not.toBe('fixed');
       });
     });
   });
 
   describe('when isLocked is true', () => {
-    it('adds scroll-locked class to body', async () => {
+    it('applies scroll lock styles to body', async () => {
       renderHook(() => useBodyScrollLock(true));
 
       await waitFor(() => {
-        expect(document.body.classList.contains('scroll-locked')).toBe(true);
+        expect(document.body.style.position).toBe('fixed');
+        expect(document.body.style.overflow).toBe('hidden');
+        expect(document.documentElement.style.overflow).toBe('hidden');
       });
     });
   });
 
   describe('cleanup on unlock', () => {
-    it('removes scroll-locked class when isLocked changes to false', async () => {
+    it('removes scroll lock styles when isLocked changes to false', async () => {
       const { rerender } = renderHook(
         ({ isLocked }) => useBodyScrollLock(isLocked),
         { initialProps: { isLocked: true } }
       );
 
       await waitFor(() => {
-        expect(document.body.classList.contains('scroll-locked')).toBe(true);
+        expect(document.body.style.position).toBe('fixed');
       });
 
       rerender({ isLocked: false });
 
       await waitFor(() => {
-        expect(document.body.classList.contains('scroll-locked')).toBe(false);
+        expect(document.body.style.position).toBe('');
+        expect(document.body.style.overflow).toBe('');
       });
     });
   });
 
   describe('cleanup on unmount', () => {
-    it('removes scroll-locked class on unmount', async () => {
+    it('removes scroll lock styles on unmount', async () => {
       const { unmount } = renderHook(() => useBodyScrollLock(true));
 
       await waitFor(() => {
-        expect(document.body.classList.contains('scroll-locked')).toBe(true);
+        expect(document.body.style.position).toBe('fixed');
       });
 
       unmount();
 
-      expect(document.body.classList.contains('scroll-locked')).toBe(false);
+      expect(document.body.style.position).toBe('');
+      expect(document.body.style.overflow).toBe('');
     });
   });
 });

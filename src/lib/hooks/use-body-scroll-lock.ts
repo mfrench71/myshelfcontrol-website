@@ -1,40 +1,75 @@
 /**
  * useBodyScrollLock hook
  * Locks body scroll when a modal/bottom sheet is open
- * Uses a synchronous approach to prevent scroll jump on mobile
+ * Uses iOS-compatible scroll lock technique
  */
 import { useLayoutEffect, useRef } from 'react';
 
+// Track scroll position globally to handle nested modals
+let scrollLockCount = 0;
+let savedScrollY = 0;
+
 /**
  * Lock body scroll when isLocked is true
+ * Uses position:fixed technique with scroll position preservation
  * @param isLocked - Whether to lock body scroll
  */
 export function useBodyScrollLock(isLocked: boolean): void {
-  const scrollPositionRef = useRef(0);
+  const wasLockedRef = useRef(false);
 
   // Use useLayoutEffect to apply styles synchronously before paint
-  // This prevents the flash of scroll-to-top on mobile
   useLayoutEffect(() => {
-    if (!isLocked) return;
+    if (isLocked && !wasLockedRef.current) {
+      // First lock - save scroll position and apply styles
+      if (scrollLockCount === 0) {
+        // Capture scroll position immediately
+        savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
 
-    // Save current scroll position immediately
-    scrollPositionRef.current = window.scrollY;
+        // Apply all styles in a single batch to prevent flash
+        const body = document.body;
+        const html = document.documentElement;
 
-    // Apply styles synchronously before browser paints
-    const scrollY = scrollPositionRef.current;
+        // Set inline styles that work together
+        body.style.position = 'fixed';
+        body.style.top = `-${savedScrollY}px`;
+        body.style.left = '0';
+        body.style.right = '0';
+        body.style.overflow = 'hidden';
+        body.style.width = '100%';
 
-    // Set top offset BEFORE adding the class to prevent visual jump
-    document.body.style.top = `-${scrollY}px`;
-    document.body.classList.add('scroll-locked');
+        // Also lock html element for iOS Safari
+        html.style.overflow = 'hidden';
+        html.style.height = '100%';
+      }
+      scrollLockCount++;
+      wasLockedRef.current = true;
+    }
 
-    // Cleanup
     return () => {
-      // Remove class and styles
-      document.body.classList.remove('scroll-locked');
-      document.body.style.top = '';
+      if (wasLockedRef.current) {
+        scrollLockCount--;
+        wasLockedRef.current = false;
 
-      // Restore scroll position synchronously
-      window.scrollTo(0, scrollY);
+        // Last unlock - restore scroll position
+        if (scrollLockCount === 0) {
+          const body = document.body;
+          const html = document.documentElement;
+
+          // Clear all inline styles
+          body.style.position = '';
+          body.style.top = '';
+          body.style.left = '';
+          body.style.right = '';
+          body.style.overflow = '';
+          body.style.width = '';
+
+          html.style.overflow = '';
+          html.style.height = '';
+
+          // Restore scroll position
+          window.scrollTo(0, savedScrollY);
+        }
+      }
     };
   }, [isLocked]);
 }

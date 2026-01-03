@@ -53,18 +53,6 @@ body {
   color: #111827;
 }
 
-/* Body scroll lock for modals/bottom sheets */
-body.scroll-locked {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  left: 0;
-  right: 0;
-  /* Prevent touch scrolling on mobile */
-  touch-action: none;
-  -webkit-overflow-scrolling: none;
-  overscroll-behavior: none;
-}
 
 /* Form Elements */
 input[type='text'],

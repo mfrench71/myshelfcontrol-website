@@ -12,7 +12,8 @@ import { auth } from '@/lib/firebase/client';
 import { getAuthErrorMessage } from '@/lib/utils/auth-errors';
 import { checkPasswordStrength } from '@/lib/utils';
 import { LoginSchema, RegisterSchema } from '@/lib/schemas/auth';
-import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 /** Field-level validation errors */
@@ -186,9 +187,16 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
       {/* Logo */}
-      <div className="flex items-center gap-2 text-primary mb-8">
-        <BookOpen className="w-10 h-10" />
-        <span className="text-2xl font-bold">Book Republic</span>
+      <div className="flex items-center gap-2 mb-8">
+        <Image
+          src="/branding/logo-icon.svg"
+          alt=""
+          width={40}
+          height={40}
+          className="w-10 h-10"
+          aria-hidden="true"
+        />
+        <span className="text-2xl font-bold text-gray-900">Book Republic</span>
       </div>
 
       {/* Auth Card */}
@@ -481,9 +489,16 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
-        <div className="flex items-center gap-2 text-primary mb-8">
-          <BookOpen className="w-10 h-10" />
-          <span className="text-2xl font-bold">Book Republic</span>
+        <div className="flex items-center gap-2 mb-8">
+          <Image
+            src="/branding/logo-icon.svg"
+            alt=""
+            width={40}
+            height={40}
+            className="w-10 h-10"
+            aria-hidden="true"
+          />
+          <span className="text-2xl font-bold text-gray-900">Book Republic</span>
         </div>
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="animate-pulse space-y-4">

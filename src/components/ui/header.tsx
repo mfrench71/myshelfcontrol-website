@@ -9,7 +9,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import {
-  BookOpen,
   Search,
   Menu,
   X,
@@ -272,9 +271,14 @@ export function Header() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 h-14">
         <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" aria-hidden="true" />
-            </div>
+            <Image
+              src="/branding/logo-icon.svg"
+              alt=""
+              width={32}
+              height={32}
+              className="w-8 h-8"
+              aria-hidden="true"
+            />
             <span className="text-xl font-bold text-gray-900">Book Republic</span>
           </Link>
           <Link
@@ -305,9 +309,14 @@ export function Header() {
         <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" aria-hidden="true" />
-            </div>
+            <Image
+              src="/branding/logo-icon.svg"
+              alt=""
+              width={32}
+              height={32}
+              className="w-8 h-8"
+              aria-hidden="true"
+            />
             <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Republic</span>
           </Link>
 

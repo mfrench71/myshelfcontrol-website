@@ -4,7 +4,7 @@
  * Server Component that reads CHANGELOG.md at build time
  */
 
-import { BookOpen } from 'lucide-react';
+import Image from 'next/image';
 import { getChangelog, getBuildVersion } from '@/lib/utils/changelog';
 import { ChangelogAccordion } from './changelog-accordion';
 
@@ -19,9 +19,14 @@ export default function AboutPage() {
       {/* App Info */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center">
-            <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
-          </div>
+          <Image
+            src="/branding/logo-icon.svg"
+            alt=""
+            width={64}
+            height={64}
+            className="w-16 h-16"
+            aria-hidden="true"
+          />
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Republic</h2>
             <p className="text-gray-500 dark:text-gray-400">Version {version}</p>

@@ -67,7 +67,8 @@ A mobile-friendly book tracking PWA with multi-user features planned. Rebuilt wi
 
 The Book Republic logo consists of three stylised book shapes (geometric rectangles with slight rotation) alongside the wordmark.
 
-**Logo file:** `/logo-concepts/concept-c-geometric.svg`
+**Logo file:** `/public/branding/logo.svg`
+**Icon file:** `/public/branding/logo-icon.svg`
 
 ### Logo Colours
 

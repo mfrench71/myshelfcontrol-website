@@ -63,13 +63,13 @@ export function SettingsHubCard({
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{description}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-300 truncate">{description}</p>
       </div>
 
       {/* Chevron */}
       <ChevronRight
         className={`flex-shrink-0 w-5 h-5 transition-transform ${
-          isActive ? 'text-primary dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-primary dark:group-hover:text-blue-400 group-hover:translate-x-0.5'
+          isActive ? 'text-primary dark:text-blue-400' : 'text-gray-400 dark:text-gray-400 group-hover:text-primary dark:group-hover:text-blue-400 group-hover:translate-x-0.5'
         }`}
         aria-hidden="true"
       />

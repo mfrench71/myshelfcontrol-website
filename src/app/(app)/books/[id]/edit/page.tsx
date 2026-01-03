@@ -373,11 +373,11 @@ export default function EditBookPage({ params }: PageProps) {
             <nav aria-label="Breadcrumb">
               <ol className="flex items-center text-sm">
                 <li>
-                  <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                  <Link href="/books" className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200">
                     Books
                   </Link>
                 </li>
-                <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+                <li className="mx-2 text-gray-400 dark:text-gray-400">/</li>
                 <li className="text-gray-900 dark:text-gray-100 font-medium">Edit Book</li>
               </ol>
             </nav>
@@ -410,20 +410,20 @@ export default function EditBookPage({ params }: PageProps) {
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center text-sm">
               <li>
-                <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                <Link href="/books" className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200">
                   Books
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="mx-2 text-gray-400 dark:text-gray-400">/</li>
               <li>
                 <Link
                   href={`/books/${id}`}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 max-w-[100px] sm:max-w-[200px] md:max-w-[300px] lg:max-w-none truncate inline-block align-middle"
+                  className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 max-w-[100px] sm:max-w-[200px] md:max-w-[300px] lg:max-w-none truncate inline-block align-middle"
                 >
                   {title || 'Book'}
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="mx-2 text-gray-400 dark:text-gray-400">/</li>
               <li className="text-gray-900 dark:text-gray-100 font-medium">Edit</li>
             </ol>
           </nav>
@@ -432,7 +432,7 @@ export default function EditBookPage({ params }: PageProps) {
               type="button"
               onClick={handleRefreshData}
               disabled={refreshing || (!isbn && !title)}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors min-h-[44px] min-w-[44px] disabled:opacity-50"
               aria-label="Refresh data from API"
             >
               {refreshing ? (

@@ -159,7 +159,7 @@ export default function BinPage() {
           <div className="flex items-center gap-3">
             {books.length > 0 && (
               <>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-300">
                   {books.length} book{books.length !== 1 ? 's' : ''}
                 </p>
                 <button
@@ -183,9 +183,9 @@ export default function BinPage() {
 
         {books.length === 0 ? (
           <div id="empty-state" className="text-center py-12">
-            <Trash2 className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
-            <p className="text-gray-500 dark:text-gray-400 mt-3">Bin is empty</p>
-            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
+            <Trash2 className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto" aria-hidden="true" />
+            <p className="text-gray-500 dark:text-gray-300 mt-3">Bin is empty</p>
+            <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">
               Deleted books will appear here for 30 days before being permanently removed.
             </p>
           </div>
@@ -216,7 +216,7 @@ export default function BinPage() {
                   {/* Details */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">{book.title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{book.author || 'Unknown author'}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 truncate">{book.author || 'Unknown author'}</p>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${badgeClass} mt-2`}>
                       <Clock className="w-3 h-3" aria-hidden="true" />
                       <span>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''} left</span>

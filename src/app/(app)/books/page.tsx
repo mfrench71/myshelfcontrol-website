@@ -716,9 +716,9 @@ function BooksPageContent() {
           {/* Empty State */}
           {books.length === 0 ? (
             <div id="empty-state" className="text-center py-12 empty-state-animate">
-              <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
+              <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto" aria-hidden="true" />
               <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4">No books yet</h2>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-gray-500 dark:text-gray-300 mt-1">
                 Start building your library by adding your first book.
               </p>
               <Link
@@ -732,13 +732,13 @@ function BooksPageContent() {
           ) : filteredAndSortedBooks.length === 0 ? (
             /* No results after filtering */
             <div className="text-center py-12 empty-state-animate">
-              <SearchX className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
-              <p className="text-gray-500 dark:text-gray-400 mt-3">No books match your filters</p>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
+              <SearchX className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto" aria-hidden="true" />
+              <p className="text-gray-500 dark:text-gray-300 mt-3">No books match your filters</p>
+              <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">
                 Try adjusting your filters or{' '}
                 <button
                   onClick={handleReset}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   clear all filters
                 </button>

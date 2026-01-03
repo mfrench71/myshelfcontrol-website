@@ -132,7 +132,7 @@ function DeleteModal({
     >
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Move to Bin?</h3>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">
+        <p className="text-gray-500 dark:text-gray-300 mb-4">
           This book will be moved to the bin and automatically deleted after 30 days. You can restore it from Settings.
         </p>
 
@@ -499,11 +499,11 @@ export default function BookDetailPage() {
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center text-sm">
               <li>
-                <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                <Link href="/books" className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200">
                   My Books
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="mx-2 text-gray-400 dark:text-gray-400">/</li>
               <li className="text-gray-900 dark:text-gray-100 font-medium truncate max-w-[150px] sm:max-w-[250px] md:max-w-[400px] lg:max-w-none">
                 {book.title}
               </li>
@@ -514,7 +514,7 @@ export default function BookDetailPage() {
           <div className="flex items-center gap-1">
             <Link
               href={`/books/${bookId}/edit`}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400 flex items-center justify-center sm:justify-start gap-1 min-h-[44px] min-w-[44px]"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 flex items-center justify-center sm:justify-start gap-1 min-h-[44px] min-w-[44px]"
               aria-label="Edit book"
             >
               <Pencil className="w-5 h-5" aria-hidden="true" />
@@ -658,7 +658,7 @@ export default function BookDetailPage() {
                           >
                             <BookOpen className="w-4 h-4" aria-hidden="true" />
                             <span>{displayText}</span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500">(viewing)</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-400">(viewing)</span>
                           </div>
                         );
                       }
@@ -669,7 +669,7 @@ export default function BookDetailPage() {
                           href={`/books/${seriesBook.id}`}
                           className="flex items-center gap-2 text-sm py-1 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400"
                         >
-                          <BookIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                          <BookIcon className="w-4 h-4 text-gray-400 dark:text-gray-400" aria-hidden="true" />
                           <span>{displayText}</span>
                         </Link>
                       );
@@ -691,43 +691,43 @@ export default function BookDetailPage() {
               <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                 {book.isbn && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">ISBN</dt>
+                    <dt className="text-gray-500 dark:text-gray-300">ISBN</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{book.isbn}</dd>
                   </div>
                 )}
                 {book.pageCount != null && book.pageCount > 0 && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">Pages</dt>
+                    <dt className="text-gray-500 dark:text-gray-300">Pages</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{book.pageCount}</dd>
                   </div>
                 )}
                 {book.physicalFormat && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">Format</dt>
+                    <dt className="text-gray-500 dark:text-gray-300">Format</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100 capitalize">{book.physicalFormat}</dd>
                   </div>
                 )}
                 {book.publisher && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">Publisher</dt>
+                    <dt className="text-gray-500 dark:text-gray-300">Publisher</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{book.publisher}</dd>
                   </div>
                 )}
                 {book.publishedDate && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">Published</dt>
+                    <dt className="text-gray-500 dark:text-gray-300">Published</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{book.publishedDate}</dd>
                   </div>
                 )}
                 {book.createdAt && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">Added</dt>
+                    <dt className="text-gray-500 dark:text-gray-300">Added</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{formatDate(book.createdAt)}</dd>
                   </div>
                 )}
                 {book.updatedAt && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">Modified</dt>
+                    <dt className="text-gray-500 dark:text-gray-300">Modified</dt>
                     <dd className="font-medium text-gray-900 dark:text-gray-100">{formatDate(book.updatedAt)}</dd>
                   </div>
                 )}

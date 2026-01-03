@@ -789,11 +789,11 @@ export default function AddBookPage() {
           <nav aria-label="Breadcrumb">
             <ol className="flex items-center text-sm">
               <li>
-                <Link href="/books" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                <Link href="/books" className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-300">
                   Books
                 </Link>
               </li>
-              <li className="mx-2 text-gray-400 dark:text-gray-500">/</li>
+              <li className="mx-2 text-gray-400 dark:text-gray-400">/</li>
               <li className="text-gray-900 dark:text-gray-100 font-medium">Add Book</li>
             </ol>
           </nav>
@@ -857,11 +857,11 @@ export default function AddBookPage() {
                   {searching ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Go'}
                 </button>
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Type an ISBN or search by title/author</p>
+              <p className="text-xs text-gray-400 dark:text-gray-400 mt-2">Type an ISBN or search by title/author</p>
 
               {/* Search status message */}
               {searchMessage && (
-                <p className={`text-sm mt-2 ${searchMessage.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                <p className={`text-sm mt-2 ${searchMessage.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-300'}`}>
                   {searchMessage.text}
                 </p>
               )}
@@ -871,7 +871,7 @@ export default function AddBookPage() {
             {searchResults.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mb-4">
                 <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">{searchResults.length} results</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-300">{searchResults.length} results</span>
                 </div>
                 <div
                   ref={resultsContainerRef}
@@ -903,21 +903,21 @@ export default function AddBookPage() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <BookOpen className="w-5 h-5 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                                <BookOpen className="w-5 h-5 text-gray-400 dark:text-gray-400" aria-hidden="true" />
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{result.title}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{result.author}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-300 truncate">{result.author}</p>
                             {result.publishedDate && (
-                              <p className="text-xs text-gray-400 dark:text-gray-500">{result.publishedDate}</p>
+                              <p className="text-xs text-gray-400 dark:text-gray-400">{result.publishedDate}</p>
                             )}
                           </div>
                           {selectingResult === result.id ? (
                             <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0 self-center" />
                           ) : (
-                            <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0 self-center" aria-hidden="true" />
+                            <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-400 flex-shrink-0 self-center" aria-hidden="true" />
                           )}
                         </button>
 
@@ -948,7 +948,7 @@ export default function AddBookPage() {
                   })}
                   {/* Sentinel for infinite scroll */}
                   {hasMoreResults && (
-                    <div ref={sentinelRef} className="py-3 text-center text-xs text-gray-400 dark:text-gray-500">
+                    <div ref={sentinelRef} className="py-3 text-center text-xs text-gray-400 dark:text-gray-400">
                       {loadingMore ? (
                         <Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" />
                       ) : (
@@ -962,8 +962,8 @@ export default function AddBookPage() {
 
             {/* Empty state for search results */}
             {searchResults.length === 0 && searchQuery && !searching && !searchMessage && (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <BookOpen className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" aria-hidden="true" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-300">
+                <BookOpen className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-500 mb-3" aria-hidden="true" />
                 <p>No results found</p>
                 <p className="text-sm mt-1">Try a different search or add manually</p>
               </div>
@@ -1000,7 +1000,7 @@ export default function AddBookPage() {
               {dataSource && (
                 <div className="flex items-center gap-2 text-sm">
                   <CheckCircle className="w-4 h-4 text-green-500" aria-hidden="true" />
-                  <span className="text-gray-600 dark:text-gray-400">Found via {dataSource}</span>
+                  <span className="text-gray-600 dark:text-gray-300">Found via {dataSource}</span>
                 </div>
               )}
             </div>

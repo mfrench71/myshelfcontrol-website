@@ -108,7 +108,7 @@ function ClearCacheModal({
     >
       <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Clear Local Cache?</h3>
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
           This will clear all cached data from your browser. Your data in the cloud will not be affected.
         </p>
         <div className="flex gap-3">
@@ -399,7 +399,7 @@ export default function PreferencesSettingsPage() {
 
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Theme</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                     Choose how Book Republic looks. Select &quot;System&quot; to automatically match your device settings.
                   </p>
 
@@ -440,7 +440,7 @@ export default function PreferencesSettingsPage() {
                   </div>
 
                   {theme === 'system' && (
-                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-300">
                       Currently using {resolvedTheme} mode based on your system settings.
                     </p>
                   )}
@@ -454,7 +454,7 @@ export default function PreferencesSettingsPage() {
                 {/* Auto-Refresh Settings */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Auto-Refresh Settings</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                     When you switch back to the app after being away, your library can automatically refresh to sync
                     changes from other devices.
                   </p>
@@ -517,7 +517,7 @@ export default function PreferencesSettingsPage() {
                 {/* Manual Refresh */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Manual Refresh</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                     Force a full refresh of your library from the server to sync the latest changes.
                   </p>
                   <button
@@ -556,7 +556,7 @@ export default function PreferencesSettingsPage() {
                     Reset
                   </button>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
                   <span className="hidden md:inline">Drag to reorder.</span>
                   <span className="md:hidden">Use arrows to reorder.</span>
                   {' '}Configure items to show and width for each widget.
@@ -586,7 +586,7 @@ export default function PreferencesSettingsPage() {
                         <div className="flex items-center gap-3">
                           {/* Drag handle - desktop only */}
                           <GripVertical
-                            className="hidden md:block w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0"
+                            className="hidden md:block w-4 h-4 text-gray-400 dark:text-gray-400 flex-shrink-0"
                             aria-hidden="true"
                           />
                           {/* Arrow buttons - mobile only */}
@@ -634,7 +634,7 @@ export default function PreferencesSettingsPage() {
                             {/* Items to show */}
                             {showCountSetting && (
                               <div className="flex items-center gap-2">
-                                <label htmlFor={`count-${widget.id}`} className="text-xs text-gray-600 dark:text-gray-400">
+                                <label htmlFor={`count-${widget.id}`} className="text-xs text-gray-600 dark:text-gray-300">
                                   Items:
                                 </label>
                                 <select
@@ -654,7 +654,7 @@ export default function PreferencesSettingsPage() {
 
                             {/* Width */}
                             <div className="flex items-center gap-2">
-                              <label htmlFor={`size-${widget.id}`} className="text-xs text-gray-600 dark:text-gray-400">
+                              <label htmlFor={`size-${widget.id}`} className="text-xs text-gray-600 dark:text-gray-300">
                                 Width:
                               </label>
                               <select
@@ -678,7 +678,7 @@ export default function PreferencesSettingsPage() {
                 </div>
 
                 {saving && (
-                  <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500 dark:text-gray-300">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Saving...
                   </div>
@@ -692,7 +692,7 @@ export default function PreferencesSettingsPage() {
                 {/* Clear Local Cache */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Clear Local Cache</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                     Clear cached data stored in your browser. This includes genre and series caches, sync settings, and
                     widget preferences. Your data in the cloud will not be affected.
                   </p>

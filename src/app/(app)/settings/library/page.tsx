@@ -730,19 +730,19 @@ export default function LibrarySettingsPage() {
           <div className="flex gap-2">
             <a
               href="#genres"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Genres
             </a>
             <a
               href="#series"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Series
             </a>
             <a
               href="#backup"
-              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
+              className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors min-h-[44px] inline-flex items-center"
             >
               Backup
             </a>
@@ -754,7 +754,7 @@ export default function LibrarySettingsPage() {
           <section id="genres" className="scroll-mt-36">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Tag className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <Tag className="w-5 h-5 text-gray-600 dark:text-gray-300" aria-hidden="true" />
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Genres</h2>
               </div>
               <button
@@ -871,7 +871,7 @@ export default function LibrarySettingsPage() {
           <section id="series" className="scroll-mt-36">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Layers className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <Layers className="w-5 h-5 text-gray-600 dark:text-gray-300" aria-hidden="true" />
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Series</h2>
               </div>
               <button
@@ -983,10 +983,10 @@ export default function LibrarySettingsPage() {
             {/* Export */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
               <div className="flex items-center gap-3 mb-2">
-                <Download className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <Download className="w-5 h-5 text-gray-600 dark:text-gray-300" aria-hidden="true" />
                 <h3 className="font-medium text-gray-900 dark:text-gray-100">Export Backup</h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">Download all your books, genres, series, and wishlist as a JSON file.</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">Download all your books, genres, series, and wishlist as a JSON file.</p>
               <button
                 onClick={handleExport}
                 disabled={exporting}
@@ -1009,10 +1009,10 @@ export default function LibrarySettingsPage() {
             {/* Import */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center gap-3 mb-2">
-                <Upload className="w-5 h-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
+                <Upload className="w-5 h-5 text-gray-600 dark:text-gray-300" aria-hidden="true" />
                 <h3 className="font-medium text-gray-900 dark:text-gray-100">Import Backup</h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                 Restore books, genres, series, and wishlist from a backup file. Duplicates will be skipped.
               </p>
               <input
@@ -1042,7 +1042,7 @@ export default function LibrarySettingsPage() {
 
               {/* Import Progress */}
               {importStatus && (
-                <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                   <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                   <span>{importStatus}</span>
                 </div>
@@ -1170,7 +1170,7 @@ export default function LibrarySettingsPage() {
       >
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Delete Genre</h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             {genreDeleteConfirm && genreDeleteConfirm.bookCount > 0 ? (
               <>
                 This will remove &quot;{genreDeleteConfirm.name}&quot; from{' '}
@@ -1213,7 +1213,7 @@ export default function LibrarySettingsPage() {
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Merge Genre</h3>
 
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
             Merge &quot;<span className="font-medium">{mergingGenre?.name}</span>&quot; into another genre. Books will be moved and the source genre will be deleted.
           </p>
 
@@ -1332,7 +1332,7 @@ export default function LibrarySettingsPage() {
       >
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Delete Series</h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             {seriesDeleteConfirm && seriesDeleteConfirm.bookCount > 0 ? (
               <>
                 This will remove &quot;{seriesDeleteConfirm.name}&quot; from{' '}
@@ -1375,7 +1375,7 @@ export default function LibrarySettingsPage() {
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Merge Series</h3>
 
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
             Merge &quot;<span className="font-medium">{mergingSeries?.name}</span>&quot; into another series. Books will be moved and the source series will be deleted.
           </p>
 

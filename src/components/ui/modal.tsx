@@ -254,7 +254,7 @@ export function ConfirmModal({
       <h3 id="sheet-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
         {title}
       </h3>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
+      <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
       <div className="flex gap-3">
         <button
           onClick={onClose}

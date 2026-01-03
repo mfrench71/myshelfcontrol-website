@@ -40,7 +40,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://bookassembly.app'
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://bookassembly.co.uk'
   ),
   title: {
     default: 'Book Assembly',

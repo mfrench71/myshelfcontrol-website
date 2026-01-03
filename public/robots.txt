@@ -4,4 +4,4 @@ Allow: /
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://bookassembly.app/sitemap.xml
+Sitemap: https://bookassembly.co.uk/sitemap.xml

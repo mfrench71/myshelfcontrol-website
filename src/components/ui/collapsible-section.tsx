@@ -60,7 +60,7 @@ export function CollapsibleSection({
             {Icon && <Icon className="w-4 h-4" aria-hidden="true" />}
             {title}
             {count !== undefined && count > 0 && (
-              <span className="text-gray-400 dark:text-gray-400 font-normal">({count})</span>
+              <span className="text-gray-500 dark:text-gray-400 font-normal">({count})</span>
             )}
           </span>
         </button>

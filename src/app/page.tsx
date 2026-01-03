@@ -29,7 +29,7 @@ export default function LandingPage() {
         </div>
 
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Track your reading journey and organise your book collection with ease.
+          Your library, assembled.
         </p>
 
         <Link

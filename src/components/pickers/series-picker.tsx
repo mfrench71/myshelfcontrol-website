@@ -298,7 +298,7 @@ export function SeriesPicker({
             <span>
               {suggestedName}
               {suggestedPosition && (
-                <span className="text-gray-400 dark:text-gray-500 ml-1">#{suggestedPosition}</span>
+                <span className="text-gray-500 dark:text-gray-400 ml-1">#{suggestedPosition}</span>
               )}
             </span>
           </button>

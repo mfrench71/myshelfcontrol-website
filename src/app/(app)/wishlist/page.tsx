@@ -440,7 +440,7 @@ export default function WishlistPage() {
           <div className="text-center py-12 empty-state-animate">
             <Heart className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
             <p className="text-gray-500 dark:text-gray-400 mt-3">Your wishlist is empty</p>
-            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Books you want to buy will appear here.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Books you want to buy will appear here.</p>
             <Link
               href="/books/add"
               className="inline-flex items-center gap-2 px-4 py-2 mt-4 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors min-h-[44px]"

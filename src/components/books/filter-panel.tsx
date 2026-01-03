@@ -261,7 +261,7 @@ function AuthorTypeahead({
                 aria-selected={value === author}
               >
                 <span>{author}</span>
-                <span className="text-gray-400 dark:text-gray-500 text-xs">({count})</span>
+                <span className="text-gray-500 dark:text-gray-400 text-xs">({count})</span>
               </button>
             );
           })}

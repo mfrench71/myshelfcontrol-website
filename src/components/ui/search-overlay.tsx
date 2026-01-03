@@ -365,7 +365,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               <div className="py-8 text-center">
                 <Search className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto" aria-hidden="true" />
                 <p className="text-gray-500 dark:text-gray-400 mt-3">Search your library</p>
-                <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                   Find books by title, author, ISBN, series, notes or publisher
                 </p>
               </div>
@@ -377,7 +377,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             <div className="py-8 text-center">
               <Search className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto" aria-hidden="true" />
               <p className="text-gray-500 dark:text-gray-400 mt-3">No books found for &quot;{query}&quot;</p>
-              <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">Try a different search term</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Try a different search term</p>
             </div>
           </div>
         ) : (

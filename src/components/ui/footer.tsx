@@ -18,7 +18,7 @@ export function Footer() {
             Privacy Policy
           </Link>
           {user && (
-            <Link href="/settings/about" className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+            <Link href="/settings/about" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
               v{version}
             </Link>
           )}

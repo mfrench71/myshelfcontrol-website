@@ -734,7 +734,7 @@ function BooksPageContent() {
             <div className="text-center py-12 empty-state-animate">
               <SearchX className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto" aria-hidden="true" />
               <p className="text-gray-500 dark:text-gray-300 mt-3">No books match your filters</p>
-              <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                 Try adjusting your filters or{' '}
                 <button
                   onClick={handleReset}

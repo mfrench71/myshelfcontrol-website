@@ -185,7 +185,7 @@ export default function BinPage() {
           <div id="empty-state" className="text-center py-12">
             <Trash2 className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto" aria-hidden="true" />
             <p className="text-gray-500 dark:text-gray-300 mt-3">Bin is empty</p>
-            <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
               Deleted books will appear here for 30 days before being permanently removed.
             </p>
           </div>

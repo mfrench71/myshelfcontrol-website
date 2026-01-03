@@ -794,7 +794,7 @@ export default function LibrarySettingsPage() {
               <div className="py-8 text-center bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
                 <Tag className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
                 <p className="text-gray-500 dark:text-gray-400 mt-3">No genres yet</p>
-                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Create your first genre to organise books</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Create your first genre to organise books</p>
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -908,7 +908,7 @@ export default function LibrarySettingsPage() {
               <div className="py-8 text-center bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
                 <Library className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
                 <p className="text-gray-500 dark:text-gray-400 mt-3">No series yet</p>
-                <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Add series to track book collections</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Add series to track book collections</p>
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">

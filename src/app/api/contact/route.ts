@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
     // Send email to support
     const supportEmail = await resend.emails.send({
-      from: 'Book Assembly <onboarding@resend.dev>', // Use verified domain when available
+      from: 'Book Assembly <hello@bookassembly.co.uk>',
       to: 'hello@bookassembly.co.uk',
       replyTo: email,
       subject: `[${subjectLabels[subject]}] from ${name}`,
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 
     // Send auto-reply to user
     const autoReply = await resend.emails.send({
-      from: 'Book Assembly <onboarding@resend.dev>', // Use verified domain when available
+      from: 'Book Assembly <hello@bookassembly.co.uk>',
       to: email,
       subject: "We've received your message",
       text: `Hi ${name},\n\nThanks for contacting Book Assembly. We've received your message and will respond within 48 hours.\n\nBest regards,\nThe Book Assembly Team`,

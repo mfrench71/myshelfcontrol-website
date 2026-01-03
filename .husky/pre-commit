@@ -1,1 +1,1 @@
-npm run lint && npm run check:unused && npm run check:circular && npm test
+npm run lint:quiet && npm run check:unused:quiet && npm run check:circular:quiet && npm run test:quiet

@@ -1,8 +1,8 @@
-// Service Worker for Book Republic PWA
+// Service Worker for Book Assembly PWA
 const CACHE_VERSION = 'v4';
-const STATIC_CACHE = `bookrepublic-static-${CACHE_VERSION}`;
-const IMAGE_CACHE = `bookrepublic-images-${CACHE_VERSION}`;
-const API_CACHE = `bookrepublic-api-${CACHE_VERSION}`;
+const STATIC_CACHE = `bookassembly-static-${CACHE_VERSION}`;
+const IMAGE_CACHE = `bookassembly-images-${CACHE_VERSION}`;
+const API_CACHE = `bookassembly-api-${CACHE_VERSION}`;
 
 // Core app shell routes (pre-cached for offline access)
 const APP_SHELL = [

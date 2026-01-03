@@ -1,6 +1,6 @@
 {
-  "name": "Book Republic",
-  "short_name": "Book Republic",
+  "name": "Book Assembly",
+  "short_name": "Book Assembly",
   "description": "Track your reading journey. Organise your book collection with ease.",
   "start_url": "/",
   "display": "standalone",

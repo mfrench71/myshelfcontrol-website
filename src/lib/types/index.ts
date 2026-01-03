@@ -1,5 +1,5 @@
 /**
- * Type Definitions for Book Republic
+ * Type Definitions for Book Assembly
  * These types mirror the Zod schemas and Firestore document structures
  */
 

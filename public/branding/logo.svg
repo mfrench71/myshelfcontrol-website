@@ -11,5 +11,5 @@
 
   <!-- Wordmark - vertically centred, closer to icon -->
   <text x="66" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="26" font-weight="700" fill="#1e293b" dominant-baseline="middle">book</text>
-  <text x="128" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="26" font-weight="400" fill="#3b82f6" dominant-baseline="middle">republic</text>
+  <text x="128" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="26" font-weight="400" fill="#3b82f6" dominant-baseline="middle">assembly</text>
 </svg>

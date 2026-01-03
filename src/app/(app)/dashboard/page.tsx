@@ -671,7 +671,7 @@ export default function DashboardPage() {
   if (authLoading || loading) {
     return (
       <div id="loading-state" className="max-w-6xl mx-auto px-4 py-6 pb-24">
-        <h1 className="sr-only">Book Republic Dashboard</h1>
+        <h1 className="sr-only">Book Assembly Dashboard</h1>
         <div className="widget-grid">
           <WidgetSkeleton size={12} />
           <WidgetSkeleton size={6} />
@@ -684,7 +684,7 @@ export default function DashboardPage() {
 
   return (
     <div id="dashboard" className="max-w-6xl mx-auto px-4 py-6 pb-24">
-      <h1 className="sr-only">Book Republic Dashboard</h1>
+      <h1 className="sr-only">Book Assembly Dashboard</h1>
 
       {showVerificationBanner && (
         <EmailVerificationBanner user={user!} onDismiss={handleDismissBanner} />

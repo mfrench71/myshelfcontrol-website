@@ -91,9 +91,9 @@ describe('Header', () => {
       render(<Header />);
 
       const bookText = screen.getByText('book');
-      const republicText = screen.getByText('republic');
+      const assemblyText = screen.getByText('assembly');
       expect(bookText).toBeInTheDocument();
-      expect(republicText).toBeInTheDocument();
+      expect(assemblyText).toBeInTheDocument();
       expect(bookText.closest('a')).toHaveAttribute('href', '/dashboard');
     });
 

@@ -4,7 +4,7 @@ Guidance for Claude Code when working with this repository.
 
 ## Project Overview
 
-**Book Republic** - A Next.js book tracking PWA with multi-user features planned.
+**Book Assembly** - A Next.js book tracking PWA with multi-user features planned.
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript

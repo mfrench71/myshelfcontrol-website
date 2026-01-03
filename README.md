@@ -1,4 +1,4 @@
-# Book Republic
+# Book Assembly
 
 A mobile-friendly book tracking PWA built with Next.js.
 

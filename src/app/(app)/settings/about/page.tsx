@@ -28,7 +28,7 @@ export default function AboutPage() {
             aria-hidden="true"
           />
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Republic</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Assembly</h2>
             <p className="text-gray-500 dark:text-gray-400">Version {version}</p>
           </div>
         </div>

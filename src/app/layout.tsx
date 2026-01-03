@@ -40,11 +40,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://bookrepublic.app'
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://bookassembly.app'
   ),
   title: {
-    default: 'Book Republic',
-    template: '%s | Book Republic',
+    default: 'Book Assembly',
+    template: '%s | Book Assembly',
   },
   description: 'Track your reading journey. Organise your book collection with ease.',
   manifest: '/manifest.json',
@@ -60,12 +60,12 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Book Republic',
+    title: 'Book Assembly',
   },
   openGraph: {
     type: 'website',
-    siteName: 'Book Republic',
-    title: 'Book Republic',
+    siteName: 'Book Assembly',
+    title: 'Book Assembly',
     description: 'Track your reading journey. Organise your book collection with ease.',
     images: [{ url: '/icons/icon-512.png', width: 512, height: 512 }],
   },

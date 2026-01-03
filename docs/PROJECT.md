@@ -1,4 +1,4 @@
-# Book Republic - Project Documentation
+# Book Assembly - Project Documentation
 
 ## Table of Contents
 
@@ -43,8 +43,8 @@
 
 A mobile-friendly book tracking PWA with multi-user features planned. Rebuilt with Next.js to enable server-side capabilities for social features.
 
-**Name:** Book Republic
-**Domain:** bookrepublic.app / bookrepublic.co.uk
+**Name:** Book Assembly
+**Domain:** bookassembly.app / bookassembly.co.uk
 
 ## Tech Stack
 
@@ -65,7 +65,7 @@ A mobile-friendly book tracking PWA with multi-user features planned. Rebuilt wi
 
 ### Logo
 
-The Book Republic logo consists of three stylised book shapes (geometric rectangles with slight rotation) alongside the wordmark.
+The Book Assembly logo consists of three stylised book shapes (geometric rectangles with slight rotation) alongside the wordmark.
 
 **Logo file:** `/public/branding/logo.svg`
 **Icon file:** `/public/branding/logo-icon.svg`
@@ -75,7 +75,7 @@ The Book Republic logo consists of three stylised book shapes (geometric rectang
 | Element | Hex | RGB | Usage |
 |---------|-----|-----|-------|
 | **Coral** | `#e07a5f` | rgb(224, 122, 95) | Back book (complementary accent) |
-| **Mid Blue** | `#3b82f6` | rgb(59, 130, 246) | Middle book, "republic" text |
+| **Mid Blue** | `#3b82f6` | rgb(59, 130, 246) | Middle book, "assembly" text |
 | **Dark Blue** | `#1e40af` | rgb(30, 64, 175) | Front book |
 | **Slate** | `#1e293b` | rgb(30, 41, 59) | "book" text |
 
@@ -295,7 +295,7 @@ const hasChanges = JSON.stringify(values) !== JSON.stringify(initialValues);
 ## Project Structure
 
 ```
-bookrepublic-website/
+bookassembly-website/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── (app)/              # Authenticated pages
@@ -1290,7 +1290,7 @@ Based on competitor analysis (Goodreads, StoryGraph, BookBuddy):
 | **Where to Buy Link** | Goodreads ✓ | Low | Low | URL field - affiliate/ethical concerns |
 | **Barcode Scan to Wishlist** | All competitors ✓ | Medium | High | Scan ISBN → add directly to wishlist |
 
-**Current advantage over competitors:** Book Republic has explicit 3-level priority system. Goodreads requires workarounds (custom shelves, manual shelf positioning). StoryGraph limits "Up Next" to 5 books.
+**Current advantage over competitors:** Book Assembly has explicit 3-level priority system. Goodreads requires workarounds (custom shelves, manual shelf positioning). StoryGraph limits "Up Next" to 5 books.
 
 #### Recommended Implementation
 

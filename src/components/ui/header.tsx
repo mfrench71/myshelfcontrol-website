@@ -284,7 +284,7 @@ export function Header() {
             />
             <span className="text-xl">
               <span className="font-bold text-slate-800">book</span>
-              <span className="font-normal text-blue-500">republic</span>
+              <span className="font-normal text-blue-500">assembly</span>
             </span>
           </Link>
           <Link
@@ -327,7 +327,7 @@ export function Header() {
             />
             <span className="text-xl">
               <span className="font-bold text-slate-800 dark:text-slate-200">book</span>
-              <span className="font-normal text-blue-500 dark:text-blue-400">republic</span>
+              <span className="font-normal text-blue-500 dark:text-blue-400">assembly</span>
             </span>
           </Link>
 
@@ -384,7 +384,7 @@ export function Header() {
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
                   {user.email}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Book Republic</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Book Assembly</p>
               </div>
             </div>
           )}
@@ -470,7 +470,7 @@ export function Header() {
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[180px]">
                         {user.email}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Book Republic</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Book Assembly</p>
                     </div>
                   </div>
                 )}

@@ -198,7 +198,7 @@ function LoginForm() {
         />
         <span className="text-2xl">
           <span className="font-bold text-slate-800">book</span>
-          <span className="font-normal text-blue-500">republic</span>
+          <span className="font-normal text-blue-500">assembly</span>
         </span>
       </div>
 
@@ -503,7 +503,7 @@ export default function LoginPage() {
           />
           <span className="text-2xl">
             <span className="font-bold text-slate-800">book</span>
-            <span className="font-normal text-blue-500">republic</span>
+            <span className="font-normal text-blue-500">assembly</span>
           </span>
         </div>
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-6">

@@ -24,7 +24,7 @@ export default function LandingPage() {
           />
           <h1 className="text-4xl">
             <span className="font-bold text-slate-800">book</span>
-            <span className="font-normal text-blue-500">republic</span>
+            <span className="font-normal text-blue-500">assembly</span>
           </h1>
         </div>
 

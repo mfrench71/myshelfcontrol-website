@@ -5,8 +5,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuthContext } from '@/components/providers/auth-provider';
 
 export default function TermsPage() {
+  const { user } = useAuthContext();
+
   return (
     <>
       {/* Sub-navigation */}
@@ -181,7 +184,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">15. Contact</h2>
               <p className="leading-relaxed">
                 If you have any questions about these Terms, please contact us via the{' '}
-                <Link href="/support" className="text-primary dark:text-blue-400 hover:underline">
+                <Link href={user ? '/settings/support' : '/support'} className="text-primary dark:text-blue-400 hover:underline">
                   Support
                 </Link>{' '}
                 page.

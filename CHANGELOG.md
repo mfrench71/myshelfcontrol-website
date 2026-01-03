@@ -4,26 +4,28 @@ All notable changes to Book Assembly are documented here.
 
 ---
 
-## 03-01-2026 (continued)
+## 03-01-2026
 
-### Accessibility
-- Improve dark mode text contrast for WCAG AA compliance (~100 instances fixed)
-- Improve light mode text contrast for WCAG AA compliance (11 instances fixed)
-- All text now meets minimum 4.5:1 contrast ratio in both themes
-
-### Branding
-- Rebrand from "Book Republic" to "Book Assembly"
-- Update logo wordmark, PWA manifest, metadata, and all user-facing text
-
-### Fixes
+- Add auto-refresh on tab/app focus to books and dashboard pages (respects sync settings)
+- Add 404 not found page with consistent branding
+- Add SEO metadata and JSON-LD structured data to landing page
+- Add support pages with contact form (via Resend email)
+- Add Terms of Service page
+- Hide footer on infinite scroll pages (/books)
+- Add quiet scripts for minimal pre-commit and build output
+- Simplify Netlify build command
+- Fix book cover spinner showing on cached images
+- Fix Terms page Support link for logged-in users
 - Fix auth loading flash on page refresh (show loading state until auth resolves)
 - Allow privacy page to respect logged-in user's dark mode preference
 - Optimise logo SVG loading with priority and unoptimized flags
-
----
-
-## 03-01-2026
-
+- Add display name competitor research to PROJECT.md
+- Move architecture decisions to ADRs (docs/adr/)
+- Improve dark mode text contrast for WCAG AA compliance (~100 instances fixed)
+- Improve light mode text contrast for WCAG AA compliance (11 instances fixed)
+- All text now meets minimum 4.5:1 contrast ratio in both themes
+- Rebrand from "Book Republic" to "Book Assembly"
+- Update logo wordmark, PWA manifest, metadata, and all user-facing text
 - Add promotional landing page for logged-out users
 - Move dashboard to /dashboard route (middleware redirects logged-in users from /)
 - Simplify theme logic: public pages (/, /login, /privacy) always use light mode

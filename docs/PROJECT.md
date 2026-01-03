@@ -12,7 +12,7 @@
 7. [Architecture](#architecture)
    - [Current Data Model](#current-single-user-design-from-legacy-app)
    - [Multi-User Architecture](#planned-multi-user-features)
-   - [Architecture Decisions](#architecture-decisions)
+   - [Architecture Decision Records](#architecture-decision-records)
 8. [Feature Roadmap](#feature-roadmap)
    - [Priorities](#roadmap-post-migration)
    - [Detailed Feature Specs](#detailed-feature-specs)
@@ -136,163 +136,14 @@ All data stored under `/users/{userId}/`:
 4. **Firestore Rules** - Allow public reads on visible content
 5. **API Routes** - Server-side validation for complex permissions
 
-### Architecture Decisions
+### Architecture Decision Records
 
-#### Settings Page: Hub vs Tabs Analysis
+Past architecture decisions are documented in [`docs/adr/`](./adr/):
 
-**Current implementation:** Hub pattern with desktop sidebar (implemented 02-01-2025)
-
-**Previous:** Horizontal tabs (legacy pattern)
-
-##### Competitor Analysis
-
-| App | Pattern | Notes |
-|-----|---------|-------|
-| **iOS Settings** | Hub + Drill-down | Gold standard - grouped list with subscreens |
-| **Android Settings** | Hub + Drill-down | Material Design recommended pattern |
-| **Goodreads** | Hamburger → List | Settings via menu, then list layout |
-| **StoryGraph** | Hamburger → Page | Simpler settings, single page with sections |
-| **Spotify** | Hub + Drill-down | Profile icon → Settings list → Subscreens |
-| **Instagram** | Hub + Drill-down | Settings list with grouped categories |
-
-**Finding:** Native apps and major mobile apps overwhelmingly use hub pattern, not horizontal tabs.
-
-##### Pattern Comparison
-
-| Aspect | **Hub Pattern** | **Horizontal Tabs** (Current) |
-|--------|-----------------|-------------------------------|
-| Clicks to setting | 2-3 clicks | 1-2 clicks |
-| Mobile friendliness | Excellent (vertical list) | Moderate (horizontal scroll) |
-| Scalability | High (unlimited sections) | Limited (5-7 tabs max) |
-| Cognitive load | Low (one section at a time) | Higher (multiple visible) |
-| iOS/Android convention | ✓ Follows native patterns | ✗ Custom pattern |
-| Thumb reachability | ✓ Natural scrolling | ✗ Requires reach to top |
-| Hidden content risk | None | Tabs may scroll off-screen |
-
-##### Decision: Hub Pattern ✅ Implemented
-
-Per [Android Design Guidelines](https://developer.android.com/design/ui/mobile/guides/patterns/settings) and [NN/g Tab Guidelines](https://www.nngroup.com/articles/tabs-used-right/):
-
-- Tabs work best with ≤5 options (we have 6)
-- Settings are infrequently accessed (hub adds one tap, acceptable)
-- Mobile-first PWA should follow mobile conventions
-- Hub scales if we add more settings categories
-
-**Implementation details:**
-- Mobile: `/settings` shows hub cards, tap drills down to sub-page
-- Mobile: Section pills for in-page navigation (visible on md and below)
-- Desktop: Sidebar always visible, `/settings` redirects to `/settings/profile`
-- Desktop: Sub-links appear under active section for in-page navigation
-- Components: `SettingsHubCard`, `SettingsSidebarLink`
-- Animations: Staggered card fade-in, press effect
-
-##### Sub-Section Access from Hub: Overkill?
-
-**Question:** Should hub items show expandable sub-sections inline?
-
-**Recommendation:** No - keep it simple.
-
-1. **Consistency:** iOS/Android don't expand settings inline
-2. **Complexity:** Adds UI state management for minimal benefit
-3. **Discoverability:** Users expect tap → drill-down pattern
-4. **Alternative:** Show status/summary text on hub items instead
-
-**Better approach:** Show contextual info on hub cards:
-```
-┌─────────────────────────────────────────┐
-│ 🔧 Maintenance                    (3) →│
-│    3 issues found in your library       │
-└─────────────────────────────────────────┘
-```
-
-##### Potential Hub Improvements
-
-1. **Status indicators:** Show counts/issues on hub cards
-2. **Desktop sidebar (>768px):** Always-visible categories sidebar
-3. **Search:** Add settings search for 15+ options
-4. **Keyboard shortcut:** Cmd/Ctrl+, for power users
-5. **Frequent settings:** Surface dark mode toggle in header
-
-#### Form Dirty State Tracking
-
-**Pattern:** Track unsaved changes in forms to prevent accidental data loss.
-
-##### Implementation
-- Compare current form values against initial values
-- Disable save button when no changes detected
-- Show visual indicator when form has unsaved changes
-- Optionally prompt user before navigating away with unsaved changes
-
-##### Current Usage
-- Book add/edit forms
-- Settings forms (profile, preferences)
-- Reading dates modal (compares initial vs current dates)
-- Notes modal (compares initial vs current text)
-- Series/Genre edit modals
-
-##### Code Pattern
-```tsx
-const [initialValues] = useState(props.initial);
-const hasChanges = JSON.stringify(values) !== JSON.stringify(initialValues);
-
-<button disabled={!hasChanges || saving}>Save</button>
-```
-
-##### Future Enhancement
-- Add `beforeunload` warning for unsaved changes
-- Consider `useBeforeUnload` hook from React Router patterns
-
-#### Author Sorting
-
-| Context | Sorting Logic |
-|---------|--------------|
-| **Author Filter Dropdown** | By book count first (most used), then alphabetically by full name |
-| **Book List "Author A-Z"** | By surname (last word of author name) |
-| **Author Typeahead** | By book count first, then alphabetically |
-
-**Surname extraction** uses `getAuthorSurname()` utility:
-- "First Last" → "last"
-- "First Middle Last" → "last"
-- "Last, First" → "last" (comma format)
-
-**Decision:** Keep current approach (count first, then full name A-Z). Add surname display as future enhancement if users request it.
-
-#### Book Notes: Single vs Multiple Entries
-
-**Current implementation:** Single note field per book
-
-**Competitor analysis (Jan 2026):**
-
-| App | Approach | Notes |
-|-----|----------|-------|
-| **Goodreads** | Single note field | One private notes field, updated/overwritten. Browser-only (not in app). |
-| **StoryGraph** | Multiple journal entries | Each progress update can include a note. Creates chronological "Reading Journal" per book. Private by default. |
-
-**Key differences:**
-- Goodreads: Single field for static info ("who recommended this")
-- StoryGraph: Journal entries tied to reading progress, allowing reactions/quotes as you read
-
-**Recommendation:** Keep single note field for MVP, add journal entries as future enhancement.
-
-**Single note works well for:**
-- Who recommended the book
-- Brief personal thoughts
-- Quick reference info
-
-**Journal entries would enable:**
-- Reading reactions over time
-- Tracking favourite quotes with page numbers
-- Detailed progress thoughts
-- Timestamped reading experience log
-
-**Future implementation path:**
-1. **Phase 1 (current):** Single note field ✓
-2. **Phase 2:** Add optional note when updating reading progress
-3. **Phase 3:** Full reading journal view (per-book and combined)
-
-**Sources:**
-- [StoryGraph Private Notes Feature Request](https://roadmap.thestorygraph.com/requests-ideas/posts/private-notes-on-books-1)
-- [Goodreads vs StoryGraph Comparison](https://laurieisreading.com/2024/01/07/discussion-goodreads-vs-the-storygraph/)
+- [ADR-001: Settings Hub Pattern](./adr/001-settings-hub-pattern.md)
+- [ADR-002: Form Dirty State Tracking](./adr/002-form-dirty-state.md)
+- [ADR-003: Author Sorting](./adr/003-author-sorting.md)
+- [ADR-004: Book Notes Single Field](./adr/004-book-notes-single-field.md)
 
 ---
 
@@ -2013,4 +1864,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-03* (Added Display Name & User Profile Research section)
+*Last updated: 2026-01-03* (Moved Architecture Decisions to ADRs)

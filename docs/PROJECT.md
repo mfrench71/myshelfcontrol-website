@@ -4,42 +4,28 @@
 
 1. [Overview & Tech Stack](#overview)
 2. [Branding](#branding)
-2. [Project Structure](#project-structure)
-3. [Development](#development)
-4. [Features & Migration Status](#features)
-5. [Widget System](#widget-system)
-6. [API Integration](#api-integration)
-7. [Architecture](#architecture)
-   - [Current Data Model](#current-single-user-design-from-legacy-app)
-   - [Multi-User Architecture](#planned-multi-user-features)
-   - [Architecture Decision Records](#architecture-decision-records)
-8. [Feature Roadmap](#feature-roadmap)
-   - [Priorities](#roadmap-post-migration)
-   - [Detailed Feature Specs](#detailed-feature-specs)
-9. [Research & Competitor Analysis](#research--competitor-analysis)
-   - [Key Competitors](#key-competitors)
-   - [Multi-User Features](#multi-user-features-research)
-   - [Additional Features](#additional-features-research)
-   - [Feature Inspiration](#feature-inspiration)
+3. [Project Structure](#project-structure)
+4. [Development](#development)
+5. [Features & Roadmap](#features)
+6. [Widget System](#widget-system)
+7. [API Integration](#api-integration)
+8. [Architecture](#architecture)
+9. [Feature Roadmap](#feature-roadmap)
 10. [Public Frontend (Marketing)](#public-frontend-marketing-site)
 11. [Demo Account & Monetisation](#demo-account--monetisation)
 12. [Legal & Compliance](#legal--compliance)
-    - [UK Legal Requirements](#uk-legal-requirements)
-    - [Privacy & Data Protection](#privacy--data-protection)
 13. [SEO & Search Indexing](#seo--search-indexing)
-    - [Current Implementation](#current-implementation)
-    - [Competitor Analysis](#competitor-robots-txt-analysis)
-    - [User Content Indexing Strategy](#user-content-indexing-strategy)
 14. [Operations](#operations)
-    - [Growth & Marketing](#growth--marketing)
-    - [Import/Export](#importexport--portability)
-    - [Scalability](#scalability-checkpoints)
-    - [Internationalisation](#internationalisation-i18n)
 15. [Security](#security-considerations)
 16. [Performance](#performance-targets)
 17. [Testing](#testing-strategy)
 18. [Known Limitations](#known-limitations)
 19. [Technical Reference](#technical-reference)
+
+**Related Documentation:**
+- [Research & Competitor Analysis](./research.md)
+- [Archive (Completed Features)](./archive.md)
+- [Architecture Decision Records](./adr/)
 
 ---
 
@@ -93,7 +79,7 @@ The Book Assembly logo consists of three stylised book shapes (geometric rectang
 
 - **Wordmark**: System UI sans-serif
 - **"book"**: Bold weight (700), slate colour
-- **"republic"**: Regular weight (400), mid-blue colour
+- **"assembly"**: Regular weight (400), mid-blue colour
 
 ### Brand Assets
 
@@ -210,55 +196,13 @@ npm run test:e2e  # Run E2E tests
 - **Collections**: `/users/{userId}/books`, `/genres`, `/series`, `/wishlist`, `/bin`
 - **Storage**: `/users/{userId}/books/{bookId}/images/`
 
-### Environment Variables
-
-Required in `.env.local`:
-```
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-FIREBASE_SERVICE_ACCOUNT_KEY=
-```
-
 ---
 
 ## Features
 
-### Completed (from legacy app)
+For completed features and migration history, see [`docs/archive.md`](./archive.md).
 
-- [x] Book collection management (CRUD)
-- [x] ISBN barcode scanning
-- [x] Google Books + Open Library API integration
-- [x] Custom genres with colours
-- [x] Book series tracking
-- [x] Reading status (Want to Read, Reading, Finished)
-- [x] Star ratings
-- [x] Wishlist for books to buy
-- [x] Soft-delete bin (30-day restore)
-- [x] Dashboard widgets (configurable)
-- [x] Custom cover image upload (up to 10 per book)
-- [x] Export/import backup (JSON)
-- [x] PWA with offline support
-
-### Migration Status
-
-| Feature | Status |
-|---------|--------|
-| Project setup | ✅ Complete |
-| Auth (login/register) | ✅ Complete |
-| Book list page | ✅ Complete |
-| Book add page | ✅ Complete |
-| Book view/edit pages | ✅ Complete |
-| Settings hub page | ✅ Complete |
-| Settings sub-pages | ✅ Complete |
-| Widgets (dashboard) | ✅ Complete |
-| PWA configuration | ✅ Complete |
-| E2E Testing | ✅ Complete (74 tests) |
-
-### Roadmap (Post-Migration)
+### Roadmap
 
 **High Priority**
 - [x] Complete page migration from legacy app
@@ -267,7 +211,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY=
 - [ ] Role-based permissions
 
 **Medium Priority**
-- [ ] Dark mode
+- [x] Dark mode
 - [ ] View mode setting (Card/Compact/List)
 - [ ] User-defined physical formats (see below)
 - [ ] Reading statistics charts
@@ -407,31 +351,6 @@ Currently, live search only queries Google Books API. Open Library is used only 
 
 ## Feature Roadmap
 
-### Add Book UX Redesign
-
-**Current Issues:**
-- Form always visible (15+ fields on first load)
-- Three separate lookup sections (scan, ISBN, search)
-- User may skip lookup and type manually (worse data quality)
-
-**Proposed Flow:**
-```
-┌─────────────────────────────────────────┐
-│ Find Your Book                          │
-│ [📷 Scan] [Search______________] [Go]   │
-│ (results appear here)                   │
-│                                         │
-│ ▼ Can't find it? Add manually           │
-└─────────────────────────────────────────┘
-        ↓ After book found/manual ↓
-┌─────────────────────────────────────────┐
-│ ✓ Found via Google Books  [Start Over]  │
-│ Title: [Pre-filled________]             │
-│ ...form fields...                       │
-│ [Add to Library]                        │
-└─────────────────────────────────────────┘
-```
-
 ### Bulk Tools
 - [ ] Bulk select mode (checkbox on each book card)
 - [ ] Select all / deselect all
@@ -495,13 +414,6 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - [ ] Reading journal with progress update notes
 - [ ] Markdown formatting support in notes/reviews
 - [ ] Spoiler tags in reviews (hide/reveal sections)
-
-### Library Health Dashboard
-- [ ] Books missing cover image
-- [ ] Books missing genre
-- [ ] Books missing publisher/date/format/page count
-- [ ] Quick-fix actions (refresh from API)
-- [ ] Completeness score with progress bar
 
 ### Year in Review / Reading Wrapped
 - [ ] Annual summary page (Spotify Wrapped-style)
@@ -837,54 +749,14 @@ Sources: [Orrick FAQ](https://www.orrick.com/en/tech-studio/resources/faq/what-l
 
 | Item | Status | Location | Notes |
 |------|--------|----------|-------|
-| **robots.txt** | ⚠️ Needs update | `/public/robots.txt` | Domain should be `.co.uk` |
-| **sitemap.ts** | Basic | `/src/app/sitemap.ts` | Only 3 pages: `/`, `/login`, `/privacy` |
-| **Metadata** | ✓ Good | `/src/app/layout.tsx` | Title, description, Open Graph |
-| **Structured data** | Missing | — | No JSON-LD schema |
+| **robots.txt** | ✅ Done | `/public/robots.txt` | Uses `.co.uk` domain |
+| **sitemap.ts** | Basic | `/src/app/sitemap.ts` | Public pages only |
+| **Metadata** | ✅ Good | `/src/app/layout.tsx` | Title, description, Open Graph |
+| **Structured data** | ✅ Done | `/src/app/page.tsx` | JSON-LD WebApplication schema |
 
-#### Immediate Fixes Needed
+### Remaining Tasks
 
-1. **Update robots.txt domain**: Change `bookassembly.app` to `bookassembly.co.uk`
-2. **Expand sitemap**: Add all public pages (about, features when created)
-3. **Add structured data**: JSON-LD for WebApplication schema
-
-### Competitor robots.txt Analysis
-
-Research conducted January 2026 on how competitors handle user content indexing:
-
-| Platform | Public Profiles | User Activity | Account Pages | Reviews | Search | AI Bots Blocked |
-|----------|-----------------|---------------|---------------|---------|--------|-----------------|
-| **Goodreads** | ✓ Indexed | Blocked (RSS) | Blocked | Blocked (`/review/show`) | Blocked | GPTBot, CCBot |
-| **StoryGraph** | ✓ Indexed | Allowed | Allowed | Allowed | Allowed | GPTBot, ClaudeBot, CCBot, Bytespider + 5 more |
-| **Hardcover** | ✓ Indexed | Allowed | Blocked (`/account/*`) | Allowed | Allowed | None specified |
-| **Literal** | ✓ Indexed | Blocked (`/activity/*`) | Blocked (via signin) | Allowed | Blocked (UTM params) | None specified |
-| **Oku** | ✓ Indexed | Blocked (`/activity/*`) | Blocked (`/settings`, `/dashboard`) | Allowed | Blocked | None specified |
-
-#### Key Patterns Observed
-
-**Universally blocked by competitors:**
-- `/api/*` — API endpoints (security)
-- `/account/*` or `/settings` — User account management (privacy)
-- Authentication pages with parameters
-
-**Commonly blocked:**
-- `/activity/*` — Personal activity feeds
-- `/search` — Internal search results (thin content, infinite crawl paths)
-- `/dashboard` — Personalised dashboards
-- Follower/following lists (Oku blocks `/user/*/followers`)
-
-**Generally allowed (for SEO benefit):**
-- Public user profiles (e.g., `/user/username`)
-- Book pages
-- Reviews (except Goodreads which blocks individual reviews)
-- Public lists/shelves
-
-**AI training bots commonly blocked:**
-- GPTBot (OpenAI)
-- CCBot (Common Crawl)
-- ClaudeBot (Anthropic)
-- Google-Extended
-- Bytespider (ByteDance)
+- [ ] Expand sitemap when adding new public pages (about, features)
 
 ### User Content Indexing Strategy
 
@@ -982,13 +854,6 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 - [ ] Add JSON-LD structured data for profiles and book lists
 - [ ] Monitor Google Search Console for crawl issues
 
-#### References
-
-- [Google: Block Search Indexing with noindex](https://developers.google.com/search/docs/crawling-indexing/block-indexing)
-- [Google: Control What You Share](https://developers.google.com/search/docs/crawling-indexing/control-what-you-share)
-- [Lumar: How Google Deals With UGC](https://www.lumar.io/office-hours/user-generated-content/)
-- [Meta Robots Tag Guide 2025](https://www.conductor.com/academy/meta-robots-tag/)
-
 ---
 
 ## Operations
@@ -1003,12 +868,179 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 | **Word of mouth** | Low | Free | Referral program? |
 
 ### Import/Export & Portability
+
+#### Export
 - [x] Export to JSON (implemented in legacy)
 - [ ] Export to CSV
 - [ ] Export to Goodreads format
+
+#### Import
 - [ ] Import from Goodreads CSV
 - [ ] Import from StoryGraph
 - [ ] Import from LibraryThing
+- [ ] Custom CSV import (user-defined column mapping)
+
+---
+
+#### Goodreads CSV Import
+
+Goodreads allows users to export their library as a CSV file via Account Settings > Import and Export.
+
+**Goodreads CSV columns:**
+| Column | Maps To | Notes |
+|--------|---------|-------|
+| `Title` | `title` | Required |
+| `Author` | `author` | Required |
+| `ISBN` | `isbn` | May be empty for older books |
+| `ISBN13` | `isbn` | Prefer over ISBN if available |
+| `My Rating` | `rating` | 0-5 stars (0 = not rated) |
+| `Date Read` | `reads[].finishedDate` | Format: YYYY/MM/DD |
+| `Date Added` | `dateAdded` | Format: YYYY/MM/DD |
+| `Bookshelves` | `status` | Map: read→Finished, currently-reading→Reading, to-read→Want to Read |
+| `Number of Pages` | `pageCount` | Optional |
+| `Publisher` | `publisher` | Optional |
+| `Year Published` | `publishedDate` | Year only |
+| `My Review` | `notes` | Private notes |
+
+**Import behaviour:**
+- Skip header row automatically (first row)
+- Validate required fields (title, author)
+- Deduplicate by ISBN13 > ISBN > title+author match
+- Show preview before importing
+- Report skipped/duplicate entries
+
+---
+
+#### Custom CSV Import
+
+Allow users to import from bespoke spreadsheets, reading logs, or exports from unsupported apps.
+
+**User flow:**
+1. Upload CSV file
+2. Preview first 5 rows
+3. Map columns to Book Assembly fields
+4. Configure options (header row, date format)
+5. Validate and preview import
+6. Confirm and import
+
+**Column mapping UI:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Map Your Columns                                            │
+├─────────────────────────────────────────────────────────────┤
+│ CSV Column          →  Book Assembly Field                  │
+│ ─────────────────────────────────────────────────────────── │
+│ "Book Name"         →  [Title ▼]              (Required)    │
+│ "Writer"            →  [Author ▼]             (Required)    │
+│ "ISBN-13"           →  [ISBN ▼]                             │
+│ "Stars"             →  [Rating ▼]                           │
+│ "Finished"          →  [Date Finished ▼]                    │
+│ "Notes"             →  [Notes ▼]                            │
+│ "Category"          →  [Skip this column ▼]                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Mappable fields:**
+
+| Book Assembly Field | Required | Notes |
+|---------------------|----------|-------|
+| `title` | Yes | Book title |
+| `author` | Yes | Author name |
+| `isbn` | No | ISBN-10 or ISBN-13 |
+| `rating` | No | Accepts: 1-5, 1-10 (scaled), 0-5 with decimals |
+| `status` | No | Map values: "read"/"finished"→Finished, "reading"→Reading, "tbr"/"to-read"→Want to Read |
+| `dateFinished` | No | Flexible date parsing |
+| `dateStarted` | No | Flexible date parsing |
+| `dateAdded` | No | Defaults to import date |
+| `pageCount` | No | Integer |
+| `publisher` | No | Text |
+| `publishedDate` | No | Year or full date |
+| `notes` | No | Private notes |
+| `genre` | No | Create genre if doesn't exist |
+| `series` | No | Create series if doesn't exist |
+| `seriesPosition` | No | Integer |
+
+**Import options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| First row is header | Yes | Skip first row |
+| Date format | Auto-detect | Or specify: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD |
+| Rating scale | 1-5 | Or 1-10 (divided by 2), 0-100 (divided by 20) |
+| On duplicate | Skip | Or: Update existing, Import as new |
+| Default status | Want to Read | For rows without status |
+
+**Deduplication logic:**
+
+| Priority | Match Type | Action |
+|----------|------------|--------|
+| 1 | ISBN13 exact match | Skip or update |
+| 2 | ISBN10 exact match | Skip or update |
+| 3 | Title + Author (normalised) | Skip or update |
+
+**Normalisation for matching:**
+- Lowercase
+- Remove leading "The", "A", "An"
+- Remove punctuation
+- Collapse whitespace
+
+**Validation rules:**
+
+| Field | Validation |
+|-------|------------|
+| `title` | Required, max 500 chars |
+| `author` | Required, max 200 chars |
+| `isbn` | Optional, valid ISBN-10 or ISBN-13 format |
+| `rating` | 0-5 (or scaled from source) |
+| `pageCount` | Positive integer |
+| `dates` | Valid parseable date |
+
+**Error handling:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Import Preview                                              │
+├─────────────────────────────────────────────────────────────┤
+│ ✓ 142 books ready to import                                 │
+│ ⚠ 3 books with warnings (missing optional fields)           │
+│ ✗ 2 books with errors (will be skipped)                     │
+│   - Row 15: Missing title                                   │
+│   - Row 89: Invalid date format "someday"                   │
+│ ○ 5 duplicates found (will be skipped)                      │
+├─────────────────────────────────────────────────────────────┤
+│ [Cancel]                              [Import 142 Books]    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Post-import:**
+- Show summary: X imported, Y skipped, Z errors
+- Option to download error report CSV
+- Option to enrich imported books via API lookup (fetch covers, page counts)
+
+---
+
+#### StoryGraph Import
+
+StoryGraph export format is similar to Goodreads but with additional fields.
+
+**Key differences from Goodreads:**
+- Quarter-star ratings (0.25 increments)
+- Mood/pace tags (not imported - app-specific)
+- Multiple read dates supported
+
+---
+
+#### LibraryThing Import
+
+LibraryThing offers CSV and JSON export.
+
+**Key fields:**
+- `Title`, `Primary Author`
+- `ISBN`, `Date`
+- `Rating` (1-5 with half stars)
+- `Collections` (maps to shelves/status)
+- `Review` (maps to notes)
 
 ### Internationalisation (i18n)
 
@@ -1037,258 +1069,11 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 
 ## Research & Competitor Analysis
 
-### Key Competitors
-
-| App | Strengths | Weaknesses |
-|-----|-----------|------------|
-| Goodreads | Largest community, social features | Outdated UI, Amazon-owned, no half-stars |
-| StoryGraph | Mood/pacing charts, AI recommendations, quarter-stars | No reading timer |
-| Bookly | Reading timer, gamification, streaks, ambient sounds | Subscription required |
-| Bookmory | Timer, quotes, notes with photos, statistics | Less social features |
-| Hardcover | Ad-free, per-book privacy, modern UI, API | Smaller community |
-| Literal | Quote-centric, public API, book clubs | Limited free features |
-| Oku | Minimalist design, clean UI, ad-free | Premium required for goals |
-| BookTrack | Native iOS, OCR quote capture, loan tracking | iOS only |
-| Pagebound | Per-book forums, sub-ratings, anonymous social | New/smaller |
-| Basmo | AI chat, Kindle sync, emotion journaling | Premium features |
-
-### Multi-User Features Research
-
-#### Feature Comparison Matrix
-
-| Feature | Goodreads | StoryGraph | Hardcover | Literal | Fable | Oku | BookTrack |
-|---------|-----------|------------|-----------|---------|-------|-----|-----------|
-| **Friends/Following** | Both systems | Opt-in friends | Follow | Follow | Follow | Follow | None |
-| **Friend Limit** | 5,000 / ∞ followers | Unlimited | — | — | — | — | N/A |
-| **Activity Feed** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| **Book Clubs** | ✓ Groups | ✓ | — | ✓ | ✓ Strong | ✗ | ✗ |
-| **Buddy Reads** | ✗ | ✓ ≤15 people | ✗ | ✗ | ✓ | ✗ | ✗ |
-| **Share to Social** | ✓ Facebook | ✓ | ✓ | ✓ Highlights | ✓ | ✓ | ✓ Stats |
-| **Shareable Lists** | ✓ Shelves | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| **Direct Messaging** | ✓ | ✗ | — | ✗ | ✓ | ✗ | ✗ |
-| **Book Lending Tracker** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ Unique |
-| **Per-Book Privacy** | ✗ | Requested | ✓ | — | — | — | N/A |
-
-#### Privacy & Visibility Options
-
-| App | Profile Visibility | Notes |
-|-----|-------------------|-------|
-| **Goodreads** | Public / Members / Friends | Reviews always public on book pages |
-| **StoryGraph** | Public / Community / Private | Reviews visible regardless of profile setting |
-| **Hardcover** | Public / Private / Friends | Per-book privacy available |
-| **BookTrack** | Private only | No social features by design |
-
-#### Key Insights
-
-**High-Value Features (Table Stakes):**
-1. Profile visibility controls (public/private/friends-only)
-2. Follow/friends system
-3. Activity feed (see what friends are reading)
-4. Shareable lists/shelves (public or link-only)
-
-**Potential Differentiators:**
-1. **Per-book privacy** (only Hardcover has this) — highly requested on StoryGraph
-2. **Book lending tracker** (only BookTrack has this) — practical for physical collections
-3. **Buddy reads with spoiler protection** (StoryGraph) — complex but loved
-
-**Privacy Gotchas to Avoid:**
-- Goodreads/StoryGraph: Reviews are public on book pages even with private profile
-- Consider separating review visibility from profile visibility
-
-**Simplest MVP Path:**
-1. Profile visibility (public/private)
-2. Follow system (one-way, no approval needed)
-3. Activity feed of followed users
-4. Shareable book lists (public link)
-
-### Display Name & User Profile Research (Jan 2026)
-
-#### Current State
-
-Book Assembly uses **email as the primary identifier**:
-- Email displayed in header menus (mobile & desktop)
-- Avatar shows: custom photo → Gravatar → first letter of email
-- No editable display name or profile info beyond email
-- Firebase `displayName` field exists but is unused
-
-#### Competitor Comparison
-
-| Feature | Goodreads | StoryGraph | Hardcover | Literal |
-|---------|-----------|------------|-----------|---------|
-| **Display Name** | First + Last | Username only | Username | First + Last |
-| **Username/URL** | Yes | Yes | Yes | Yes |
-| **Pronouns** | No | Yes | ? | ? |
-| **Bio** | Yes | Yes (160 chars) | Yes | Yes |
-| **Last Name Privacy** | Yes | N/A | N/A | ? |
-| **Per-Book Privacy** | No | No | Yes | No |
-
-#### Goodreads
-
-**Fields available:**
-- First Name (required) - what's publicly displayed
-- Middle Name (optional)
-- Last Name (optional)
-- Custom Username/URL for profile
-
-**Privacy options:**
-- "Show my last name to" with radio options:
-  - "Anyone (including search engines)"
-  - "Friends only"
-
-**Key insight:** Users can put full name in "First Name" field for display purposes.
-
-#### StoryGraph
-
-**Current fields:**
-- Username (required, used for profile URL)
-- Profile photo
-- Pronouns
-- Bio (160 chars max)
-- Social media links
-
-**No display name yet** - it's a [popular feature request](https://roadmap.thestorygraph.com/requests-ideas/posts/add-display-name-for-user-profile). Users want real names shown instead of usernames like "r3adalotofbooks".
-
-**Privacy levels:**
-- Private (friends only see profile)
-- Community (signed-in users only)
-- Public (anyone)
-
-#### Hardcover
-
-**Profile options:**
-- Username for profile URL
-- Profile photo
-- Per-book privacy: public, friends only, private
-- Overall profile: public, private, friends-only
-
-#### Literal Club
-
-**Fields collected:**
-- Email
-- First Name
-- Last Name
-- Username
-
-#### Recommendations for Book Assembly
-
-**Minimum Viable Profile:**
-1. **Display Name** (optional) - shown instead of email
-2. **Privacy toggle** - "Show email to others" (for future social features)
-
-**Enhanced Profile (Future):**
-- Pronouns
-- Short bio
-- Social links
-- Username for shareable profile URL
-
-**Privacy Considerations:**
-- Default to private (don't show email)
-- Display name optional (fallback to email initial)
-- Consider UK GDPR implications for storing additional PII
-
-**Sources:**
-- [Goodreads Help - Edit Profile Settings](https://help.goodreads.com/s/article/How-do-I-edit-my-profile-settings)
-- [StoryGraph Display Name Request](https://roadmap.thestorygraph.com/requests-ideas/posts/add-display-name-for-user-profile)
-
-### Additional Features Research (Dec 2025)
-
-| Feature | App(s) | Notes |
-|---------|--------|-------|
-| **Paused Book Status** | StoryGraph | Most upvoted request ever. Separate from DNF, excludes paused time from stats |
-| **Favorites Showcase** | StoryGraph | Pin up to 5 books to profile, used for recommendations |
-| **Sub-Ratings** | Pagebound | Rate enjoyment, quality, characters, plot separately |
-| **Per-Book Forums** | Pagebound | Each book has discussion forum, posts sorted by % read (unique) |
-| **Year in Review** | BookTrack, StoryGraph | Spotify Wrapped-style annual summary, shareable cards |
-| **AI Book Chat** | Basmo, Bookly | Ask questions about current book, summaries without spoilers |
-| **Kindle/Notion Sync** | Basmo | Import highlights and notes automatically |
-| **Match Percentage** | Hardcover | See reading taste overlap with other users |
-| **Similar Users ML** | StoryGraph | ML-powered suggestions for reading buddies |
-| **Reading Speed Prediction** | Bookly, Basmo | Estimate time to finish based on pace |
-| **Ambient Sounds** | Bookly | Rain, coffee shop sounds during reading timer |
-| **Book Characters Tracker** | Bookly | Track character names and relationships |
-| **Emotion Journaling** | Basmo | Log how each reading session made you feel |
-| **Anonymous Social** | Pagebound | No profile photos, private follower counts |
-| **GraphQL API** | Hardcover | Developer-friendly public API |
-
-#### DNF Tracking
-
-- **StoryGraph/Pagebound/Tome**: DNF in status dropdown
-- **Reading Journey**: "DNF Graveyard" feature
-- Track pages read before abandoning
-- Optional review of why book was abandoned
-
-#### Content Warnings
-
-StoryGraph implementation:
-- User specifies content to avoid in preferences survey
-- Books filtered from recommendations automatically
-- Warning symbols shown on book pages
-- Traffic light severity system (planned)
-- Community-sourced via [BookTriggerWarnings.com](https://booktriggerwarnings.com/)
-
-#### Edition/Version Handling
-
-- **StoryGraph**: Each edition is separate item (controversial but necessary)
-- **BookTrack**: ISBN-based exact matching for metadata accuracy
-- **Challenge**: Users want to track physical + audiobook of same title
-- **Consideration**: Show "You've read another edition" on book pages
-
-#### Reread Tracking
-
-- **Bookmory**: Explicit "Reread" section with history
-- **Goodreads**: Limited - rereads don't count toward reading challenges
-- **Best practice**: Track each read date separately, show reread count
-
-### Feature Inspiration Summary
-
-- **Reading Timer**: Track sessions, calculate reading speed, ambient sounds, reading speed prediction
-- **Reading Progress**: Daily page tracking, visual progress bars, reading calendar with covers, multi-device sync
-- **Mood Tracking**: Tag by mood, pacing, content warnings with severity levels, emotion journaling per session
-- **Gamification**: Streaks, badges, annual challenges, progress bars, Year in Review/Reading Wrapped
-- **Quote Capture**: OCR from photos, reading journal, highlight capture, Kindle sync, markdown formatting
-- **Advanced Stats**: Year-over-year comparison, custom charts, reading speed trends, sub-ratings, ratings histogram
-- **Privacy**: Per-book visibility, anonymous browsing mode, anonymous social profiles, spoiler tags in reviews
-- **Social**: Buddy reads, readalongs, direct messaging, per-book discussion forums, match percentage
-- **Book Management**: Paused status, DNF with page tracking, edition handling, reread tracking, character tracker
-- **TBR Management**: Manual drag-drop sorting, smart tags, priority queue
-- **Book Metadata**: Purchase price/date, start/end pages, Bluetooth bulk scanning
-- **Wishlist**: Price drop alerts, library availability (Libby/OverDrive)
-- **Notifications**: New release alerts for followed authors, wishlist release notifications
-- **AI Features**: Book chat assistant, summaries without spoilers (emerging 2025 trend)
-
-### Research Sources
-
-- [The StoryGraph](https://thestorygraph.com/) | [Roadmap](https://roadmap.thestorygraph.com/)
-- [Bookly](https://getbookly.com/)
-- [BookTrack App](https://booktrack.app/)
-- [Hardcover](https://hardcover.app/) | [API](https://www.emgoto.com/hardcover-book-api/)
-- [Literal](https://literal.club/)
-- [Oku](https://oku.club/)
-- [Pagebound](https://pagebound.co/)
-- [Basmo](https://basmo.app/)
-- [Fable](https://fable.co/)
-- [Goodreads Help](https://help.goodreads.com/)
-- [Book Riot Comparison](https://bookriot.com/best-book-tracking-app/)
-- [BookTriggerWarnings](https://booktriggerwarnings.com/)
-- [Bookmory](https://play.google.com/store/apps/details?id=net.tonysoft.bookmory)
-- [BookBuddy](https://apps.apple.com/us/app/bookbuddy-book-tracker/id395150347)
-- [Libby/OverDrive](https://www.overdrive.com/apps/libby)
-- [Jelu (self-hosted)](https://github.com/bayang/jelu)
-- [Keepa Price Tracker](https://keepa.com/)
+For detailed competitor research, feature analysis, and market insights, see [`docs/research.md`](./research.md).
 
 ---
 
 ## Author Pages Feature (Future)
-
-### Competitor Analysis
-
-| Feature | Goodreads | StoryGraph | Literal | Hardcover |
-|---------|-----------|------------|---------|-----------|
-| **Dedicated Author Pages** | ✓ (comprehensive) | Planned | ✓ (basic) | ✓ |
-| **Author Photo** | ✓ | No | ✓ | ✓ |
-| **Bibliography** | ✓ (complete) | Basic list | ✓ | ✓ |
-| **Series Grouping** | ✓ | Requested | Unknown | ✓ |
-| **Follow Author** | ✓ | Requested | Unknown | ✓ |
 
 ### Recommended Implementation
 
@@ -1372,31 +1157,7 @@ Move wishlist filtering/sorting to a left sidebar layout (matching the book list
 
 ### Future Enhancements
 
-#### Competitor Analysis
-
-| Feature | Goodreads | StoryGraph | Amazon Kindle |
-|---------|-----------|------------|---------------|
-| **Price Displayed** | Deals only | No | ✓ |
-| **Release Date** | ✓ | ✓ | ✓ |
-| **Priority Ranking** | Custom shelves | Up Next (5 books) | List priority |
-| **Gift List Feature** | Workaround | Planned | ✓ (registry) |
-| **Library Availability** | Via extensions | No | No |
-
-#### Additional Wishlist Fields (Gaps to Consider)
-
-Based on competitor analysis (Goodreads, StoryGraph, BookBuddy):
-
-| Field | Competitor Support | Effort | Value | Notes |
-|-------|-------------------|--------|-------|-------|
-| **Recommended By** | Goodreads ✓ | Low | Medium | Text field - remember who suggested the book |
-| **Expected Price** | None | Low | Medium | Currency field for budget tracking |
-| **Custom Tags** | Goodreads, StoryGraph ✓ | Medium | Medium | Beyond priority - e.g. "gift idea", "holiday read" |
-| **Where to Buy Link** | Goodreads ✓ | Low | Low | URL field - affiliate/ethical concerns |
-| **Barcode Scan to Wishlist** | All competitors ✓ | Medium | High | Scan ISBN → add directly to wishlist |
-
-**Current advantage over competitors:** Book Assembly has explicit 3-level priority system. Goodreads requires workarounds (custom shelves, manual shelf positioning). StoryGraph limits "Up Next" to 5 books.
-
-#### Recommended Implementation
+For competitor analysis and field recommendations, see [Wishlist Competitor Analysis](./research.md#wishlist-competitor-analysis).
 
 **High Priority:**
 1. **Manual Entry** - Quick-add modal (already planned above)
@@ -1413,7 +1174,7 @@ Based on competitor analysis (Goodreads, StoryGraph, BookBuddy):
 8. **Custom Tags** - Flexible organisation beyond priority
 9. **Library Availability** - Check Libby/OverDrive availability
 10. **Shareable Wishlists** - Public link for gift coordination
-11. **Price Drop Alerts** - Notify when wishlisted books go on sale (integration with price trackers)
+11. **Price Drop Alerts** - Notify when wishlisted books go on sale
 
 ---
 
@@ -1864,4 +1625,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-03* (Moved Architecture Decisions to ADRs)
+*Last updated: 2026-01-03* (Added CSV import documentation)

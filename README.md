@@ -1,4 +1,4 @@
-# MyShelfControl
+# Book Republic
 
 A mobile-friendly book tracking PWA built with Next.js.
 

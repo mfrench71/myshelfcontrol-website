@@ -1,8 +1,9 @@
-# MyShelfControl - Project Documentation
+# Book Republic - Project Documentation
 
 ## Table of Contents
 
 1. [Overview & Tech Stack](#overview)
+2. [Branding](#branding)
 2. [Project Structure](#project-structure)
 3. [Development](#development)
 4. [Features & Migration Status](#features)
@@ -42,8 +43,8 @@
 
 A mobile-friendly book tracking PWA with multi-user features planned. Rebuilt with Next.js to enable server-side capabilities for social features.
 
-**Name:** MyShelfControl (pun on "my self control")
-**Domain:** myshelfcontrol.app (TBD)
+**Name:** Book Republic
+**Domain:** bookrepublic.app / bookrepublic.co.uk
 
 ## Tech Stack
 
@@ -57,6 +58,46 @@ A mobile-friendly book tracking PWA with multi-user features planned. Rebuilt wi
 | Book Data | Google Books API + Open Library API (fallback) |
 | Hosting | Netlify (free tier) |
 | Testing | Vitest (unit) + Playwright (E2E) |
+
+---
+
+## Branding
+
+### Logo
+
+The Book Republic logo consists of three stylised book shapes (geometric rectangles with slight rotation) alongside the wordmark.
+
+**Logo file:** `/logo-concepts/concept-c-geometric.svg`
+
+### Logo Colours
+
+| Element | Hex | RGB | Usage |
+|---------|-----|-----|-------|
+| **Coral** | `#e07a5f` | rgb(224, 122, 95) | Back book (complementary accent) |
+| **Mid Blue** | `#3b82f6` | rgb(59, 130, 246) | Middle book, "republic" text |
+| **Dark Blue** | `#1e40af` | rgb(30, 64, 175) | Front book |
+| **Slate** | `#1e293b` | rgb(30, 41, 59) | "book" text |
+
+### Colour Rationale
+
+- **Blue palette**: Primary brand colour, trustworthy and calm
+- **Coral accent**: Complementary to blue (opposite on colour wheel), adds warmth and visual interest
+- **Geometric books**: Three tilted rectangles suggest a stack of books, modern and clean
+
+### Typography
+
+- **Wordmark**: System UI sans-serif
+- **"book"**: Bold weight (700), slate colour
+- **"republic"**: Regular weight (400), mid-blue colour
+
+### Brand Assets
+
+| Asset | Location | Sizes |
+|-------|----------|-------|
+| Logo SVG | `/logo-concepts/concept-c-geometric.svg` | Scalable |
+| Favicon | `/src/app/favicon.ico` | 32x32 |
+| PWA Icons | `/public/icons/` | 72, 96, 128, 144, 152, 192, 384, 512 |
+| Icon SVG | `/public/icons/icon.svg` | Scalable |
 
 ---
 
@@ -253,7 +294,7 @@ const hasChanges = JSON.stringify(values) !== JSON.stringify(initialValues);
 ## Project Structure
 
 ```
-myshelfcontrol-website/
+bookrepublic-website/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── (app)/              # Authenticated pages
@@ -1248,7 +1289,7 @@ Based on competitor analysis (Goodreads, StoryGraph, BookBuddy):
 | **Where to Buy Link** | Goodreads ✓ | Low | Low | URL field - affiliate/ethical concerns |
 | **Barcode Scan to Wishlist** | All competitors ✓ | Medium | High | Scan ISBN → add directly to wishlist |
 
-**Current advantage over competitors:** MyShelfControl has explicit 3-level priority system. Goodreads requires workarounds (custom shelves, manual shelf positioning). StoryGraph limits "Up Next" to 5 books.
+**Current advantage over competitors:** Book Republic has explicit 3-level priority system. Goodreads requires workarounds (custom shelves, manual shelf positioning). StoryGraph limits "Up Next" to 5 books.
 
 #### Recommended Implementation
 

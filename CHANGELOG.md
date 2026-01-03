@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to MyShelfControl are documented here.
+All notable changes to Book Republic are documented here.
 
 ---
 

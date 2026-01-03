@@ -45,7 +45,7 @@ describe('Footer', () => {
     it('renders copyright with current year', () => {
       render(<Footer />);
 
-      expect(screen.getByText(/© 2026 MyShelfControl/)).toBeInTheDocument();
+      expect(screen.getByText(/© 2026 Book Republic/)).toBeInTheDocument();
     });
 
     it('renders privacy policy link', () => {

@@ -90,7 +90,7 @@ describe('Header', () => {
     it('renders logo with link to dashboard', () => {
       render(<Header />);
 
-      const logo = screen.getByText('MyShelfControl');
+      const logo = screen.getByText('Book Republic');
       expect(logo).toBeInTheDocument();
       expect(logo.closest('a')).toHaveAttribute('href', '/dashboard');
     });

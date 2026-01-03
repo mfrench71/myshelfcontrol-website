@@ -87,12 +87,12 @@ describe('Header', () => {
   });
 
   describe('rendering', () => {
-    it('renders logo with link to home', () => {
+    it('renders logo with link to dashboard', () => {
       render(<Header />);
 
       const logo = screen.getByText('MyShelfControl');
       expect(logo).toBeInTheDocument();
-      expect(logo.closest('a')).toHaveAttribute('href', '/');
+      expect(logo.closest('a')).toHaveAttribute('href', '/dashboard');
     });
 
     it('renders My Library button', () => {

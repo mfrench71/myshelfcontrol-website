@@ -7,19 +7,19 @@ import { ToastProvider } from '@/components/ui/toast';
 import { ServiceWorkerRegister } from '@/components/service-worker-register';
 
 // Anti-flash script to set theme before React hydrates
-// Forces light mode on public/auth pages and when not authenticated
+// Public pages (landing, login, privacy) always use light mode
 const themeScript = `
   (function() {
     var path = window.location.pathname;
-    var isPublicPage = path.startsWith('/login') || path.startsWith('/privacy');
-    var isAuthenticated = document.cookie.indexOf('auth=') !== -1;
+    var isPublicPage = path === '/' || path.startsWith('/login') || path.startsWith('/privacy');
 
-    // Force light mode for public pages or unauthenticated users on home
-    if (isPublicPage || (path === '/' && !isAuthenticated)) {
+    // Public pages always use light mode
+    if (isPublicPage) {
       document.documentElement.classList.add('light');
       return;
     }
 
+    // Authenticated pages use user's preference
     var stored = localStorage.getItem('theme');
     var theme = stored || 'system';
     var resolved = theme;

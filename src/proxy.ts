@@ -4,10 +4,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Routes that require authentication
-const protectedRoutes = ['/books', '/settings', '/wishlist'];
+const protectedRoutes = ['/dashboard', '/books', '/settings', '/wishlist'];
 
-// Routes that should redirect to home if already authenticated
-const authRoutes = ['/login'];
+// Routes only for unauthenticated users
+const publicOnlyRoutes = ['/login'];
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -21,19 +21,24 @@ export default function proxy(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
-  // Check if the current path is an auth route
-  const isAuthRoute = authRoutes.some((route) => pathname === route);
+  // Check if the current path is a public-only route
+  const isPublicOnlyRoute = publicOnlyRoutes.includes(pathname);
 
-  // Redirect unauthenticated users trying to access protected routes
+  // Logged-in user on landing page → redirect to dashboard
+  if (pathname === '/' && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // Unauthenticated user on protected route → redirect to login
   if (isProtectedRoute && !isAuthenticated) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect authenticated users away from auth routes
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/', request.url));
+  // Authenticated user on login → redirect to dashboard
+  if (isPublicOnlyRoute && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();

@@ -4,7 +4,6 @@ import { cookies } from 'next/headers';
 
 // Session cookie configuration
 const SESSION_COOKIE_NAME = 'session';
-const AUTH_INDICATOR_COOKIE_NAME = 'auth'; // Non-httpOnly, readable by JS for theme detection
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
 
 /**
@@ -32,15 +31,6 @@ export async function POST(request: Request) {
       path: '/',
     });
 
-    // Set non-httpOnly auth indicator cookie (readable by JS for theme detection)
-    cookieStore.set(AUTH_INDICATOR_COOKIE_NAME, '1', {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: SESSION_MAX_AGE,
-      path: '/',
-    });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Session creation error:', error);
@@ -59,7 +49,6 @@ export async function DELETE() {
   try {
     const cookieStore = await cookies();
     cookieStore.delete(SESSION_COOKIE_NAME);
-    cookieStore.delete(AUTH_INDICATOR_COOKIE_NAME);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -24,27 +24,14 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = 'theme';
 
-/**
- * Check if current path is a public page (login, privacy, etc.)
- * Public pages always use light mode regardless of user preference
- */
-function isPublicPath(pathname: string): boolean {
-  return pathname.startsWith('/login') || pathname.startsWith('/privacy');
-}
+// Public pages that always use light mode (landing, login, privacy)
+const PUBLIC_PAGES = ['/', '/login', '/privacy'];
 
 /**
- * Check if we should force light mode (public pages or unauthenticated on home)
+ * Check if pathname is a public page (always light mode)
  */
-function shouldForceLightMode(pathname: string): boolean {
-  if (isPublicPath(pathname)) return true;
-
-  // Check for auth cookie on home page
-  if (pathname === '/' && typeof document !== 'undefined') {
-    const isAuthenticated = document.cookie.indexOf('auth=') !== -1;
-    if (!isAuthenticated) return true;
-  }
-
-  return false;
+function isPublicPage(pathname: string): boolean {
+  return PUBLIC_PAGES.includes(pathname) || pathname.startsWith('/privacy');
 }
 
 /**
@@ -88,8 +75,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>('system');
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light');
 
-  // Check if we should force light mode (public pages or unauthenticated on home)
-  const forceLight = shouldForceLightMode(pathname);
+  // Public pages always use light mode
+  const forceLight = isPublicPage(pathname);
 
   // Resolve theme based on preference and system setting
   const resolveTheme = useCallback((themeValue: Theme): ResolvedTheme => {
@@ -105,31 +92,30 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     localStorage.setItem(STORAGE_KEY, newTheme);
     const resolved = resolveTheme(newTheme);
     setResolvedTheme(resolved);
-    // Only apply theme if not forcing light mode
-    if (!shouldForceLightMode(window.location.pathname)) {
+    // Only apply theme if not on a public page
+    if (!isPublicPage(window.location.pathname)) {
       applyTheme(resolved);
     }
   }, [resolveTheme]);
 
-  // Initialize theme from localStorage on mount
+  // Initialize theme from localStorage on mount and when pathname changes
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
     const initialTheme = stored || 'system';
     setThemeState(initialTheme);
     const resolved = resolveTheme(initialTheme);
     setResolvedTheme(resolved);
-    // Only apply theme if not forcing light mode
-    if (!forceLight) {
-      applyTheme(resolved);
-    } else {
-      // Force light mode
+    // Public pages always use light mode
+    if (forceLight) {
       applyTheme('light');
+    } else {
+      applyTheme(resolved);
     }
-  }, [resolveTheme, forceLight]);
+  }, [resolveTheme, forceLight, pathname]);
 
   // Listen for system theme changes
   useEffect(() => {
-    // Don't listen for system changes when forcing light mode
+    // Don't listen for system changes on public pages
     if (forceLight) return;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

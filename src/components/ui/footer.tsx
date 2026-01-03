@@ -2,8 +2,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuthContext } from '@/components/providers/auth-provider';
 
 export function Footer() {
+  const { user } = useAuthContext();
   const currentYear = new Date().getFullYear();
   const version = process.env.NEXT_PUBLIC_BUILD_VERSION || 'dev';
 
@@ -15,9 +17,11 @@ export function Footer() {
           <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
             Privacy Policy
           </Link>
-          <Link href="/settings/about" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
-            v{version}
-          </Link>
+          {user && (
+            <Link href="/settings/about" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
+              v{version}
+            </Link>
+          )}
         </div>
       </div>
     </footer>

@@ -1,7 +1,7 @@
 /**
- * Home Page - Dashboard with widgets
+ * Dashboard Page - User's book library dashboard with widgets
  * Displays reading stats, currently reading, recently added, and more
- * Matches old site's horizontal scrolling widget layout
+ * Protected route - unauthenticated users are redirected by middleware
  */
 'use client';
 
@@ -165,7 +165,7 @@ function WidgetSkeleton({ size = 12 }: { size?: number }) {
 }
 
 /**
- * Welcome Widget - Library stats (keep this as is, user requested)
+ * Welcome Widget - Library stats
  */
 function WelcomeWidget({
   totalBooks,
@@ -498,7 +498,7 @@ function EmailVerificationBanner({
 
 const BANNER_DISMISSED_KEY = 'email-verification-banner-dismissed';
 
-export default function HomePage() {
+export default function DashboardPage() {
   const { user, loading: authLoading } = useAuthContext();
   const [books, setBooks] = useState<Book[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
@@ -667,6 +667,7 @@ export default function HomePage() {
     };
   }, [books]);
 
+  // Show loading skeletons while auth or data is loading
   if (authLoading || loading) {
     return (
       <div id="loading-state" className="max-w-6xl mx-auto px-4 py-6 pb-24">
@@ -681,32 +682,12 @@ export default function HomePage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" aria-hidden="true" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-4">Welcome to MyShelfControl</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Track your reading journey and organise your book collection.
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 mt-6 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors"
-          >
-            Get Started
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div id="dashboard" className="max-w-6xl mx-auto px-4 py-6 pb-24">
       <h1 className="sr-only">MyShelfControl Dashboard</h1>
 
       {showVerificationBanner && (
-        <EmailVerificationBanner user={user} onDismiss={handleDismissBanner} />
+        <EmailVerificationBanner user={user!} onDismiss={handleDismissBanner} />
       )}
 
       {/* Widget Grid (12-column responsive) */}

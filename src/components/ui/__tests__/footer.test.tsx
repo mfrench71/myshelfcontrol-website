@@ -6,6 +6,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Footer } from '../footer';
 
+// Mock auth context
+const mockUser = {
+  uid: 'test-uid',
+  email: 'test@example.com',
+};
+vi.mock('@/components/providers/auth-provider', () => ({
+  useAuthContext: () => ({ user: mockUser }),
+}));
+
 describe('Footer', () => {
   let originalDate: typeof Date;
 
@@ -47,7 +56,7 @@ describe('Footer', () => {
       expect(privacyLink).toHaveAttribute('href', '/privacy');
     });
 
-    it('renders build version from environment', () => {
+    it('renders build version from environment for authenticated users', () => {
       render(<Footer />);
 
       expect(screen.getByText('v02.01.2025')).toBeInTheDocument();

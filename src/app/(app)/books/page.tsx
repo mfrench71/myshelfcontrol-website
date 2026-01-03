@@ -6,6 +6,7 @@ import { BookOpen, Plus, AlertCircle, SlidersHorizontal, Loader2, SearchX } from
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { useToast } from '@/components/ui/toast';
 import { getBooks } from '@/lib/repositories/books';
 import { getGenres, createGenreLookup } from '@/lib/repositories/genres';
 import { getSeries, createSeriesLookup } from '@/lib/repositories/series';
@@ -21,6 +22,35 @@ import {
 } from '@/components/books/filter-panel';
 import { getBookStatus, filterBooks, sortBooks } from '@/lib/utils/book-filters';
 import type { Book, Genre, Series, BookFilters } from '@/lib/types';
+
+/** Sync settings stored in localStorage */
+type SyncSettings = {
+  autoRefreshEnabled: boolean;
+  hiddenThreshold: number; // seconds before auto-refresh triggers
+  cooldownPeriod: number; // minimum seconds between refreshes
+};
+
+const DEFAULT_SYNC_SETTINGS: SyncSettings = {
+  autoRefreshEnabled: true,
+  hiddenThreshold: 60,
+  cooldownPeriod: 300,
+};
+
+const SYNC_SETTINGS_KEY = 'bookassembly_sync_settings';
+
+/** Load sync settings from localStorage */
+function loadSyncSettings(): SyncSettings {
+  if (typeof window === 'undefined') return DEFAULT_SYNC_SETTINGS;
+  try {
+    const stored = localStorage.getItem(SYNC_SETTINGS_KEY);
+    if (stored) {
+      return { ...DEFAULT_SYNC_SETTINGS, ...JSON.parse(stored) };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return DEFAULT_SYNC_SETTINGS;
+}
 
 /**
  * Parse sort option string into sortBy and direction
@@ -112,6 +142,7 @@ function buildURLParams(filters: BookFilters, sort: SortOption): string {
 
 function BooksPageContent() {
   const { user, loading: authLoading } = useAuthContext();
+  const { showToast } = useToast();
   const searchParams = useSearchParams();
   const [books, setBooks] = useState<Book[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
@@ -119,6 +150,10 @@ function BooksPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Auto-refresh tracking refs
+  const hiddenAtRef = useRef<number | null>(null);
+  const lastRefreshRef = useRef<number>(Date.now());
 
   // Parse initial filters from URL
   const initialState = useMemo(() => parseFiltersFromURL(searchParams), [searchParams]);
@@ -384,6 +419,76 @@ function BooksPageContent() {
       setLoading(false);
     }
   }, [user, authLoading]);
+
+  // Visibility-based auto-refresh
+  // Uses both visibilitychange (for tab switches) and focus (for app switches)
+  useEffect(() => {
+    if (!user) return;
+
+    const checkAndRefresh = async () => {
+      if (!hiddenAtRef.current) return;
+
+      const settings = loadSyncSettings();
+      if (!settings.autoRefreshEnabled) {
+        hiddenAtRef.current = null;
+        return;
+      }
+
+      const now = Date.now();
+      const hiddenDuration = (now - hiddenAtRef.current) / 1000;
+      const timeSinceLastRefresh = (now - lastRefreshRef.current) / 1000;
+
+      if (hiddenDuration >= settings.hiddenThreshold && timeSinceLastRefresh >= settings.cooldownPeriod) {
+        try {
+          const [userBooks, userGenres, userSeries] = await Promise.all([
+            getBooks(user.uid),
+            getGenres(user.uid),
+            getSeries(user.uid),
+          ]);
+          setBooks(userBooks);
+          setGenres(userGenres);
+          setSeries(userSeries);
+          setVisibleCount(ITEMS_PER_PAGE);
+          lastRefreshRef.current = Date.now();
+          showToast('Library refreshed', { type: 'success' });
+        } catch (err) {
+          console.error('Failed to auto-refresh:', err);
+        }
+      }
+
+      hiddenAtRef.current = null;
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAtRef.current = Date.now();
+      } else if (document.visibilityState === 'visible') {
+        checkAndRefresh();
+      }
+    };
+
+    const handleFocus = () => {
+      if (hiddenAtRef.current) {
+        checkAndRefresh();
+      }
+    };
+
+    const handleBlur = () => {
+      if (!hiddenAtRef.current) {
+        hiddenAtRef.current = Date.now();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [user, showToast]);
 
   /**
    * Scroll to top of book list when filters change

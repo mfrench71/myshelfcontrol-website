@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
   BookOpen,
@@ -24,6 +24,7 @@ import {
 import { BookCover } from '@/components/ui/book-cover';
 import { sendEmailVerification } from 'firebase/auth';
 import { useAuthContext } from '@/components/providers/auth-provider';
+import { useToast } from '@/components/ui/toast';
 import { getBooks } from '@/lib/repositories/books';
 import { getSeries } from '@/lib/repositories/series';
 import { getWishlist } from '@/lib/repositories/wishlist';
@@ -33,6 +34,35 @@ import {
 } from '@/lib/repositories/widget-settings';
 import type { Book, Series, WishlistItem } from '@/lib/types';
 import type { WidgetConfig } from '@/lib/types/widgets';
+
+/** Sync settings stored in localStorage */
+type SyncSettings = {
+  autoRefreshEnabled: boolean;
+  hiddenThreshold: number; // seconds before auto-refresh triggers
+  cooldownPeriod: number; // minimum seconds between refreshes
+};
+
+const DEFAULT_SYNC_SETTINGS: SyncSettings = {
+  autoRefreshEnabled: true,
+  hiddenThreshold: 60,
+  cooldownPeriod: 300,
+};
+
+const SYNC_SETTINGS_KEY = 'bookassembly_sync_settings';
+
+/** Load sync settings from localStorage */
+function loadSyncSettings(): SyncSettings {
+  if (typeof window === 'undefined') return DEFAULT_SYNC_SETTINGS;
+  try {
+    const stored = localStorage.getItem(SYNC_SETTINGS_KEY);
+    if (stored) {
+      return { ...DEFAULT_SYNC_SETTINGS, ...JSON.parse(stored) };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return DEFAULT_SYNC_SETTINGS;
+}
 
 /**
  * Get reading status from book's reads array
@@ -500,12 +530,17 @@ const BANNER_DISMISSED_KEY = 'email-verification-banner-dismissed';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuthContext();
+  const { showToast } = useToast();
   const [books, setBooks] = useState<Book[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [widgetConfigs, setWidgetConfigs] = useState<WidgetConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [bannerDismissed, setBannerDismissed] = useState(true);
+
+  // Auto-refresh tracking refs
+  const hiddenAtRef = useRef<number | null>(null);
+  const lastRefreshRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -553,21 +588,78 @@ export default function DashboardPage() {
     }
   }, [user, authLoading, loadData]);
 
-  // Visibility-based auto-sync
+  // Visibility-based auto-sync with settings support
+  // Uses both visibilitychange (for tab switches) and focus (for app switches)
   useEffect(() => {
     if (!user) return;
 
+    const checkAndRefresh = async () => {
+      if (!hiddenAtRef.current) return;
+
+      const settings = loadSyncSettings();
+      if (!settings.autoRefreshEnabled) {
+        hiddenAtRef.current = null;
+        return;
+      }
+
+      const now = Date.now();
+      const hiddenDuration = (now - hiddenAtRef.current) / 1000;
+      const timeSinceLastRefresh = (now - lastRefreshRef.current) / 1000;
+
+      if (hiddenDuration >= settings.hiddenThreshold && timeSinceLastRefresh >= settings.cooldownPeriod) {
+        try {
+          const [userBooks, userSeries, userWishlist, userWidgets] = await Promise.all([
+            getBooks(user.uid),
+            getSeries(user.uid),
+            getWishlist(user.uid),
+            loadWidgetSettings(user.uid),
+          ]);
+          setBooks(userBooks);
+          setSeries(userSeries);
+          setWishlistItems(userWishlist);
+          setWidgetConfigs(userWidgets);
+          lastRefreshRef.current = Date.now();
+          showToast('Dashboard refreshed', { type: 'success' });
+        } catch (err) {
+          console.error('Failed to auto-refresh:', err);
+        }
+      }
+
+      hiddenAtRef.current = null;
+    };
+
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        loadData();
+      if (document.visibilityState === 'hidden') {
+        hiddenAtRef.current = Date.now();
+      } else if (document.visibilityState === 'visible') {
+        checkAndRefresh();
+      }
+    };
+
+    const handleFocus = () => {
+      // Focus event fires when window gains focus (e.g., switching from another app)
+      if (hiddenAtRef.current) {
+        checkAndRefresh();
+      }
+    };
+
+    const handleBlur = () => {
+      // Blur event fires when window loses focus
+      if (!hiddenAtRef.current) {
+        hiddenAtRef.current = Date.now();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
     };
-  }, [user, loadData]);
+  }, [user, showToast]);
 
   const enabledWidgets = useMemo(() => getEnabledWidgets(widgetConfigs), [widgetConfigs]);
 

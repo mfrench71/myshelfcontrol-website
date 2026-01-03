@@ -279,7 +279,10 @@ export function Header() {
               className="w-8 h-8"
               aria-hidden="true"
             />
-            <span className="text-xl font-bold text-gray-900">Book Republic</span>
+            <span className="text-xl">
+              <span className="font-bold text-slate-800">book</span>
+              <span className="font-normal text-blue-500">republic</span>
+            </span>
           </Link>
           <Link
             href="/login"
@@ -317,7 +320,10 @@ export function Header() {
               className="w-8 h-8"
               aria-hidden="true"
             />
-            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Republic</span>
+            <span className="text-xl">
+              <span className="font-bold text-slate-800 dark:text-slate-200">book</span>
+              <span className="font-normal text-blue-500">republic</span>
+            </span>
           </Link>
 
           {/* Right side buttons */}

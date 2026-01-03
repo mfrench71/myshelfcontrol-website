@@ -196,7 +196,10 @@ function LoginForm() {
           className="w-10 h-10"
           aria-hidden="true"
         />
-        <span className="text-2xl font-bold text-gray-900">Book Republic</span>
+        <span className="text-2xl">
+          <span className="font-bold text-slate-800">book</span>
+          <span className="font-normal text-blue-500">republic</span>
+        </span>
       </div>
 
       {/* Auth Card */}
@@ -498,7 +501,10 @@ export default function LoginPage() {
             className="w-10 h-10"
             aria-hidden="true"
           />
-          <span className="text-2xl font-bold text-gray-900">Book Republic</span>
+          <span className="text-2xl">
+            <span className="font-bold text-slate-800">book</span>
+            <span className="font-normal text-blue-500">republic</span>
+          </span>
         </div>
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="animate-pulse space-y-4">

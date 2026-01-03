@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 68">
   <!-- Geometric books icon only (no text) -->
-  <g transform="translate(5, 0)">
+  <g transform="translate(5, 4)">
     <rect x="0" y="8" width="20" height="52" rx="2" fill="#e07a5f" transform="rotate(-8, 10, 34)"/>
     <rect x="12" y="6" width="20" height="52" rx="2" fill="#3b82f6" transform="rotate(-2, 22, 32)"/>
     <rect x="26" y="4" width="20" height="52" rx="2" fill="#1e40af" transform="rotate(4, 36, 30)"/>

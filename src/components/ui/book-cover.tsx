@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { BookOpen, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface BookCoverProps {
   src?: string | null;
@@ -42,8 +42,12 @@ export function BookCover({
         className={`flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark ${className}`}
         style={containerStyle}
       >
-        <BookOpen
-          className="text-white/80 w-[35%] h-[35%]"
+        <Image
+          src="/branding/logo-icon.svg"
+          alt=""
+          width={width}
+          height={height}
+          className="w-[50%] h-[50%] opacity-80"
           aria-hidden="true"
         />
       </div>

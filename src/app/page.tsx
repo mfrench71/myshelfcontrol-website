@@ -20,7 +20,10 @@ export default function LandingPage() {
             className="w-12 h-12"
             aria-hidden="true"
           />
-          <h1 className="text-4xl font-bold text-gray-900">Book Republic</h1>
+          <h1 className="text-4xl">
+            <span className="font-bold text-slate-800">book</span>
+            <span className="font-normal text-blue-500">republic</span>
+          </h1>
         </div>
 
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">

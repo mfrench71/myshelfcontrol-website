@@ -90,9 +90,11 @@ describe('Header', () => {
     it('renders logo with link to dashboard', () => {
       render(<Header />);
 
-      const logo = screen.getByText('Book Republic');
-      expect(logo).toBeInTheDocument();
-      expect(logo.closest('a')).toHaveAttribute('href', '/dashboard');
+      const bookText = screen.getByText('book');
+      const republicText = screen.getByText('republic');
+      expect(bookText).toBeInTheDocument();
+      expect(republicText).toBeInTheDocument();
+      expect(bookText.closest('a')).toHaveAttribute('href', '/dashboard');
     });
 
     it('renders My Library button', () => {

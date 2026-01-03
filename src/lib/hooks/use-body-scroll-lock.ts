@@ -1,9 +1,9 @@
 /**
  * useBodyScrollLock hook
  * Locks body scroll when a modal/bottom sheet is open
- * Preserves scroll position when using position: fixed
+ * Uses a synchronous approach to prevent scroll jump on mobile
  */
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 /**
  * Lock body scroll when isLocked is true
@@ -12,25 +12,29 @@ import { useEffect, useRef } from 'react';
 export function useBodyScrollLock(isLocked: boolean): void {
   const scrollPositionRef = useRef(0);
 
-  useEffect(() => {
+  // Use useLayoutEffect to apply styles synchronously before paint
+  // This prevents the flash of scroll-to-top on mobile
+  useLayoutEffect(() => {
     if (!isLocked) return;
 
-    // Save current scroll position
+    // Save current scroll position immediately
     scrollPositionRef.current = window.scrollY;
 
-    // Apply scroll position as negative top to maintain visual position
-    document.body.style.top = `-${scrollPositionRef.current}px`;
+    // Apply styles synchronously before browser paints
+    const scrollY = scrollPositionRef.current;
 
-    // Lock body scroll
+    // Set top offset BEFORE adding the class to prevent visual jump
+    document.body.style.top = `-${scrollY}px`;
     document.body.classList.add('scroll-locked');
 
     // Cleanup
     return () => {
+      // Remove class and styles
       document.body.classList.remove('scroll-locked');
       document.body.style.top = '';
 
-      // Restore scroll position
-      window.scrollTo(0, scrollPositionRef.current);
+      // Restore scroll position synchronously
+      window.scrollTo(0, scrollY);
     };
   }, [isLocked]);
 }

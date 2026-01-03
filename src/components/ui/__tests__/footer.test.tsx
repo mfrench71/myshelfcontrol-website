@@ -15,6 +15,12 @@ vi.mock('@/components/providers/auth-provider', () => ({
   useAuthContext: () => ({ user: mockUser }),
 }));
 
+// Mock usePathname - default to settings page where footer is visible
+let mockPathname = '/settings';
+vi.mock('next/navigation', () => ({
+  usePathname: () => mockPathname,
+}));
+
 describe('Footer', () => {
   let originalDate: typeof Date;
 
@@ -39,6 +45,7 @@ describe('Footer', () => {
   afterEach(() => {
     global.Date = originalDate;
     vi.unstubAllEnvs();
+    mockPathname = '/settings'; // Reset to default
   });
 
   describe('rendering', () => {
@@ -84,6 +91,29 @@ describe('Footer', () => {
 
       const footer = screen.getByRole('contentinfo');
       expect(footer).toBeInTheDocument();
+    });
+  });
+
+  describe('infinite scroll pages', () => {
+    it('hides footer on /books page', () => {
+      mockPathname = '/books';
+      const { container } = render(<Footer />);
+
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('shows footer on dashboard', () => {
+      mockPathname = '/dashboard';
+      render(<Footer />);
+
+      expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    });
+
+    it('shows footer on other pages', () => {
+      mockPathname = '/settings/about';
+      render(<Footer />);
+
+      expect(screen.getByRole('contentinfo')).toBeInTheDocument();
     });
   });
 });

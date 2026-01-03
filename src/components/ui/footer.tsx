@@ -2,12 +2,22 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/auth-provider';
 
+// Pages with infinite scroll where footer shouldn't appear
+const INFINITE_SCROLL_PAGES = ['/books'];
+
 export function Footer() {
+  const pathname = usePathname();
   const { user } = useAuthContext();
   const currentYear = new Date().getFullYear();
   const version = process.env.NEXT_PUBLIC_BUILD_VERSION || 'dev';
+
+  // Hide footer on infinite scroll pages
+  if (INFINITE_SCROLL_PAGES.includes(pathname)) {
+    return null;
+  }
 
   return (
     <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 mt-auto">

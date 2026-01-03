@@ -28,7 +28,10 @@ export default function AboutPage() {
             aria-hidden="true"
           />
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Assembly</h2>
+            <h2 className="text-2xl">
+              <span className="font-bold text-slate-800 dark:text-slate-200">book</span>
+              <span className="font-normal text-blue-500">assembly</span>
+            </h2>
             <p className="text-gray-500 dark:text-gray-400">Version {version}</p>
           </div>
         </div>

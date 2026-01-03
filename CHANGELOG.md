@@ -4,6 +4,24 @@ All notable changes to Book Assembly are documented here.
 
 ---
 
+## 03-01-2026 (continued)
+
+### Accessibility
+- Improve dark mode text contrast for WCAG AA compliance (~100 instances fixed)
+- Improve light mode text contrast for WCAG AA compliance (11 instances fixed)
+- All text now meets minimum 4.5:1 contrast ratio in both themes
+
+### Branding
+- Rebrand from "Book Republic" to "Book Assembly"
+- Update logo wordmark, PWA manifest, metadata, and all user-facing text
+
+### Fixes
+- Fix auth loading flash on page refresh (show loading state until auth resolves)
+- Allow privacy page to respect logged-in user's dark mode preference
+- Optimise logo SVG loading with priority and unoptimized flags
+
+---
+
 ## 03-01-2026
 
 - Add promotional landing page for logged-out users

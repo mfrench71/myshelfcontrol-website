@@ -188,7 +188,7 @@ function LoginForm() {
       {/* Logo */}
       <div className="flex items-center gap-2 text-primary mb-8">
         <BookOpen className="w-10 h-10" />
-        <span className="text-2xl font-bold">MyShelfControl</span>
+        <span className="text-2xl font-bold">Book Republic</span>
       </div>
 
       {/* Auth Card */}
@@ -483,7 +483,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
         <div className="flex items-center gap-2 text-primary mb-8">
           <BookOpen className="w-10 h-10" />
-          <span className="text-2xl font-bold">MyShelfControl</span>
+          <span className="text-2xl font-bold">Book Republic</span>
         </div>
         <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="animate-pulse space-y-4">

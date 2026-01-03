@@ -23,7 +23,7 @@ export default function AboutPage() {
             <BookOpen className="w-8 h-8 text-white" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">MyShelfControl</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Republic</h2>
             <p className="text-gray-500 dark:text-gray-400">Version {version}</p>
           </div>
         </div>

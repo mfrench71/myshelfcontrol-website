@@ -4,4 +4,4 @@ Allow: /
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://myshelfcontrol.app/sitemap.xml
+Sitemap: https://bookrepublic.app/sitemap.xml

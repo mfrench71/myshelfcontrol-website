@@ -6,8 +6,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | MyShelfControl',
-  description: 'Privacy policy for MyShelfControl - how we collect, use, and protect your data',
+  title: 'Privacy Policy | Book Republic',
+  description: 'Privacy policy for Book Republic - how we collect, use, and protect your data',
 };
 
 export default function PrivacyPage() {
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Overview</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                MyShelfControl is a personal book tracking application. We are committed to protecting your privacy and
+                Book Republic is a personal book tracking application. We are committed to protecting your privacy and
                 being transparent about how we handle your data. This policy explains what information we collect, how
                 we use it, and your rights regarding your data.
               </p>

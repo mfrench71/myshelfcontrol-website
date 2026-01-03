@@ -40,11 +40,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://myshelfcontrol.app'
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://bookrepublic.app'
   ),
   title: {
-    default: 'MyShelfControl',
-    template: '%s | MyShelfControl',
+    default: 'Book Republic',
+    template: '%s | Book Republic',
   },
   description: 'Track your reading journey. Organise your book collection with ease.',
   manifest: '/manifest.json',
@@ -60,12 +60,12 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'MyShelfControl',
+    title: 'Book Republic',
   },
   openGraph: {
     type: 'website',
-    siteName: 'MyShelfControl',
-    title: 'MyShelfControl',
+    siteName: 'Book Republic',
+    title: 'Book Republic',
     description: 'Track your reading journey. Organise your book collection with ease.',
     images: [{ url: '/icons/icon-512.png', width: 512, height: 512 }],
   },

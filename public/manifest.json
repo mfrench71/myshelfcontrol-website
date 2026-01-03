@@ -1,6 +1,6 @@
 {
-  "name": "MyShelfControl",
-  "short_name": "MyShelfControl",
+  "name": "Book Republic",
+  "short_name": "Book Republic",
   "description": "Track your reading journey. Organise your book collection with ease.",
   "start_url": "/",
   "display": "standalone",

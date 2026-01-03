@@ -12,7 +12,7 @@ export default function LandingPage() {
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <div className="flex items-center justify-center gap-3 text-primary mb-6">
           <BookOpen className="w-12 h-12" />
-          <h1 className="text-4xl font-bold">MyShelfControl</h1>
+          <h1 className="text-4xl font-bold">Book Republic</h1>
         </div>
 
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">

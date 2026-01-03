@@ -1,5 +1,5 @@
 /**
- * Type Definitions for MyShelfControl
+ * Type Definitions for Book Republic
  * These types mirror the Zod schemas and Firestore document structures
  */
 

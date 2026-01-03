@@ -1,8 +1,8 @@
-// Service Worker for MyShelfControl PWA
-const CACHE_VERSION = 'v3';
-const STATIC_CACHE = `myshelfcontrol-static-${CACHE_VERSION}`;
-const IMAGE_CACHE = `myshelfcontrol-images-${CACHE_VERSION}`;
-const API_CACHE = `myshelfcontrol-api-${CACHE_VERSION}`;
+// Service Worker for Book Republic PWA
+const CACHE_VERSION = 'v4';
+const STATIC_CACHE = `bookrepublic-static-${CACHE_VERSION}`;
+const IMAGE_CACHE = `bookrepublic-images-${CACHE_VERSION}`;
+const API_CACHE = `bookrepublic-api-${CACHE_VERSION}`;
 
 // Core app shell routes (pre-cached for offline access)
 const APP_SHELL = [

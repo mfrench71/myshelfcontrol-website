@@ -51,7 +51,7 @@ const DEFAULT_SYNC_SETTINGS: SyncSettings = {
   cooldownPeriod: 300, // 5 minutes
 };
 
-const SYNC_SETTINGS_KEY = 'myshelfcontrol_sync_settings';
+const SYNC_SETTINGS_KEY = 'bookrepublic_sync_settings';
 
 /** Load sync settings from localStorage */
 function loadSyncSettings(): SyncSettings {
@@ -324,7 +324,7 @@ export default function PreferencesSettingsPage() {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && (key.startsWith('myshelfcontrol_') || key.startsWith('widget_'))) {
+        if (key && (key.startsWith('bookrepublic_') || key.startsWith('widget_'))) {
           keysToRemove.push(key);
         }
       }
@@ -400,7 +400,7 @@ export default function PreferencesSettingsPage() {
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Theme</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                    Choose how MyShelfControl looks. Select &quot;System&quot; to automatically match your device settings.
+                    Choose how Book Republic looks. Select &quot;System&quot; to automatically match your device settings.
                   </p>
 
                   <div className="flex flex-wrap gap-3">

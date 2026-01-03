@@ -275,7 +275,7 @@ export function Header() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-white" aria-hidden="true" />
             </div>
-            <span className="text-xl font-bold text-gray-900">MyShelfControl</span>
+            <span className="text-xl font-bold text-gray-900">Book Republic</span>
           </Link>
           <Link
             href="/login"
@@ -308,7 +308,7 @@ export function Header() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-white" aria-hidden="true" />
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">MyShelfControl</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Book Republic</span>
           </Link>
 
           {/* Right side buttons */}
@@ -364,7 +364,7 @@ export function Header() {
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
                   {user.email}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">MyShelfControl</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Book Republic</p>
               </div>
             </div>
           )}
@@ -450,7 +450,7 @@ export function Header() {
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[180px]">
                         {user.email}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">MyShelfControl</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Book Republic</p>
                     </div>
                   </div>
                 )}

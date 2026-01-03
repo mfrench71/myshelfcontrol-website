@@ -14,6 +14,9 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-gray-500 dark:text-gray-300 text-sm">
         <span>© {currentYear} Book Assembly</span>
         <div className="flex items-center gap-4">
+          <Link href={user ? '/settings/support' : '/support'} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+            Support
+          </Link>
           <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
             Privacy Policy
           </Link>

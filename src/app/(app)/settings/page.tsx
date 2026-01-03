@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Library, Settings2, Wrench, Trash2, Info } from 'lucide-react';
+import { User, Library, Settings2, Wrench, Trash2, Info, MessageSquare } from 'lucide-react';
 import { SettingsHubCard } from '@/components/ui/settings-hub-card';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks, getBinBooks } from '@/lib/repositories/books';
@@ -59,6 +59,13 @@ const SETTINGS_SECTIONS = [
     description: 'Version, changelog, credits',
     href: '/settings/about',
     icon: Info,
+  },
+  {
+    id: 'support',
+    title: 'Support',
+    description: 'Contact us for help',
+    href: '/settings/support',
+    icon: MessageSquare,
   },
 ];
 

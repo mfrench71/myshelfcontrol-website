@@ -77,6 +77,10 @@ export default function LandingPage() {
 
       {/* Footer */}
       <div className="text-center py-8 border-t border-gray-200">
+        <Link href="/support" className="text-sm text-gray-500 hover:text-gray-700">
+          Support
+        </Link>
+        <span className="mx-2 text-gray-300">·</span>
         <Link href="/privacy" className="text-sm text-gray-500 hover:text-gray-700">
           Privacy Policy
         </Link>

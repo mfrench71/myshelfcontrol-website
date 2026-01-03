@@ -1,16 +1,39 @@
 /**
  * Privacy Policy Page
  * Explains data collection, storage, and user rights
+ * Shows links to settings pages only for logged-in users
  */
-import Link from 'next/link';
-import type { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy | Book Assembly',
-  description: 'Privacy policy for Book Assembly - how we collect, use, and protect your data',
-};
+import Link from 'next/link';
+import { useAuthContext } from '@/components/providers/auth-provider';
+
+/**
+ * Conditionally render a link (logged in) or plain text (logged out)
+ */
+function ConditionalLink({
+  href,
+  children,
+  isLoggedIn,
+}: {
+  href: string;
+  children: React.ReactNode;
+  isLoggedIn: boolean;
+}) {
+  if (isLoggedIn) {
+    return (
+      <Link href={href} className="text-primary dark:text-blue-400 hover:underline">
+        {children}
+      </Link>
+    );
+  }
+  return <span className="font-medium">{children}</span>;
+}
 
 export default function PrivacyPage() {
+  const { user } = useAuthContext();
+  const isLoggedIn = !!user;
+
   return (
     <>
       {/* Sub-navigation */}
@@ -94,9 +117,9 @@ export default function PrivacyPage() {
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mt-3">
                 We also use your browser&apos;s local storage to cache data for faster loading and offline access. This
                 cached data never leaves your device and can be cleared at any time from{' '}
-                <Link href="/settings/preferences" className="text-primary dark:text-blue-400 hover:underline">
+                <ConditionalLink href="/settings/preferences" isLoggedIn={isLoggedIn}>
                   Settings → Preferences
-                </Link>
+                </ConditionalLink>
                 .
               </p>
             </section>
@@ -124,9 +147,9 @@ export default function PrivacyPage() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">External Services</h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
                 When you search for books or scan barcodes on the{' '}
-                <Link href="/books/add" className="text-primary dark:text-blue-400 hover:underline">
+                <ConditionalLink href="/books/add" isLoggedIn={isLoggedIn}>
                   Add Book
-                </Link>{' '}
+                </ConditionalLink>{' '}
                 page, we query these external APIs to find book information:
               </p>
               <ul className="text-gray-600 dark:text-gray-300 space-y-2 ml-6 list-disc">
@@ -151,21 +174,21 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <strong>Export:</strong> Download all your data as a JSON file from{' '}
-                  <Link href="/settings/library" className="text-primary dark:text-blue-400 hover:underline">
+                  <ConditionalLink href="/settings/library" isLoggedIn={isLoggedIn}>
                     Settings → Library → Backup & Restore
-                  </Link>
+                  </ConditionalLink>
                 </li>
                 <li>
                   <strong>Delete:</strong> Permanently delete your account and all associated data from{' '}
-                  <Link href="/settings/profile" className="text-primary dark:text-blue-400 hover:underline">
+                  <ConditionalLink href="/settings/profile" isLoggedIn={isLoggedIn}>
                     Settings → Profile → Delete Account
-                  </Link>
+                  </ConditionalLink>
                 </li>
                 <li>
                   <strong>Clear cache:</strong> Remove locally stored data from your browser via{' '}
-                  <Link href="/settings/preferences" className="text-primary dark:text-blue-400 hover:underline">
+                  <ConditionalLink href="/settings/preferences" isLoggedIn={isLoggedIn}>
                     Settings → Preferences → Clear Local Cache
-                  </Link>
+                  </ConditionalLink>
                 </li>
               </ul>
             </section>
@@ -180,9 +203,9 @@ export default function PrivacyPage() {
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 <strong>Deleted books:</strong> When you delete a book, it moves to a bin where it can be restored for
                 30 days. After 30 days, deleted books are permanently removed. You can also empty the bin manually from{' '}
-                <Link href="/settings/bin" className="text-primary dark:text-blue-400 hover:underline">
+                <ConditionalLink href="/settings/bin" isLoggedIn={isLoggedIn}>
                   Settings → Bin
-                </Link>
+                </ConditionalLink>
                 .
               </p>
             </section>
@@ -206,8 +229,12 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Contact</h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                If you have any questions about this privacy policy or how your data is handled, please reach out
-                through the app&apos;s feedback channels.
+                If you have any questions about this privacy policy or how your data is handled, please contact us via
+                the{' '}
+                <Link href={isLoggedIn ? '/settings/support' : '/support'} className="text-primary dark:text-blue-400 hover:underline">
+                  Support
+                </Link>{' '}
+                page.
               </p>
             </section>
           </div>

@@ -15,6 +15,7 @@ import {
   Wrench,
   Trash2,
   Info,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuthContext } from '@/components/providers/auth-provider';
 import { getBooks, getBinBooks } from '@/lib/repositories/books';
@@ -57,6 +58,7 @@ const SETTINGS_SECTIONS = [
   { id: 'maintenance', label: 'Maintenance', href: '/settings/maintenance', icon: Wrench, badgeVariant: 'warning' as const },
   { id: 'bin', label: 'Bin', href: '/settings/bin', icon: Trash2, badgeVariant: 'danger' as const },
   { id: 'about', label: 'About', href: '/settings/about', icon: Info },
+  { id: 'support', label: 'Support', href: '/settings/support', icon: MessageSquare },
 ];
 
 type Props = {

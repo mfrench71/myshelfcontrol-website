@@ -477,6 +477,10 @@ function LoginForm() {
 
       {/* Footer */}
       <p className="mt-8 text-sm text-gray-500">
+        <Link href="/support" className="hover:text-gray-700">
+          Support
+        </Link>
+        <span className="mx-2 text-gray-300">·</span>
         <Link href="/privacy" className="hover:text-gray-700">
           Privacy Policy
         </Link>

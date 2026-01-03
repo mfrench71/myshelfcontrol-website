@@ -26,7 +26,7 @@ const STORAGE_KEY = 'theme';
 
 // Public pages that always use light mode (landing, login)
 // Note: /privacy respects user preference when logged in
-const PUBLIC_PAGES = ['/', '/login'];
+const PUBLIC_PAGES = ['/', '/login', '/support'];
 
 /**
  * Check if pathname is a public page (always light mode)

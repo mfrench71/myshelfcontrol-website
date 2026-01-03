@@ -1250,6 +1250,95 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 3. Activity feed of followed users
 4. Shareable book lists (public link)
 
+### Display Name & User Profile Research (Jan 2026)
+
+#### Current State
+
+Book Assembly uses **email as the primary identifier**:
+- Email displayed in header menus (mobile & desktop)
+- Avatar shows: custom photo → Gravatar → first letter of email
+- No editable display name or profile info beyond email
+- Firebase `displayName` field exists but is unused
+
+#### Competitor Comparison
+
+| Feature | Goodreads | StoryGraph | Hardcover | Literal |
+|---------|-----------|------------|-----------|---------|
+| **Display Name** | First + Last | Username only | Username | First + Last |
+| **Username/URL** | Yes | Yes | Yes | Yes |
+| **Pronouns** | No | Yes | ? | ? |
+| **Bio** | Yes | Yes (160 chars) | Yes | Yes |
+| **Last Name Privacy** | Yes | N/A | N/A | ? |
+| **Per-Book Privacy** | No | No | Yes | No |
+
+#### Goodreads
+
+**Fields available:**
+- First Name (required) - what's publicly displayed
+- Middle Name (optional)
+- Last Name (optional)
+- Custom Username/URL for profile
+
+**Privacy options:**
+- "Show my last name to" with radio options:
+  - "Anyone (including search engines)"
+  - "Friends only"
+
+**Key insight:** Users can put full name in "First Name" field for display purposes.
+
+#### StoryGraph
+
+**Current fields:**
+- Username (required, used for profile URL)
+- Profile photo
+- Pronouns
+- Bio (160 chars max)
+- Social media links
+
+**No display name yet** - it's a [popular feature request](https://roadmap.thestorygraph.com/requests-ideas/posts/add-display-name-for-user-profile). Users want real names shown instead of usernames like "r3adalotofbooks".
+
+**Privacy levels:**
+- Private (friends only see profile)
+- Community (signed-in users only)
+- Public (anyone)
+
+#### Hardcover
+
+**Profile options:**
+- Username for profile URL
+- Profile photo
+- Per-book privacy: public, friends only, private
+- Overall profile: public, private, friends-only
+
+#### Literal Club
+
+**Fields collected:**
+- Email
+- First Name
+- Last Name
+- Username
+
+#### Recommendations for Book Assembly
+
+**Minimum Viable Profile:**
+1. **Display Name** (optional) - shown instead of email
+2. **Privacy toggle** - "Show email to others" (for future social features)
+
+**Enhanced Profile (Future):**
+- Pronouns
+- Short bio
+- Social links
+- Username for shareable profile URL
+
+**Privacy Considerations:**
+- Default to private (don't show email)
+- Display name optional (fallback to email initial)
+- Consider UK GDPR implications for storing additional PII
+
+**Sources:**
+- [Goodreads Help - Edit Profile Settings](https://help.goodreads.com/s/article/How-do-I-edit-my-profile-settings)
+- [StoryGraph Display Name Request](https://roadmap.thestorygraph.com/requests-ideas/posts/add-display-name-for-user-profile)
+
 ### Additional Features Research (Dec 2025)
 
 | Feature | App(s) | Notes |
@@ -1924,4 +2013,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-03* (Added SEO & Search Indexing section with competitor robots.txt analysis and user content indexing strategy)
+*Last updated: 2026-01-03* (Added Display Name & User Profile Research section)

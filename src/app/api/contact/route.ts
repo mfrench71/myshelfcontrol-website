@@ -6,9 +6,6 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { z } from 'zod';
 
-// Validate environment
-const resendApiKey = process.env.RESEND_API_KEY;
-
 // Contact form schema
 const ContactSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -27,7 +24,8 @@ const subjectLabels: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
-    // Check API key
+    // Check API key at request time (allows runtime config and testing)
+    const resendApiKey = process.env.RESEND_API_KEY;
     if (!resendApiKey) {
       console.error('RESEND_API_KEY not configured');
       return NextResponse.json(

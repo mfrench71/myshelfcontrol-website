@@ -48,10 +48,18 @@ describe('Footer', () => {
       expect(screen.getByText(/© 2026 Book Assembly/)).toBeInTheDocument();
     });
 
-    it('renders privacy policy link', () => {
+    it('renders footer links', () => {
       render(<Footer />);
 
-      const privacyLink = screen.getByText('Privacy Policy');
+      const supportLink = screen.getByText('Support');
+      expect(supportLink).toBeInTheDocument();
+      expect(supportLink).toHaveAttribute('href', '/settings/support');
+
+      const termsLink = screen.getByText('Terms');
+      expect(termsLink).toBeInTheDocument();
+      expect(termsLink).toHaveAttribute('href', '/terms');
+
+      const privacyLink = screen.getByText('Privacy');
       expect(privacyLink).toBeInTheDocument();
       expect(privacyLink).toHaveAttribute('href', '/privacy');
     });

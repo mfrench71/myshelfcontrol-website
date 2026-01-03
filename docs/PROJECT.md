@@ -26,16 +26,20 @@
 12. [Legal & Compliance](#legal--compliance)
     - [UK Legal Requirements](#uk-legal-requirements)
     - [Privacy & Data Protection](#privacy--data-protection)
-13. [Operations](#operations)
+13. [SEO & Search Indexing](#seo--search-indexing)
+    - [Current Implementation](#current-implementation)
+    - [Competitor Analysis](#competitor-robots-txt-analysis)
+    - [User Content Indexing Strategy](#user-content-indexing-strategy)
+14. [Operations](#operations)
     - [Growth & Marketing](#growth--marketing)
     - [Import/Export](#importexport--portability)
     - [Scalability](#scalability-checkpoints)
     - [Internationalisation](#internationalisation-i18n)
-14. [Security](#security-considerations)
-15. [Performance](#performance-targets)
-16. [Testing](#testing-strategy)
-17. [Known Limitations](#known-limitations)
-18. [Technical Reference](#technical-reference)
+15. [Security](#security-considerations)
+16. [Performance](#performance-targets)
+17. [Testing](#testing-strategy)
+18. [Known Limitations](#known-limitations)
+19. [Technical Reference](#technical-reference)
 
 ---
 
@@ -976,6 +980,166 @@ Sources: [Orrick FAQ](https://www.orrick.com/en/tech-studio/resources/faq/what-l
 
 ---
 
+## SEO & Search Indexing
+
+### Current Implementation
+
+| Item | Status | Location | Notes |
+|------|--------|----------|-------|
+| **robots.txt** | ⚠️ Needs update | `/public/robots.txt` | Domain should be `.co.uk` |
+| **sitemap.ts** | Basic | `/src/app/sitemap.ts` | Only 3 pages: `/`, `/login`, `/privacy` |
+| **Metadata** | ✓ Good | `/src/app/layout.tsx` | Title, description, Open Graph |
+| **Structured data** | Missing | — | No JSON-LD schema |
+
+#### Immediate Fixes Needed
+
+1. **Update robots.txt domain**: Change `bookassembly.app` to `bookassembly.co.uk`
+2. **Expand sitemap**: Add all public pages (about, features when created)
+3. **Add structured data**: JSON-LD for WebApplication schema
+
+### Competitor robots.txt Analysis
+
+Research conducted January 2026 on how competitors handle user content indexing:
+
+| Platform | Public Profiles | User Activity | Account Pages | Reviews | Search | AI Bots Blocked |
+|----------|-----------------|---------------|---------------|---------|--------|-----------------|
+| **Goodreads** | ✓ Indexed | Blocked (RSS) | Blocked | Blocked (`/review/show`) | Blocked | GPTBot, CCBot |
+| **StoryGraph** | ✓ Indexed | Allowed | Allowed | Allowed | Allowed | GPTBot, ClaudeBot, CCBot, Bytespider + 5 more |
+| **Hardcover** | ✓ Indexed | Allowed | Blocked (`/account/*`) | Allowed | Allowed | None specified |
+| **Literal** | ✓ Indexed | Blocked (`/activity/*`) | Blocked (via signin) | Allowed | Blocked (UTM params) | None specified |
+| **Oku** | ✓ Indexed | Blocked (`/activity/*`) | Blocked (`/settings`, `/dashboard`) | Allowed | Blocked | None specified |
+
+#### Key Patterns Observed
+
+**Universally blocked by competitors:**
+- `/api/*` — API endpoints (security)
+- `/account/*` or `/settings` — User account management (privacy)
+- Authentication pages with parameters
+
+**Commonly blocked:**
+- `/activity/*` — Personal activity feeds
+- `/search` — Internal search results (thin content, infinite crawl paths)
+- `/dashboard` — Personalised dashboards
+- Follower/following lists (Oku blocks `/user/*/followers`)
+
+**Generally allowed (for SEO benefit):**
+- Public user profiles (e.g., `/user/username`)
+- Book pages
+- Reviews (except Goodreads which blocks individual reviews)
+- Public lists/shelves
+
+**AI training bots commonly blocked:**
+- GPTBot (OpenAI)
+- CCBot (Common Crawl)
+- ClaudeBot (Anthropic)
+- Google-Extended
+- Bytespider (ByteDance)
+
+### User Content Indexing Strategy
+
+#### Phase 1: Current (Single-User)
+
+No user content is publicly accessible. Current robots.txt is sufficient:
+
+```txt
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://bookassembly.co.uk/sitemap.xml
+```
+
+#### Phase 2: Multi-User Launch
+
+Recommended robots.txt for multi-user:
+
+```txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /settings/
+Disallow: /dashboard
+Disallow: /activity/
+Disallow: /search
+
+# Block AI training bots
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+Sitemap: https://bookassembly.co.uk/sitemap.xml
+```
+
+#### Per-User Privacy Controls
+
+For users who set their profile to **private**, dynamically add noindex meta tag:
+
+```tsx
+// In profile page component
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const profile = await getProfile(params.username);
+
+  if (profile.visibility === 'private') {
+    return {
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  return {
+    title: `${profile.displayName}'s Books`,
+    // ... other metadata
+  };
+}
+```
+
+#### Content Types & Indexing Decisions
+
+| Content Type | Index? | Rationale |
+|--------------|--------|-----------|
+| **Public profiles** | Yes | SEO benefit, discoverability |
+| **Private profiles** | No | User privacy preference |
+| **Public book lists** | Yes | SEO benefit, shareable |
+| **Private book lists** | No | User privacy preference |
+| **Individual reviews** | Consider | Goodreads blocks, others allow |
+| **Activity feeds** | No | Personal, low SEO value |
+| **Search results** | No | Thin content, duplicate |
+| **Settings pages** | No | Private, no SEO value |
+| **Book pages (global)** | Yes | If implementing global book DB |
+
+#### Implementation Checklist (Multi-User)
+
+- [ ] Update robots.txt with expanded disallow rules
+- [ ] Add AI bot blocking directives
+- [ ] Implement dynamic `robots` metadata for private profiles
+- [ ] Add `rel="nofollow"` to user-generated links (spam prevention)
+- [ ] Consider `rel="ugc"` attribute for user-generated content links
+- [ ] Create dynamic sitemap including public profiles
+- [ ] Add JSON-LD structured data for profiles and book lists
+- [ ] Monitor Google Search Console for crawl issues
+
+#### References
+
+- [Google: Block Search Indexing with noindex](https://developers.google.com/search/docs/crawling-indexing/block-indexing)
+- [Google: Control What You Share](https://developers.google.com/search/docs/crawling-indexing/control-what-you-share)
+- [Lumar: How Google Deals With UGC](https://www.lumar.io/office-hours/user-generated-content/)
+- [Meta Robots Tag Guide 2025](https://www.conductor.com/academy/meta-robots-tag/)
+
+---
+
 ## Operations
 
 ### Growth & Marketing
@@ -1760,4 +1924,4 @@ npm run test:coverage # Unit test coverage report
 
 ---
 
-*Last updated: 2026-01-02* (Competitor analysis: added reading progress tracking, TBR management, book metadata enhancements, spoiler tags, price alerts to roadmap)
+*Last updated: 2026-01-03* (Added SEO & Search Indexing section with competitor robots.txt analysis and user content indexing strategy)

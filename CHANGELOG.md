@@ -4,6 +4,17 @@ All notable changes to MyShelfControl are documented here.
 
 ---
 
+## 03-01-2026
+
+- Add promotional landing page for logged-out users
+- Move dashboard to /dashboard route (middleware redirects logged-in users from /)
+- Simplify theme logic: public pages (/, /login, /privacy) always use light mode
+- Show simple header with logo and login button for unauthenticated users
+- Hide version link in footer for logged-out users
+- Sign-out now redirects to landing page instead of login page
+
+---
+
 ## 02-01-2026
 
 - Add pre-commit hooks with husky (runs lint and tests before commit)

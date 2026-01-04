@@ -19,7 +19,7 @@ interface BookCoverProps {
 
 /**
  * Book cover with loading spinner and gradient placeholder
- * Skips spinner if image is already cached
+ * Only shows spinner if image takes longer than 50ms to load (avoids flash for cached images)
  */
 export function BookCover({
   src,
@@ -29,24 +29,39 @@ export function BookCover({
   priority = false,
   className = '',
 }: BookCoverProps) {
-  const [loading, setLoading] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const hasCheckedCache = useRef(false);
+  const spinnerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Check if image is already cached on mount
+  // Only show spinner if image takes longer than 50ms to load
+  // This prevents spinner flash for cached images
   useEffect(() => {
-    if (!src || hasCheckedCache.current) return;
-    hasCheckedCache.current = true;
+    if (!src) return;
 
-    const img = new window.Image();
-    img.src = src;
+    // Reset state when src changes
+    setLoaded(false);
+    setShowSpinner(false);
+    setError(false);
 
-    // If image is already complete (cached), skip loading state
-    if (img.complete) {
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
+    // Start timer to show spinner after delay
+    spinnerTimeoutRef.current = setTimeout(() => {
+      // Before showing spinner, check if image is already complete
+      // (handles bfcache restoration on iOS where onLoad doesn't fire)
+      const img = containerRef.current?.querySelector('img');
+      if (img?.complete && img.naturalWidth > 0) {
+        setLoaded(true);
+      } else {
+        setShowSpinner(true);
+      }
+    }, 50);
+
+    return () => {
+      if (spinnerTimeoutRef.current) {
+        clearTimeout(spinnerTimeoutRef.current);
+      }
+    };
   }, [src]);
 
   // Check if className contains full sizing classes (let container control size)
@@ -73,10 +88,30 @@ export function BookCover({
     );
   }
 
+  // Handle image load - clear spinner timeout and mark as loaded
+  const handleLoad = () => {
+    if (spinnerTimeoutRef.current) {
+      clearTimeout(spinnerTimeoutRef.current);
+    }
+    setShowSpinner(false);
+    setLoaded(true);
+  };
+
+  const handleError = () => {
+    if (spinnerTimeoutRef.current) {
+      clearTimeout(spinnerTimeoutRef.current);
+    }
+    setShowSpinner(false);
+    setError(true);
+  };
+
+  // Show spinner only if: not loaded, not errored, and delay has passed
+  const isLoading = !loaded && !error && showSpinner;
+
   return (
-    <div className={`relative ${className}`} style={containerStyle}>
-      {/* Loading spinner */}
-      {loading && (
+    <div ref={containerRef} className={`relative ${className}`} style={containerStyle}>
+      {/* Loading spinner - only shown after 50ms delay */}
+      {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
           <Loader2
             className="text-white/80 animate-spin w-[30%] h-[30%]"
@@ -91,13 +126,10 @@ export function BookCover({
         width={width}
         height={height}
         className={`w-full h-full object-cover transition-opacity duration-200 ${
-          loading ? 'opacity-0' : 'opacity-100'
+          loaded ? 'opacity-100' : 'opacity-0'
         }`}
-        onLoad={() => setLoading(false)}
-        onError={() => {
-          setLoading(false);
-          setError(true);
-        }}
+        onLoad={handleLoad}
+        onError={handleError}
         priority={priority}
       />
     </div>

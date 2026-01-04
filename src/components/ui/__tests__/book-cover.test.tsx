@@ -2,8 +2,8 @@
  * Unit Tests for components/ui/book-cover.tsx
  * Tests for book cover component with loading and error states
  */
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BookCover } from '../book-cover';
 
 describe('BookCover', () => {
@@ -32,10 +32,31 @@ describe('BookCover', () => {
   });
 
   describe('loading state', () => {
-    it('shows loading spinner when image is loading', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('does not show spinner immediately (waits 50ms)', () => {
       render(<BookCover src="https://example.com/cover.jpg" width={100} height={150} />);
 
-      // Loader2 icon should be visible during loading
+      // Spinner should NOT be visible immediately
+      const spinner = document.querySelector('.animate-spin');
+      expect(spinner).not.toBeInTheDocument();
+    });
+
+    it('shows loading spinner after 50ms delay if image not loaded', () => {
+      render(<BookCover src="https://example.com/cover.jpg" width={100} height={150} />);
+
+      // Advance timers past the 50ms threshold
+      act(() => {
+        vi.advanceTimersByTime(60);
+      });
+
+      // Loader2 icon should be visible after delay
       const spinner = document.querySelector('.animate-spin');
       expect(spinner).toBeInTheDocument();
     });
@@ -49,6 +70,25 @@ describe('BookCover', () => {
       expect(img).toBeInTheDocument();
       fireEvent.load(img!);
 
+      const spinner = container.querySelector('.animate-spin');
+      expect(spinner).not.toBeInTheDocument();
+    });
+
+    it('does not show spinner if image loads within 50ms', () => {
+      const { container } = render(
+        <BookCover src="https://example.com/cover.jpg" width={100} height={150} />
+      );
+
+      // Image loads quickly (before 50ms timeout)
+      const img = container.querySelector('img');
+      fireEvent.load(img!);
+
+      // Advance past timeout
+      act(() => {
+        vi.advanceTimersByTime(60);
+      });
+
+      // Spinner should never have appeared
       const spinner = container.querySelector('.animate-spin');
       expect(spinner).not.toBeInTheDocument();
     });

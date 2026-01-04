@@ -315,6 +315,11 @@ Currently, live search only queries Google Books API. Open Library is used only 
 - Proposed: Replace with actionable upload prompt (camera icon + "Add cover image" text)
 - Matches profile photo upload pattern for consistency
 
+**Cover Image Source Label (TODO):**
+- Display source of cover image below large cover on book view page
+- Labels: "Google Books" / "Open Library" / "User upload"
+- Show nothing if no cover image
+
 ### Barcode Scanner
 
 **Feature Overview:**
